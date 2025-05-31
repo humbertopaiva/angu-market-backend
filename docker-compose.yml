@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  # Banco de dados PostgreSQL
+  postgres:
+    image: postgres:15-alpine
+    container_name: new-project-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: angu_market
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - new-project-network
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres -d new_project']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Aplicação Backend
+
+  # PgAdmin (opcional - para administração do banco)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: new-project-pgadmin
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - '5050:80'
+    depends_on:
+      - postgres
+    networks:
+      - new-project-network
+    profiles:
+      - tools
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  new-project-network:
+    driver: bridge

@@ -1,0 +1,51 @@
+# Dependências
+node_modules
+npm-debug.log*
+
+# Builds
+dist
+build
+
+# Logs
+logs
+*.log
+
+# Arquivos de ambiente
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Coverage
+coverage
+.nyc_output
+
+# IDEs
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git
+.gitignore
+
+# Docker
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Temporários
+.temp
+.tmp
+
+# Runtime
+pids
+*.pid
+*.seed
+*.pid.lock
