@@ -4,17 +4,21 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 
 import { AppResolver } from './app.resolver';
-import { UsersModule } from './users/users.module';
 import { GraphQLModule } from './graphql.module';
+import { UsersModule } from './users/users.module';
+import { AuthModule } from './auth/auth.module';
+import { OrganizationsModule } from './organizations/organizations.module';
+import { PlacesModule } from './places/places.module';
+import { CompaniesModule } from './companies/companies.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    GraphQLModule, // Importe aqui primeiro
+    GraphQLModule,
     TypeOrmModule.forRootAsync({
-      imports: [ConfigModule], // Remova GraphQLModule daqui
+      imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         type: 'postgres',
@@ -29,6 +33,10 @@ import { GraphQLModule } from './graphql.module';
       }),
     }),
     UsersModule,
+    AuthModule,
+    OrganizationsModule,
+    PlacesModule,
+    CompaniesModule,
   ],
   providers: [AppResolver],
 })

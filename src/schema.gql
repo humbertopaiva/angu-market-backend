@@ -2,8 +2,18 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type Base {
+  """Example field (placeholder)"""
+  exampleField: Int!
+}
+
 """Cursor for paging through collections"""
 scalar ConnectionCursor
+
+input CreateBaseInput {
+  """Example field (placeholder)"""
+  exampleField: Int!
+}
 
 input CreateManyUsersInput {
   """Array of records to create"""
@@ -13,6 +23,11 @@ input CreateManyUsersInput {
 input CreateOneUserInput {
   """The record to create"""
   user: CreateUser!
+}
+
+input CreateOrganizationInput {
+  """Example field (placeholder)"""
+  exampleField: Int!
 }
 
 input CreateUser {
@@ -74,14 +89,20 @@ input IDFilterComparison {
 }
 
 type Mutation {
+  createBase(createBaseInput: CreateBaseInput!): Base!
   createManyUsers(input: CreateManyUsersInput!): [User!]!
   createOneUser(input: CreateOneUserInput!): User!
+  createOrganization(createOrganizationInput: CreateOrganizationInput!): Organization!
   createUser(createUserInput: CreateUserInput!): User!
   deleteManyUsers(input: DeleteManyUsersInput!): DeleteManyResponse!
   deleteOneUser(input: DeleteOneUserInput!): UserDeleteResponse!
+  removeBase(id: Int!): Base!
+  removeOrganization(id: Int!): Organization!
   removeUser(id: Int!): User!
+  updateBase(updateBaseInput: UpdateBaseInput!): Base!
   updateManyUsers(input: UpdateManyUsersInput!): UpdateManyResponse!
   updateOneUser(input: UpdateOneUserInput!): User!
+  updateOrganization(updateOrganizationInput: UpdateOrganizationInput!): Organization!
   updateUser(updateUserInput: UpdateUserInput!): User!
 }
 
@@ -105,6 +126,11 @@ input NumberFieldComparisonBetween {
   upper: Float!
 }
 
+type Organization {
+  """Example field (placeholder)"""
+  exampleField: Int!
+}
+
 type PageInfo {
   """The cursor of the last returned record."""
   endCursor: ConnectionCursor
@@ -120,7 +146,11 @@ type PageInfo {
 }
 
 type Query {
+  base(id: Int!): Base!
+  bases: [Base!]!
   hello: String!
+  organization(id: Int!): Organization!
+  organizations: [Organization!]!
   user(
     """The id of the record to find."""
     id: ID!
@@ -166,6 +196,12 @@ input StringFieldComparison {
   notLike: String
 }
 
+input UpdateBaseInput {
+  """Example field (placeholder)"""
+  exampleField: Int
+  id: Int!
+}
+
 type UpdateManyResponse {
   """The number of records updated."""
   updatedCount: Int!
@@ -185,6 +221,12 @@ input UpdateOneUserInput {
 
   """The update to apply."""
   update: UpdateUser!
+}
+
+input UpdateOrganizationInput {
+  """Example field (placeholder)"""
+  exampleField: Int
+  id: Int!
 }
 
 input UpdateUser {
