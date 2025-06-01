@@ -3,6 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
 import { GraphQLModule } from './graphql.module';
+import { AppResolver } from './app.resolver';
 
 @Module({
   imports: [
@@ -19,7 +20,7 @@ import { GraphQLModule } from './graphql.module';
         port: configService.get('DB_PORT', 5432),
         username: configService.get('DB_USERNAME', 'postgres'),
         password: configService.get('DB_PASSWORD', 'postgres'),
-        database: configService.get('DB_DATABASE', 'cubos_movies'),
+        database: configService.get('DB_DATABASE', 'angu_market'),
         entities: [],
         synchronize: configService.get('NODE_ENV') !== 'production',
         logging: configService.get('NODE_ENV') !== 'production',
@@ -28,5 +29,6 @@ import { GraphQLModule } from './graphql.module';
 
     ScheduleModule.forRoot(),
   ],
+  providers: [AppResolver],
 })
 export class AppModule {}
