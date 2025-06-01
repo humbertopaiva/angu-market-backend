@@ -3,8 +3,6 @@ import { GraphQLModule as NestGraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { join } from 'path';
 
-import { Request } from 'express';
-
 interface GraphQLContext {
   req: Request;
 }

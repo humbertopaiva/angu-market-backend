@@ -5,11 +5,11 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 
 import { AppResolver } from './app.resolver';
 import { GraphQLModule } from './graphql.module';
-import { UsersModule } from './users/users.module';
-import { AuthModule } from './auth/auth.module';
-import { OrganizationsModule } from './organizations/organizations.module';
-import { PlacesModule } from './places/places.module';
-import { CompaniesModule } from './companies/companies.module';
+import { UsersModule } from './modules/users/users.module';
+import { AuthModule } from './modules/auth/auth.module';
+import { OrganizationsModule } from './modules/organizations/organizations.module';
+import { PlacesModule } from './modules/places/places.module';
+import { CompaniesModule } from './modules/companies/companies.module';
 
 @Module({
   imports: [
