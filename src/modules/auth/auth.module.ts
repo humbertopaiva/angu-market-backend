@@ -1,3 +1,4 @@
+// src/modules/auth/auth.module.ts
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
@@ -10,6 +11,8 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 import { User } from '../users/entities/user.entity';
 import { Role } from './entities/role.entity';
 import { UserRole } from './entities/user-role.entity';
+import { PasswordResetToken } from './entities/password-reset-token.entity';
+import { EmailModule } from '../common/email/email.module';
 
 @Module({
   imports: [
@@ -24,7 +27,8 @@ import { UserRole } from './entities/user-role.entity';
         },
       }),
     }),
-    TypeOrmModule.forFeature([User, Role, UserRole]),
+    TypeOrmModule.forFeature([User, Role, UserRole, PasswordResetToken]),
+    EmailModule,
   ],
   providers: [AuthService, AuthResolver, JwtStrategy],
   exports: [AuthService],

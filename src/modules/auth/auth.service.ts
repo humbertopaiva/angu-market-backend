@@ -1,14 +1,34 @@
-import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
+// src/modules/auth/auth.service.ts
+import {
+  Injectable,
+  UnauthorizedException,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
+import * as crypto from 'crypto';
 
 import { User } from '../users/entities/user.entity';
 import { Role, RoleType } from './entities/role.entity';
 import { UserRole } from './entities/user-role.entity';
+import { PasswordResetToken } from './entities/password-reset-token.entity';
+import { EmailService } from '../common/email/email.service';
+
 import { LoginInput } from './dto/login.input';
+import { SignUpInput } from './dto/signup.input';
+import { RequestPasswordResetInput } from './dto/request-password-reset.input';
+import { ResetPasswordInput } from './dto/reset-password.input';
+import { VerifyEmailInput } from './dto/verify-email.input';
+import { ResendVerificationInput } from './dto/resend-verification.input';
 import { AssignRoleInput } from './dto/assign-role.input';
+
+import { SignUpResponse } from './dto/signup-response';
+import { RequestPasswordResetResponse } from './dto/request-password-reset-response';
+import { ResetPasswordResponse } from './dto/reset-password-response';
+import { VerifyEmailResponse } from './dto/verify-email-response';
 
 @Injectable()
 export class AuthService {
@@ -19,17 +39,174 @@ export class AuthService {
     private roleRepository: Repository<Role>,
     @InjectRepository(UserRole)
     private userRoleRepository: Repository<UserRole>,
+    @InjectRepository(PasswordResetToken)
+    private passwordResetTokenRepository: Repository<PasswordResetToken>,
     private jwtService: JwtService,
+    private emailService: EmailService,
   ) {}
+
+  async signUp(signUpInput: SignUpInput): Promise<SignUpResponse> {
+    const { name, email, password, passwordConfirmation } = signUpInput;
+
+    // Verificar se as senhas coincidem
+    if (password !== passwordConfirmation) {
+      throw new BadRequestException('As senhas não coincidem');
+    }
+
+    // Verificar se o usuário já existe
+    const existingUser = await this.userRepository.findOne({
+      where: { email },
+    });
+
+    if (existingUser) {
+      throw new BadRequestException('Usuário já existe com este email');
+    }
+
+    // Hash da senha
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Gerar token de verificação
+    const verificationToken = crypto.randomBytes(32).toString('hex');
+    const tokenExpiration = new Date();
+    tokenExpiration.setHours(tokenExpiration.getHours() + 24); // 24 horas
+
+    // Criar o usuário
+    const user = this.userRepository.create({
+      name,
+      email,
+      password: hashedPassword,
+      verificationToken,
+      tokenExpiration,
+      isVerified: false,
+      isActive: false, // Usuário inativo até verificar email
+    });
+
+    const savedUser = await this.userRepository.save(user);
+
+    // Atribuir role de usuário público por padrão
+    const publicRole = await this.roleRepository.findOne({
+      where: { name: RoleType.PUBLIC_USER },
+    });
+
+    if (publicRole) {
+      const userRole = this.userRoleRepository.create({
+        userId: savedUser.id,
+        roleId: publicRole.id,
+      });
+      await this.userRoleRepository.save(userRole);
+    }
+
+    // Enviar email de verificação
+    const emailSent = await this.emailService.sendVerificationEmail({
+      to: email,
+      verificationToken,
+      userName: name,
+    });
+
+    if (!emailSent) {
+      // Se o email não foi enviado, ainda assim retornamos sucesso
+      // mas podemos logar o erro
+      console.warn(`Failed to send verification email to ${email}`);
+    }
+
+    return {
+      success: true,
+      message: 'Usuário criado com sucesso! Verifique seu email para ativar a conta.',
+      userId: savedUser.id,
+    };
+  }
+
+  async verifyEmail(verifyEmailInput: VerifyEmailInput): Promise<VerifyEmailResponse> {
+    const { token } = verifyEmailInput;
+
+    const user = await this.userRepository.findOne({
+      where: {
+        verificationToken: token,
+        isVerified: false,
+      },
+    });
+
+    if (!user) {
+      throw new BadRequestException('Token de verificação inválido ou expirado');
+    }
+
+    // Verificar se o token não expirou
+    if (user.tokenExpiration && user.tokenExpiration < new Date()) {
+      throw new BadRequestException('Token de verificação expirado');
+    }
+
+    // Ativar o usuário
+    user.isVerified = true;
+    user.isActive = true;
+    user.verificationToken = undefined;
+    user.tokenExpiration = undefined;
+
+    await this.userRepository.save(user);
+
+    // Enviar email de boas-vindas
+    await this.emailService.sendWelcomeEmail(user.email, user.name);
+
+    return {
+      success: true,
+      message: 'Email verificado com sucesso! Sua conta está ativa.',
+    };
+  }
+
+  async resendVerificationEmail(
+    resendVerificationInput: ResendVerificationInput,
+  ): Promise<VerifyEmailResponse> {
+    const { email } = resendVerificationInput;
+
+    const user = await this.userRepository.findOne({
+      where: {
+        email,
+        isVerified: false,
+      },
+    });
+
+    if (!user) {
+      throw new NotFoundException('Usuário não encontrado ou já verificado');
+    }
+
+    // Gerar novo token de verificação
+    const verificationToken = crypto.randomBytes(32).toString('hex');
+    const tokenExpiration = new Date();
+    tokenExpiration.setHours(tokenExpiration.getHours() + 24); // 24 horas
+
+    user.verificationToken = verificationToken;
+    user.tokenExpiration = tokenExpiration;
+
+    await this.userRepository.save(user);
+
+    // Enviar novo email de verificação
+    const emailSent = await this.emailService.sendVerificationEmail({
+      to: email,
+      verificationToken,
+      userName: user.name,
+    });
+
+    if (!emailSent) {
+      throw new BadRequestException('Erro ao enviar email de verificação');
+    }
+
+    return {
+      success: true,
+      message: 'Email de verificação reenviado com sucesso!',
+    };
+  }
 
   async validateUser(email: string, password: string): Promise<User> {
     const user = await this.userRepository.findOne({
       where: { email },
-      select: ['id', 'email', 'password', 'isActive'],
+      select: ['id', 'email', 'password', 'isActive', 'isVerified'],
     });
 
     if (!user) {
       throw new UnauthorizedException('Credenciais inválidas');
+    }
+
+    if (!user.isVerified) {
+      throw new UnauthorizedException('Email não verificado. Verifique sua caixa de entrada.');
     }
 
     if (!user.isActive) {
@@ -69,6 +246,105 @@ export class AuthService {
     return {
       accessToken: this.jwtService.sign(payload),
       user,
+    };
+  }
+
+  async requestPasswordReset(
+    requestPasswordResetInput: RequestPasswordResetInput,
+  ): Promise<RequestPasswordResetResponse> {
+    const { email } = requestPasswordResetInput;
+
+    const user = await this.userRepository.findOne({
+      where: { email, isActive: true, isVerified: true },
+    });
+
+    if (!user) {
+      // Por segurança, sempre retornamos sucesso mesmo se o usuário não existir
+      return {
+        success: true,
+        message:
+          'Se o email existir em nossa base, você receberá instruções para redefinir sua senha.',
+      };
+    }
+
+    // Invalidar tokens de reset anteriores
+    await this.passwordResetTokenRepository.update(
+      { userId: user.id, used: false },
+      { used: true },
+    );
+
+    // Gerar novo token
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    const expiresAt = new Date();
+    expiresAt.setHours(expiresAt.getHours() + 1); // 1 hora
+
+    // Salvar token no banco
+    const passwordResetToken = this.passwordResetTokenRepository.create({
+      userId: user.id,
+      token: resetToken,
+      expiresAt,
+      used: false,
+    });
+
+    await this.passwordResetTokenRepository.save(passwordResetToken);
+
+    // Enviar email
+    const emailSent = await this.emailService.sendPasswordResetEmail({
+      to: email,
+      resetToken,
+      userName: user.name,
+    });
+
+    if (!emailSent) {
+      throw new BadRequestException('Erro ao enviar email de recuperação');
+    }
+
+    return {
+      success: true,
+      message: 'Instruções para redefinir sua senha foram enviadas para seu email.',
+    };
+  }
+
+  async resetPassword(resetPasswordInput: ResetPasswordInput): Promise<ResetPasswordResponse> {
+    const { token, newPassword } = resetPasswordInput;
+
+    const resetToken = await this.passwordResetTokenRepository.findOne({
+      where: {
+        token,
+        used: false,
+      },
+      relations: ['user'],
+    });
+
+    if (!resetToken) {
+      throw new BadRequestException('Token inválido ou já utilizado');
+    }
+
+    // Verificar se o token não expirou
+    if (resetToken.expiresAt < new Date()) {
+      throw new BadRequestException('Token expirado');
+    }
+
+    // Verificar se o usuário ainda está ativo
+    if (!resetToken.user.isActive || !resetToken.user.isVerified) {
+      throw new BadRequestException('Usuário inativo ou não verificado');
+    }
+
+    // Hash da nova senha
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Atualizar senha do usuário
+    await this.userRepository.update(resetToken.user.id, {
+      password: hashedPassword,
+    });
+
+    // Marcar token como usado
+    resetToken.used = true;
+    await this.passwordResetTokenRepository.save(resetToken);
+
+    return {
+      success: true,
+      message: 'Senha redefinida com sucesso!',
     };
   }
 
