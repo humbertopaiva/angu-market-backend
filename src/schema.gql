@@ -1,0 +1,1543 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+input AssignRoleInput {
+  roleId: Int!
+  userId: Int!
+}
+
+type AuthResponse {
+  accessToken: String!
+  user: User!
+}
+
+input BooleanFieldComparison {
+  is: Boolean
+  isNot: Boolean
+}
+
+type Company {
+  address: String
+  banner: String
+  cnpj: String
+  createdAt: DateTime!
+  deletedAt: DateTime
+  description: String!
+  email: String
+  id: ID!
+  isActive: Boolean!
+  latitude: Float
+  logo: String
+  longitude: Float
+  name: String!
+  openingHours: String
+  phone: String
+  place: Place!
+  placeId: Float!
+  slug: String!
+  updatedAt: DateTime!
+  users: [User!]
+  uuid: String!
+  website: String
+}
+
+input CompanyAggregateFilter {
+  address: StringFieldComparison
+  and: [CompanyAggregateFilter!]
+  banner: StringFieldComparison
+  cnpj: StringFieldComparison
+  createdAt: DateFieldComparison
+  deletedAt: DateFieldComparison
+  description: StringFieldComparison
+  email: StringFieldComparison
+  id: IDFilterComparison
+  isActive: BooleanFieldComparison
+  latitude: NumberFieldComparison
+  logo: StringFieldComparison
+  longitude: NumberFieldComparison
+  name: StringFieldComparison
+  openingHours: StringFieldComparison
+  or: [CompanyAggregateFilter!]
+  phone: StringFieldComparison
+  placeId: NumberFieldComparison
+  slug: StringFieldComparison
+  updatedAt: DateFieldComparison
+  uuid: StringFieldComparison
+  website: StringFieldComparison
+}
+
+type CompanyAggregateGroupBy {
+  address: String
+  banner: String
+  cnpj: String
+  createdAt: DateTime
+  deletedAt: DateTime
+  description: String
+  email: String
+  id: ID
+  isActive: Boolean
+  latitude: Float
+  logo: String
+  longitude: Float
+  name: String
+  openingHours: String
+  phone: String
+  placeId: Float
+  slug: String
+  updatedAt: DateTime
+  uuid: String
+  website: String
+}
+
+type CompanyAggregateResponse {
+  avg: CompanyAvgAggregate
+  count: CompanyCountAggregate
+  groupBy: CompanyAggregateGroupBy
+  max: CompanyMaxAggregate
+  min: CompanyMinAggregate
+  sum: CompanySumAggregate
+}
+
+type CompanyAvgAggregate {
+  id: Float
+  latitude: Float
+  longitude: Float
+  placeId: Float
+}
+
+type CompanyConnection {
+  """Array of edges."""
+  edges: [CompanyEdge!]!
+
+  """Paging information"""
+  pageInfo: PageInfo!
+}
+
+type CompanyCountAggregate {
+  address: Int
+  banner: Int
+  cnpj: Int
+  createdAt: Int
+  deletedAt: Int
+  description: Int
+  email: Int
+  id: Int
+  isActive: Int
+  latitude: Int
+  logo: Int
+  longitude: Int
+  name: Int
+  openingHours: Int
+  phone: Int
+  placeId: Int
+  slug: Int
+  updatedAt: Int
+  uuid: Int
+  website: Int
+}
+
+input CompanyDeleteFilter {
+  address: StringFieldComparison
+  and: [CompanyDeleteFilter!]
+  banner: StringFieldComparison
+  cnpj: StringFieldComparison
+  createdAt: DateFieldComparison
+  deletedAt: DateFieldComparison
+  description: StringFieldComparison
+  email: StringFieldComparison
+  id: IDFilterComparison
+  isActive: BooleanFieldComparison
+  latitude: NumberFieldComparison
+  logo: StringFieldComparison
+  longitude: NumberFieldComparison
+  name: StringFieldComparison
+  openingHours: StringFieldComparison
+  or: [CompanyDeleteFilter!]
+  phone: StringFieldComparison
+  placeId: NumberFieldComparison
+  slug: StringFieldComparison
+  updatedAt: DateFieldComparison
+  uuid: StringFieldComparison
+  website: StringFieldComparison
+}
+
+type CompanyDeleteResponse {
+  address: String
+  banner: String
+  cnpj: String
+  createdAt: DateTime
+  deletedAt: DateTime
+  description: String
+  email: String
+  id: ID
+  isActive: Boolean
+  latitude: Float
+  logo: String
+  longitude: Float
+  name: String
+  openingHours: String
+  phone: String
+  place: Place
+  placeId: Float
+  slug: String
+  updatedAt: DateTime
+  users: [User!]
+  uuid: String
+  website: String
+}
+
+type CompanyEdge {
+  """Cursor for this node."""
+  cursor: ConnectionCursor!
+
+  """The node containing the Company"""
+  node: Company!
+}
+
+input CompanyFilter {
+  address: StringFieldComparison
+  and: [CompanyFilter!]
+  banner: StringFieldComparison
+  cnpj: StringFieldComparison
+  createdAt: DateFieldComparison
+  deletedAt: DateFieldComparison
+  description: StringFieldComparison
+  email: StringFieldComparison
+  id: IDFilterComparison
+  isActive: BooleanFieldComparison
+  latitude: NumberFieldComparison
+  logo: StringFieldComparison
+  longitude: NumberFieldComparison
+  name: StringFieldComparison
+  openingHours: StringFieldComparison
+  or: [CompanyFilter!]
+  phone: StringFieldComparison
+  placeId: NumberFieldComparison
+  slug: StringFieldComparison
+  updatedAt: DateFieldComparison
+  uuid: StringFieldComparison
+  website: StringFieldComparison
+}
+
+type CompanyMaxAggregate {
+  address: String
+  banner: String
+  cnpj: String
+  createdAt: DateTime
+  deletedAt: DateTime
+  description: String
+  email: String
+  id: ID
+  latitude: Float
+  logo: String
+  longitude: Float
+  name: String
+  openingHours: String
+  phone: String
+  placeId: Float
+  slug: String
+  updatedAt: DateTime
+  uuid: String
+  website: String
+}
+
+type CompanyMinAggregate {
+  address: String
+  banner: String
+  cnpj: String
+  createdAt: DateTime
+  deletedAt: DateTime
+  description: String
+  email: String
+  id: ID
+  latitude: Float
+  logo: String
+  longitude: Float
+  name: String
+  openingHours: String
+  phone: String
+  placeId: Float
+  slug: String
+  updatedAt: DateTime
+  uuid: String
+  website: String
+}
+
+input CompanySort {
+  direction: SortDirection!
+  field: CompanySortFields!
+  nulls: SortNulls
+}
+
+enum CompanySortFields {
+  address
+  banner
+  cnpj
+  createdAt
+  deletedAt
+  description
+  email
+  id
+  isActive
+  latitude
+  logo
+  longitude
+  name
+  openingHours
+  phone
+  placeId
+  slug
+  updatedAt
+  uuid
+  website
+}
+
+type CompanySumAggregate {
+  id: Float
+  latitude: Float
+  longitude: Float
+  placeId: Float
+}
+
+input CompanyUpdateFilter {
+  address: StringFieldComparison
+  and: [CompanyUpdateFilter!]
+  banner: StringFieldComparison
+  cnpj: StringFieldComparison
+  createdAt: DateFieldComparison
+  deletedAt: DateFieldComparison
+  description: StringFieldComparison
+  email: StringFieldComparison
+  id: IDFilterComparison
+  isActive: BooleanFieldComparison
+  latitude: NumberFieldComparison
+  logo: StringFieldComparison
+  longitude: NumberFieldComparison
+  name: StringFieldComparison
+  openingHours: StringFieldComparison
+  or: [CompanyUpdateFilter!]
+  phone: StringFieldComparison
+  placeId: NumberFieldComparison
+  slug: StringFieldComparison
+  updatedAt: DateFieldComparison
+  uuid: StringFieldComparison
+  website: StringFieldComparison
+}
+
+"""Cursor for paging through collections"""
+scalar ConnectionCursor
+
+input CreateCompanyInput {
+  address: String
+  banner: String
+  cnpj: String
+  description: String!
+  email: String
+  isActive: Boolean
+  latitude: Float
+  logo: String
+  longitude: Float
+  name: String!
+  openingHours: String
+  phone: String
+  placeId: Int!
+  slug: String!
+  website: String
+}
+
+input CreateManyCompaniesInput {
+  """Array of records to create"""
+  companies: [CreateCompanyInput!]!
+}
+
+input CreateManyOrganizationsInput {
+  """Array of records to create"""
+  organizations: [CreateOrganizationInput!]!
+}
+
+input CreateManyPlacesInput {
+  """Array of records to create"""
+  places: [CreatePlaceInput!]!
+}
+
+input CreateOneCompanyInput {
+  """The record to create"""
+  company: CreateCompanyInput!
+}
+
+input CreateOneOrganizationInput {
+  """The record to create"""
+  organization: CreateOrganizationInput!
+}
+
+input CreateOnePlaceInput {
+  """The record to create"""
+  place: CreatePlaceInput!
+}
+
+input CreateOrganizationInput {
+  banner: String
+  description: String!
+  isActive: Boolean
+  logo: String
+  name: String!
+  slug: String!
+}
+
+input CreatePlaceInput {
+  banner: String
+  city: String!
+  description: String!
+  isActive: Boolean
+  latitude: Float
+  logo: String
+  longitude: Float
+  name: String!
+  neighborhood: String
+  organizationId: Int!
+  postalCode: String
+  slug: String!
+  state: String!
+}
+
+input CreateUserInput {
+  avatar: String
+  companyId: Int
+  email: String!
+  isActive: Boolean
+  name: String!
+  organizationId: Int
+  password: String!
+  phone: String
+  placeId: Int
+  roleIds: [Int!]
+}
+
+input CursorPaging {
+  """Paginate after opaque cursor"""
+  after: ConnectionCursor
+
+  """Paginate before opaque cursor"""
+  before: ConnectionCursor
+
+  """Paginate first"""
+  first: Int
+
+  """Paginate last"""
+  last: Int
+}
+
+input DateFieldComparison {
+  between: DateFieldComparisonBetween
+  eq: DateTime
+  gt: DateTime
+  gte: DateTime
+  in: [DateTime!]
+  is: Boolean
+  isNot: Boolean
+  lt: DateTime
+  lte: DateTime
+  neq: DateTime
+  notBetween: DateFieldComparisonBetween
+  notIn: [DateTime!]
+}
+
+input DateFieldComparisonBetween {
+  lower: DateTime!
+  upper: DateTime!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+input DeleteManyCompaniesInput {
+  """Filter to find records to delete"""
+  filter: CompanyDeleteFilter!
+}
+
+input DeleteManyOrganizationsInput {
+  """Filter to find records to delete"""
+  filter: OrganizationDeleteFilter!
+}
+
+input DeleteManyPlacesInput {
+  """Filter to find records to delete"""
+  filter: PlaceDeleteFilter!
+}
+
+type DeleteManyResponse {
+  """The number of records deleted."""
+  deletedCount: Int!
+}
+
+input DeleteOneCompanyInput {
+  """The id of the record to delete."""
+  id: ID!
+}
+
+input DeleteOneOrganizationInput {
+  """The id of the record to delete."""
+  id: ID!
+}
+
+input DeleteOnePlaceInput {
+  """The id of the record to delete."""
+  id: ID!
+}
+
+input DeleteOneUserInput {
+  """The id of the record to delete."""
+  id: ID!
+}
+
+input IDFilterComparison {
+  eq: ID
+  gt: ID
+  gte: ID
+  iLike: ID
+  in: [ID!]
+  is: Boolean
+  isNot: Boolean
+  like: ID
+  lt: ID
+  lte: ID
+  neq: ID
+  notILike: ID
+  notIn: [ID!]
+  notLike: ID
+}
+
+input LoginInput {
+  email: String!
+  password: String!
+}
+
+type Mutation {
+  assignRole(assignRoleInput: AssignRoleInput!): UserRole!
+  createCompany(createCompanyInput: CreateCompanyInput!): Company!
+  createManyCompanies(input: CreateManyCompaniesInput!): [Company!]!
+  createManyOrganizations(input: CreateManyOrganizationsInput!): [Organization!]!
+  createManyPlaces(input: CreateManyPlacesInput!): [Place!]!
+  createOneCompany(input: CreateOneCompanyInput!): Company!
+  createOneOrganization(input: CreateOneOrganizationInput!): Organization!
+  createOnePlace(input: CreateOnePlaceInput!): Place!
+  createOrganization(createOrganizationInput: CreateOrganizationInput!): Organization!
+  createPlace(createPlaceInput: CreatePlaceInput!): Place!
+  createUser(createUserInput: CreateUserInput!): User!
+  deleteManyCompanies(input: DeleteManyCompaniesInput!): DeleteManyResponse!
+  deleteManyOrganizations(input: DeleteManyOrganizationsInput!): DeleteManyResponse!
+  deleteManyPlaces(input: DeleteManyPlacesInput!): DeleteManyResponse!
+  deleteOneCompany(input: DeleteOneCompanyInput!): CompanyDeleteResponse!
+  deleteOneOrganization(input: DeleteOneOrganizationInput!): OrganizationDeleteResponse!
+  deleteOnePlace(input: DeleteOnePlaceInput!): PlaceDeleteResponse!
+  deleteOneUser(input: DeleteOneUserInput!): UserDeleteResponse!
+  login(loginInput: LoginInput!): AuthResponse!
+  removeCompany(id: Int!): Company!
+  removeOrganization(id: Int!): Organization!
+  removePlace(id: Int!): Place!
+  removeRole(roleId: Float!, userId: Float!): Boolean!
+  removeUser(id: Int!): User!
+  updateCompany(updateCompanyInput: UpdateCompanyInput!): Company!
+  updateManyCompanies(input: UpdateManyCompaniesInput!): UpdateManyResponse!
+  updateManyOrganizations(input: UpdateManyOrganizationsInput!): UpdateManyResponse!
+  updateManyPlaces(input: UpdateManyPlacesInput!): UpdateManyResponse!
+  updateOneCompany(input: UpdateOneCompanyInput!): Company!
+  updateOneOrganization(input: UpdateOneOrganizationInput!): Organization!
+  updateOnePlace(input: UpdateOnePlaceInput!): Place!
+  updateOrganization(updateOrganizationInput: UpdateOrganizationInput!): Organization!
+  updatePlace(updatePlaceInput: UpdatePlaceInput!): Place!
+  updateUser(updateUserInput: UpdateUserInput!): User!
+}
+
+input NumberFieldComparison {
+  between: NumberFieldComparisonBetween
+  eq: Float
+  gt: Float
+  gte: Float
+  in: [Float!]
+  is: Boolean
+  isNot: Boolean
+  lt: Float
+  lte: Float
+  neq: Float
+  notBetween: NumberFieldComparisonBetween
+  notIn: [Float!]
+}
+
+input NumberFieldComparisonBetween {
+  lower: Float!
+  upper: Float!
+}
+
+type Organization {
+  banner: String
+  createdAt: DateTime!
+  deletedAt: DateTime
+  description: String!
+  id: ID!
+  isActive: Boolean!
+  logo: String
+  name: String!
+  places: [Place!]
+  slug: String!
+  updatedAt: DateTime!
+  users: [User!]
+  uuid: String!
+}
+
+input OrganizationAggregateFilter {
+  and: [OrganizationAggregateFilter!]
+  banner: StringFieldComparison
+  createdAt: DateFieldComparison
+  deletedAt: DateFieldComparison
+  description: StringFieldComparison
+  id: IDFilterComparison
+  isActive: BooleanFieldComparison
+  logo: StringFieldComparison
+  name: StringFieldComparison
+  or: [OrganizationAggregateFilter!]
+  slug: StringFieldComparison
+  updatedAt: DateFieldComparison
+  uuid: StringFieldComparison
+}
+
+type OrganizationAggregateGroupBy {
+  banner: String
+  createdAt: DateTime
+  deletedAt: DateTime
+  description: String
+  id: ID
+  isActive: Boolean
+  logo: String
+  name: String
+  slug: String
+  updatedAt: DateTime
+  uuid: String
+}
+
+type OrganizationAggregateResponse {
+  avg: OrganizationAvgAggregate
+  count: OrganizationCountAggregate
+  groupBy: OrganizationAggregateGroupBy
+  max: OrganizationMaxAggregate
+  min: OrganizationMinAggregate
+  sum: OrganizationSumAggregate
+}
+
+type OrganizationAvgAggregate {
+  id: Float
+}
+
+type OrganizationConnection {
+  """Array of edges."""
+  edges: [OrganizationEdge!]!
+
+  """Paging information"""
+  pageInfo: PageInfo!
+}
+
+type OrganizationCountAggregate {
+  banner: Int
+  createdAt: Int
+  deletedAt: Int
+  description: Int
+  id: Int
+  isActive: Int
+  logo: Int
+  name: Int
+  slug: Int
+  updatedAt: Int
+  uuid: Int
+}
+
+input OrganizationDeleteFilter {
+  and: [OrganizationDeleteFilter!]
+  banner: StringFieldComparison
+  createdAt: DateFieldComparison
+  deletedAt: DateFieldComparison
+  description: StringFieldComparison
+  id: IDFilterComparison
+  isActive: BooleanFieldComparison
+  logo: StringFieldComparison
+  name: StringFieldComparison
+  or: [OrganizationDeleteFilter!]
+  slug: StringFieldComparison
+  updatedAt: DateFieldComparison
+  uuid: StringFieldComparison
+}
+
+type OrganizationDeleteResponse {
+  banner: String
+  createdAt: DateTime
+  deletedAt: DateTime
+  description: String
+  id: ID
+  isActive: Boolean
+  logo: String
+  name: String
+  places: [Place!]
+  slug: String
+  updatedAt: DateTime
+  users: [User!]
+  uuid: String
+}
+
+type OrganizationEdge {
+  """Cursor for this node."""
+  cursor: ConnectionCursor!
+
+  """The node containing the Organization"""
+  node: Organization!
+}
+
+input OrganizationFilter {
+  and: [OrganizationFilter!]
+  banner: StringFieldComparison
+  createdAt: DateFieldComparison
+  deletedAt: DateFieldComparison
+  description: StringFieldComparison
+  id: IDFilterComparison
+  isActive: BooleanFieldComparison
+  logo: StringFieldComparison
+  name: StringFieldComparison
+  or: [OrganizationFilter!]
+  slug: StringFieldComparison
+  updatedAt: DateFieldComparison
+  uuid: StringFieldComparison
+}
+
+type OrganizationMaxAggregate {
+  banner: String
+  createdAt: DateTime
+  deletedAt: DateTime
+  description: String
+  id: ID
+  logo: String
+  name: String
+  slug: String
+  updatedAt: DateTime
+  uuid: String
+}
+
+type OrganizationMinAggregate {
+  banner: String
+  createdAt: DateTime
+  deletedAt: DateTime
+  description: String
+  id: ID
+  logo: String
+  name: String
+  slug: String
+  updatedAt: DateTime
+  uuid: String
+}
+
+input OrganizationSort {
+  direction: SortDirection!
+  field: OrganizationSortFields!
+  nulls: SortNulls
+}
+
+enum OrganizationSortFields {
+  banner
+  createdAt
+  deletedAt
+  description
+  id
+  isActive
+  logo
+  name
+  slug
+  updatedAt
+  uuid
+}
+
+type OrganizationSumAggregate {
+  id: Float
+}
+
+input OrganizationUpdateFilter {
+  and: [OrganizationUpdateFilter!]
+  banner: StringFieldComparison
+  createdAt: DateFieldComparison
+  deletedAt: DateFieldComparison
+  description: StringFieldComparison
+  id: IDFilterComparison
+  isActive: BooleanFieldComparison
+  logo: StringFieldComparison
+  name: StringFieldComparison
+  or: [OrganizationUpdateFilter!]
+  slug: StringFieldComparison
+  updatedAt: DateFieldComparison
+  uuid: StringFieldComparison
+}
+
+type PageInfo {
+  """The cursor of the last returned record."""
+  endCursor: ConnectionCursor
+
+  """true if paging forward and there are more records."""
+  hasNextPage: Boolean
+
+  """true if paging backwards and there are more records."""
+  hasPreviousPage: Boolean
+
+  """The cursor of the first returned record."""
+  startCursor: ConnectionCursor
+}
+
+type Place {
+  banner: String
+  city: String!
+  companies: [Company!]
+  createdAt: DateTime!
+  deletedAt: DateTime
+  description: String!
+  id: ID!
+  isActive: Boolean!
+  latitude: Float
+  logo: String
+  longitude: Float
+  name: String!
+  neighborhood: String
+  organization: Organization!
+  organizationId: Float!
+  postalCode: String
+  slug: String!
+  state: String!
+  updatedAt: DateTime!
+  users: [User!]
+  uuid: String!
+}
+
+input PlaceAggregateFilter {
+  and: [PlaceAggregateFilter!]
+  banner: StringFieldComparison
+  city: StringFieldComparison
+  createdAt: DateFieldComparison
+  deletedAt: DateFieldComparison
+  description: StringFieldComparison
+  id: IDFilterComparison
+  isActive: BooleanFieldComparison
+  latitude: NumberFieldComparison
+  logo: StringFieldComparison
+  longitude: NumberFieldComparison
+  name: StringFieldComparison
+  neighborhood: StringFieldComparison
+  or: [PlaceAggregateFilter!]
+  organizationId: NumberFieldComparison
+  postalCode: StringFieldComparison
+  slug: StringFieldComparison
+  state: StringFieldComparison
+  updatedAt: DateFieldComparison
+  uuid: StringFieldComparison
+}
+
+type PlaceAggregateGroupBy {
+  banner: String
+  city: String
+  createdAt: DateTime
+  deletedAt: DateTime
+  description: String
+  id: ID
+  isActive: Boolean
+  latitude: Float
+  logo: String
+  longitude: Float
+  name: String
+  neighborhood: String
+  organizationId: Float
+  postalCode: String
+  slug: String
+  state: String
+  updatedAt: DateTime
+  uuid: String
+}
+
+type PlaceAggregateResponse {
+  avg: PlaceAvgAggregate
+  count: PlaceCountAggregate
+  groupBy: PlaceAggregateGroupBy
+  max: PlaceMaxAggregate
+  min: PlaceMinAggregate
+  sum: PlaceSumAggregate
+}
+
+type PlaceAvgAggregate {
+  id: Float
+  latitude: Float
+  longitude: Float
+  organizationId: Float
+}
+
+type PlaceConnection {
+  """Array of edges."""
+  edges: [PlaceEdge!]!
+
+  """Paging information"""
+  pageInfo: PageInfo!
+}
+
+type PlaceCountAggregate {
+  banner: Int
+  city: Int
+  createdAt: Int
+  deletedAt: Int
+  description: Int
+  id: Int
+  isActive: Int
+  latitude: Int
+  logo: Int
+  longitude: Int
+  name: Int
+  neighborhood: Int
+  organizationId: Int
+  postalCode: Int
+  slug: Int
+  state: Int
+  updatedAt: Int
+  uuid: Int
+}
+
+input PlaceDeleteFilter {
+  and: [PlaceDeleteFilter!]
+  banner: StringFieldComparison
+  city: StringFieldComparison
+  createdAt: DateFieldComparison
+  deletedAt: DateFieldComparison
+  description: StringFieldComparison
+  id: IDFilterComparison
+  isActive: BooleanFieldComparison
+  latitude: NumberFieldComparison
+  logo: StringFieldComparison
+  longitude: NumberFieldComparison
+  name: StringFieldComparison
+  neighborhood: StringFieldComparison
+  or: [PlaceDeleteFilter!]
+  organizationId: NumberFieldComparison
+  postalCode: StringFieldComparison
+  slug: StringFieldComparison
+  state: StringFieldComparison
+  updatedAt: DateFieldComparison
+  uuid: StringFieldComparison
+}
+
+type PlaceDeleteResponse {
+  banner: String
+  city: String
+  companies: [Company!]
+  createdAt: DateTime
+  deletedAt: DateTime
+  description: String
+  id: ID
+  isActive: Boolean
+  latitude: Float
+  logo: String
+  longitude: Float
+  name: String
+  neighborhood: String
+  organization: Organization
+  organizationId: Float
+  postalCode: String
+  slug: String
+  state: String
+  updatedAt: DateTime
+  users: [User!]
+  uuid: String
+}
+
+type PlaceEdge {
+  """Cursor for this node."""
+  cursor: ConnectionCursor!
+
+  """The node containing the Place"""
+  node: Place!
+}
+
+input PlaceFilter {
+  and: [PlaceFilter!]
+  banner: StringFieldComparison
+  city: StringFieldComparison
+  createdAt: DateFieldComparison
+  deletedAt: DateFieldComparison
+  description: StringFieldComparison
+  id: IDFilterComparison
+  isActive: BooleanFieldComparison
+  latitude: NumberFieldComparison
+  logo: StringFieldComparison
+  longitude: NumberFieldComparison
+  name: StringFieldComparison
+  neighborhood: StringFieldComparison
+  or: [PlaceFilter!]
+  organizationId: NumberFieldComparison
+  postalCode: StringFieldComparison
+  slug: StringFieldComparison
+  state: StringFieldComparison
+  updatedAt: DateFieldComparison
+  uuid: StringFieldComparison
+}
+
+type PlaceMaxAggregate {
+  banner: String
+  city: String
+  createdAt: DateTime
+  deletedAt: DateTime
+  description: String
+  id: ID
+  latitude: Float
+  logo: String
+  longitude: Float
+  name: String
+  neighborhood: String
+  organizationId: Float
+  postalCode: String
+  slug: String
+  state: String
+  updatedAt: DateTime
+  uuid: String
+}
+
+type PlaceMinAggregate {
+  banner: String
+  city: String
+  createdAt: DateTime
+  deletedAt: DateTime
+  description: String
+  id: ID
+  latitude: Float
+  logo: String
+  longitude: Float
+  name: String
+  neighborhood: String
+  organizationId: Float
+  postalCode: String
+  slug: String
+  state: String
+  updatedAt: DateTime
+  uuid: String
+}
+
+input PlaceSort {
+  direction: SortDirection!
+  field: PlaceSortFields!
+  nulls: SortNulls
+}
+
+enum PlaceSortFields {
+  banner
+  city
+  createdAt
+  deletedAt
+  description
+  id
+  isActive
+  latitude
+  logo
+  longitude
+  name
+  neighborhood
+  organizationId
+  postalCode
+  slug
+  state
+  updatedAt
+  uuid
+}
+
+type PlaceSumAggregate {
+  id: Float
+  latitude: Float
+  longitude: Float
+  organizationId: Float
+}
+
+input PlaceUpdateFilter {
+  and: [PlaceUpdateFilter!]
+  banner: StringFieldComparison
+  city: StringFieldComparison
+  createdAt: DateFieldComparison
+  deletedAt: DateFieldComparison
+  description: StringFieldComparison
+  id: IDFilterComparison
+  isActive: BooleanFieldComparison
+  latitude: NumberFieldComparison
+  logo: StringFieldComparison
+  longitude: NumberFieldComparison
+  name: StringFieldComparison
+  neighborhood: StringFieldComparison
+  or: [PlaceUpdateFilter!]
+  organizationId: NumberFieldComparison
+  postalCode: StringFieldComparison
+  slug: StringFieldComparison
+  state: StringFieldComparison
+  updatedAt: DateFieldComparison
+  uuid: StringFieldComparison
+}
+
+type Query {
+  companies(
+    """Specify to filter the records returned."""
+    filter: CompanyFilter! = {}
+
+    """Limit or page results."""
+    paging: CursorPaging! = {first: 10}
+
+    """Specify to sort results."""
+    sorting: [CompanySort!]! = []
+  ): CompanyConnection!
+  companiesByPlace(placeId: Int!): [Company!]!
+  company(
+    """The id of the record to find."""
+    id: ID!
+  ): Company
+  companyAggregate(
+    """Filter to find records to aggregate on"""
+    filter: CompanyAggregateFilter
+  ): [CompanyAggregateResponse!]!
+  companyBySlug(slug: String!): Company!
+  hello: String!
+  me: User!
+  organization(
+    """The id of the record to find."""
+    id: ID!
+  ): Organization
+  organizationAggregate(
+    """Filter to find records to aggregate on"""
+    filter: OrganizationAggregateFilter
+  ): [OrganizationAggregateResponse!]!
+  organizationBySlug(slug: String!): Organization!
+  organizations(
+    """Specify to filter the records returned."""
+    filter: OrganizationFilter! = {}
+
+    """Limit or page results."""
+    paging: CursorPaging! = {first: 10}
+
+    """Specify to sort results."""
+    sorting: [OrganizationSort!]! = []
+  ): OrganizationConnection!
+  place(
+    """The id of the record to find."""
+    id: ID!
+  ): Place
+  placeAggregate(
+    """Filter to find records to aggregate on"""
+    filter: PlaceAggregateFilter
+  ): [PlaceAggregateResponse!]!
+  placeBySlug(slug: String!): Place!
+  places(
+    """Specify to filter the records returned."""
+    filter: PlaceFilter! = {}
+
+    """Limit or page results."""
+    paging: CursorPaging! = {first: 10}
+
+    """Specify to sort results."""
+    sorting: [PlaceSort!]! = []
+  ): PlaceConnection!
+  placesByOrganization(organizationId: Int!): [Place!]!
+  user(
+    """The id of the record to find."""
+    id: ID!
+  ): User
+  userAggregate(
+    """Filter to find records to aggregate on"""
+    filter: UserAggregateFilter
+  ): [UserAggregateResponse!]!
+  userRoles(userId: Float!): [UserRole!]!
+  users(
+    """Specify to filter the records returned."""
+    filter: UserFilter! = {}
+
+    """Limit or page results."""
+    paging: CursorPaging! = {first: 10}
+
+    """Specify to sort results."""
+    sorting: [UserSort!]! = []
+  ): UserConnection!
+}
+
+type Role {
+  createdAt: DateTime!
+  deletedAt: DateTime
+  description: String!
+  id: ID!
+  isActive: Boolean!
+  name: RoleType!
+  updatedAt: DateTime!
+  userRoles: [UserRole!]
+  uuid: String!
+}
+
+"""Os tipos de papéis disponíveis no sistema"""
+enum RoleType {
+  COMPANY_ADMIN
+  COMPANY_STAFF
+  ORGANIZATION_ADMIN
+  PLACE_ADMIN
+  PUBLIC_USER
+  SUPER_ADMIN
+}
+
+"""Sort Directions"""
+enum SortDirection {
+  ASC
+  DESC
+}
+
+"""Sort Nulls Options"""
+enum SortNulls {
+  NULLS_FIRST
+  NULLS_LAST
+}
+
+input StringFieldComparison {
+  eq: String
+  gt: String
+  gte: String
+  iLike: String
+  in: [String!]
+  is: Boolean
+  isNot: Boolean
+  like: String
+  lt: String
+  lte: String
+  neq: String
+  notILike: String
+  notIn: [String!]
+  notLike: String
+}
+
+input UpdateCompanyInput {
+  address: String
+  banner: String
+  cnpj: String
+  description: String
+  email: String
+  id: Int!
+  isActive: Boolean
+  latitude: Float
+  logo: String
+  longitude: Float
+  name: String
+  openingHours: String
+  phone: String
+  placeId: Int
+  slug: String
+  website: String
+}
+
+input UpdateManyCompaniesInput {
+  """Filter used to find fields to update"""
+  filter: CompanyUpdateFilter!
+
+  """The update to apply to all records found using the filter"""
+  update: UpdateCompanyInput!
+}
+
+input UpdateManyOrganizationsInput {
+  """Filter used to find fields to update"""
+  filter: OrganizationUpdateFilter!
+
+  """The update to apply to all records found using the filter"""
+  update: UpdateOrganizationInput!
+}
+
+input UpdateManyPlacesInput {
+  """Filter used to find fields to update"""
+  filter: PlaceUpdateFilter!
+
+  """The update to apply to all records found using the filter"""
+  update: UpdatePlaceInput!
+}
+
+type UpdateManyResponse {
+  """The number of records updated."""
+  updatedCount: Int!
+}
+
+input UpdateOneCompanyInput {
+  """The id of the record to update"""
+  id: ID!
+
+  """The update to apply."""
+  update: UpdateCompanyInput!
+}
+
+input UpdateOneOrganizationInput {
+  """The id of the record to update"""
+  id: ID!
+
+  """The update to apply."""
+  update: UpdateOrganizationInput!
+}
+
+input UpdateOnePlaceInput {
+  """The id of the record to update"""
+  id: ID!
+
+  """The update to apply."""
+  update: UpdatePlaceInput!
+}
+
+input UpdateOrganizationInput {
+  banner: String
+  description: String
+  id: Int!
+  isActive: Boolean
+  logo: String
+  name: String
+  slug: String
+}
+
+input UpdatePlaceInput {
+  banner: String
+  city: String
+  description: String
+  id: Int!
+  isActive: Boolean
+  latitude: Float
+  logo: String
+  longitude: Float
+  name: String
+  neighborhood: String
+  organizationId: Int
+  postalCode: String
+  slug: String
+  state: String
+}
+
+input UpdateUserInput {
+  avatar: String
+  companyId: Int
+  id: Int!
+  isActive: Boolean
+  name: String
+  organizationId: Int
+  password: String
+  phone: String
+  placeId: Int
+  roleIds: [Int!]
+}
+
+type User {
+  avatar: String
+  company: Company
+  companyId: Float
+  createdAt: DateTime!
+  deletedAt: DateTime
+  email: String!
+  id: ID!
+  isActive: Boolean!
+  isVerified: Boolean!
+  name: String!
+  organization: Organization
+  organizationId: Float
+  phone: String
+  place: Place
+  placeId: Float
+  updatedAt: DateTime!
+  userRoles: [UserRole!]
+  uuid: String!
+}
+
+input UserAggregateFilter {
+  and: [UserAggregateFilter!]
+  avatar: StringFieldComparison
+  companyId: NumberFieldComparison
+  createdAt: DateFieldComparison
+  deletedAt: DateFieldComparison
+  email: StringFieldComparison
+  id: IDFilterComparison
+  isActive: BooleanFieldComparison
+  isVerified: BooleanFieldComparison
+  name: StringFieldComparison
+  or: [UserAggregateFilter!]
+  organizationId: NumberFieldComparison
+  phone: StringFieldComparison
+  placeId: NumberFieldComparison
+  updatedAt: DateFieldComparison
+  uuid: StringFieldComparison
+}
+
+type UserAggregateGroupBy {
+  avatar: String
+  companyId: Float
+  createdAt: DateTime
+  deletedAt: DateTime
+  email: String
+  id: ID
+  isActive: Boolean
+  isVerified: Boolean
+  name: String
+  organizationId: Float
+  phone: String
+  placeId: Float
+  updatedAt: DateTime
+  uuid: String
+}
+
+type UserAggregateResponse {
+  avg: UserAvgAggregate
+  count: UserCountAggregate
+  groupBy: UserAggregateGroupBy
+  max: UserMaxAggregate
+  min: UserMinAggregate
+  sum: UserSumAggregate
+}
+
+type UserAvgAggregate {
+  companyId: Float
+  id: Float
+  organizationId: Float
+  placeId: Float
+}
+
+type UserConnection {
+  """Array of edges."""
+  edges: [UserEdge!]!
+
+  """Paging information"""
+  pageInfo: PageInfo!
+}
+
+type UserCountAggregate {
+  avatar: Int
+  companyId: Int
+  createdAt: Int
+  deletedAt: Int
+  email: Int
+  id: Int
+  isActive: Int
+  isVerified: Int
+  name: Int
+  organizationId: Int
+  phone: Int
+  placeId: Int
+  updatedAt: Int
+  uuid: Int
+}
+
+type UserDeleteResponse {
+  avatar: String
+  company: Company
+  companyId: Float
+  createdAt: DateTime
+  deletedAt: DateTime
+  email: String
+  id: ID
+  isActive: Boolean
+  isVerified: Boolean
+  name: String
+  organization: Organization
+  organizationId: Float
+  phone: String
+  place: Place
+  placeId: Float
+  updatedAt: DateTime
+  userRoles: [UserRole!]
+  uuid: String
+}
+
+type UserEdge {
+  """Cursor for this node."""
+  cursor: ConnectionCursor!
+
+  """The node containing the User"""
+  node: User!
+}
+
+input UserFilter {
+  and: [UserFilter!]
+  avatar: StringFieldComparison
+  companyId: NumberFieldComparison
+  createdAt: DateFieldComparison
+  deletedAt: DateFieldComparison
+  email: StringFieldComparison
+  id: IDFilterComparison
+  isActive: BooleanFieldComparison
+  isVerified: BooleanFieldComparison
+  name: StringFieldComparison
+  or: [UserFilter!]
+  organizationId: NumberFieldComparison
+  phone: StringFieldComparison
+  placeId: NumberFieldComparison
+  updatedAt: DateFieldComparison
+  uuid: StringFieldComparison
+}
+
+type UserMaxAggregate {
+  avatar: String
+  companyId: Float
+  createdAt: DateTime
+  deletedAt: DateTime
+  email: String
+  id: ID
+  name: String
+  organizationId: Float
+  phone: String
+  placeId: Float
+  updatedAt: DateTime
+  uuid: String
+}
+
+type UserMinAggregate {
+  avatar: String
+  companyId: Float
+  createdAt: DateTime
+  deletedAt: DateTime
+  email: String
+  id: ID
+  name: String
+  organizationId: Float
+  phone: String
+  placeId: Float
+  updatedAt: DateTime
+  uuid: String
+}
+
+type UserRole {
+  createdAt: DateTime!
+  deletedAt: DateTime
+  id: ID!
+  isActive: Boolean!
+  role: Role!
+  roleId: Float!
+  updatedAt: DateTime!
+  user: User!
+  userId: Float!
+  uuid: String!
+}
+
+input UserSort {
+  direction: SortDirection!
+  field: UserSortFields!
+  nulls: SortNulls
+}
+
+enum UserSortFields {
+  avatar
+  companyId
+  createdAt
+  deletedAt
+  email
+  id
+  isActive
+  isVerified
+  name
+  organizationId
+  phone
+  placeId
+  updatedAt
+  uuid
+}
+
+type UserSumAggregate {
+  companyId: Float
+  id: Float
+  organizationId: Float
+  placeId: Float
+}
