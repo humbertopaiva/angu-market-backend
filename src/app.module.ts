@@ -1,4 +1,4 @@
-// src/modules/app.module.ts
+// src/app.module.ts
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -10,9 +10,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { OrganizationsModule } from './modules/organizations/organizations.module';
 import { PlacesModule } from './modules/places/places.module';
 import { CompaniesModule } from './modules/companies/companies.module';
-import { SegmentsModule } from './segments/segments.module';
-import { CompanyCategoriesModule } from './company-categories/company-categories.module';
-import { CompanySubcategoriesModule } from './company-subcategories/company-subcategories.module';
+import { SegmentationModule } from './modules/segments/segmentation.module'; // ÚNICO MÓDULO NECESSÁRIO
 
 @Module({
   imports: [
@@ -40,9 +38,7 @@ import { CompanySubcategoriesModule } from './company-subcategories/company-subc
     OrganizationsModule,
     PlacesModule,
     CompaniesModule,
-    SegmentsModule,
-    CompanyCategoriesModule,
-    CompanySubcategoriesModule,
+    SegmentationModule,
   ],
   providers: [AppResolver],
 })

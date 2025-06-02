@@ -10,7 +10,7 @@ import { Repository } from 'typeorm';
 import { Place } from '../places/entities/place.entity';
 import { User } from '../users/entities/user.entity';
 import { Subcategory } from './entities/company-subcategory.entity';
-import { Category } from '../company-categories/entities/company-category.entity';
+import { Category } from './entities/company-category.entity';
 import { CreateSubcategoryInput } from './dto/create-company-subcategory.input';
 import { UpdateSubcategoryInput } from './dto/update-company-subcategory.input';
 

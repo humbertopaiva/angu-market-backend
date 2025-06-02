@@ -13,7 +13,7 @@ import { Place } from '../places/entities/place.entity';
 import { User } from '../users/entities/user.entity';
 import { CreateSegmentInput } from './dto/create-segment.input';
 import { UpdateSegmentInput } from './dto/update-segment.input';
-import { Category } from '../company-categories/entities/company-category.entity';
+import { Category } from './entities/company-category.entity';
 
 @Injectable()
 export class SegmentsService {

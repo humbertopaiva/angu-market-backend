@@ -7,9 +7,10 @@ import { RoleType } from '../auth/entities/role.entity';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { User } from '../users/entities/user.entity';
 import { Subcategory } from './entities/company-subcategory.entity';
-import { SubcategoriesService } from './company-subcategories.service';
+
 import { CreateSubcategoryInput } from './dto/create-company-subcategory.input';
 import { UpdateSubcategoryInput } from './dto/update-company-subcategory.input';
+import { SubcategoriesService } from './company-subcategories.service';
 
 @Resolver(() => Subcategory)
 export class SubcategoriesResolver {

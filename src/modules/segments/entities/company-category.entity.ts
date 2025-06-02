@@ -1,14 +1,16 @@
-import { Entity, Column, ManyToOne, OneToMany, JoinColumn } from 'typeorm';
+import { Entity, Column, ManyToMany, OneToMany, ManyToOne, JoinColumn } from 'typeorm';
 import { ObjectType, Field } from '@nestjs/graphql';
 import { FilterableField } from '@nestjs-query/query-graphql';
 import { BaseEntity } from '@/modules/common/entities/base.entity';
-import { Category } from './category.entity';
+
 import { Company } from '../../companies/entities/company.entity';
 import { Place } from '../../places/entities/place.entity';
+import { Segment } from '@/modules/segments/entities/segment.entity';
+import { Subcategory } from '@/modules/segments/entities/company-subcategory.entity';
 
 @Entity()
 @ObjectType()
-export class Subcategory extends BaseEntity {
+export class Category extends BaseEntity {
   @Column()
   @FilterableField()
   name: string;
@@ -23,7 +25,11 @@ export class Subcategory extends BaseEntity {
 
   @Column({ nullable: true })
   @FilterableField({ nullable: true })
-  icon?: string; // Ícone da subcategoria
+  icon?: string; // Ícone da categoria
+
+  @Column({ nullable: true })
+  @FilterableField({ nullable: true })
+  color?: string; // Cor tema da categoria
 
   @Column({ default: 0 })
   @FilterableField()
@@ -34,7 +40,7 @@ export class Subcategory extends BaseEntity {
   keywords?: string; // Palavras-chave para busca (separadas por vírgula)
 
   // Relacionamentos
-  @ManyToOne(() => Place, place => place.subcategories)
+  @ManyToOne(() => Place, place => place.categories)
   @JoinColumn({ name: 'placeId' })
   @Field(() => Place)
   place: Place;
@@ -43,16 +49,15 @@ export class Subcategory extends BaseEntity {
   @FilterableField()
   placeId: number;
 
-  @ManyToOne(() => Category, category => category.subcategories)
-  @JoinColumn({ name: 'categoryId' })
-  @Field(() => Category)
-  category: Category;
+  @ManyToMany(() => Segment, segment => segment.categories)
+  @Field(() => [Segment], { nullable: true })
+  segments?: Segment[];
 
-  @Column()
-  @FilterableField()
-  categoryId: number;
+  @OneToMany(() => Subcategory, subcategory => subcategory.category)
+  @Field(() => [Subcategory], { nullable: true })
+  subcategories?: Subcategory[];
 
-  @OneToMany(() => Company, company => company.subcategory)
+  @OneToMany(() => Company, company => company.category)
   @Field(() => [Company], { nullable: true })
   companies?: Company[];
 }

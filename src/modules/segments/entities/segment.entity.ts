@@ -4,7 +4,7 @@ import { FilterableField } from '@nestjs-query/query-graphql';
 import { BaseEntity } from '@/modules/common/entities/base.entity';
 
 import { Place } from '../../places/entities/place.entity';
-import { Category } from '@/modules/company-categories/entities/company-category.entity';
+import { Category } from '@/modules/segments/entities/company-category.entity';
 
 @Entity()
 @ObjectType()
