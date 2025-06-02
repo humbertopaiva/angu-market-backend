@@ -8,6 +8,7 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 
@@ -43,10 +44,24 @@ export class AuthService {
     private passwordResetTokenRepository: Repository<PasswordResetToken>,
     private jwtService: JwtService,
     private emailService: EmailService,
+    private configService: ConfigService,
   ) {}
 
   async signUp(signUpInput: SignUpInput): Promise<SignUpResponse> {
-    const { name, email, password, passwordConfirmation } = signUpInput;
+    const { name, email, password, passwordConfirmation, securityToken } = signUpInput;
+
+    // Validar token de segurança
+    const validSecurityToken = this.configService.get<string>('SIGNUP_SECURITY_TOKEN');
+
+    if (!validSecurityToken) {
+      throw new BadRequestException('Sistema de registro não configurado corretamente');
+    }
+
+    if (securityToken !== validSecurityToken) {
+      throw new UnauthorizedException(
+        'Token de segurança inválido. Apenas usuários autorizados podem se registrar.',
+      );
+    }
 
     // Verificar se as senhas coincidem
     if (password !== passwordConfirmation) {

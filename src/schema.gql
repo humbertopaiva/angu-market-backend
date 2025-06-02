@@ -540,6 +540,11 @@ type Mutation {
   removePlace(id: Int!): Place!
   removeRole(roleId: Float!, userId: Float!): Boolean!
   removeUser(id: Int!): User!
+  requestPasswordReset(requestPasswordResetInput: RequestPasswordResetInput!): RequestPasswordResetResponse!
+  resendVerificationEmail(resendVerificationInput: ResendVerificationInput!): VerifyEmailResponse!
+  resetPassword(resetPasswordInput: ResetPasswordInput!): ResetPasswordResponse!
+  signUp(signUpInput: SignUpInput!): SignUpResponse!
+  testAuth: String!
   updateCompany(updateCompanyInput: UpdateCompanyInput!): Company!
   updateManyCompanies(input: UpdateManyCompaniesInput!): UpdateManyResponse!
   updateManyOrganizations(input: UpdateManyOrganizationsInput!): UpdateManyResponse!
@@ -550,6 +555,7 @@ type Mutation {
   updateOrganization(updateOrganizationInput: UpdateOrganizationInput!): Organization!
   updatePlace(updatePlaceInput: UpdatePlaceInput!): Place!
   updateUser(updateUserInput: UpdateUserInput!): User!
+  verifyEmail(verifyEmailInput: VerifyEmailInput!): VerifyEmailResponse!
 }
 
 input NumberFieldComparison {
@@ -1160,6 +1166,29 @@ type Query {
   ): UserConnection!
 }
 
+input RequestPasswordResetInput {
+  email: String!
+}
+
+type RequestPasswordResetResponse {
+  message: String!
+  success: Boolean!
+}
+
+input ResendVerificationInput {
+  email: String!
+}
+
+input ResetPasswordInput {
+  newPassword: String!
+  token: String!
+}
+
+type ResetPasswordResponse {
+  message: String!
+  success: Boolean!
+}
+
 type Role {
   createdAt: DateTime!
   deletedAt: DateTime
@@ -1180,6 +1209,20 @@ enum RoleType {
   PLACE_ADMIN
   PUBLIC_USER
   SUPER_ADMIN
+}
+
+input SignUpInput {
+  email: String!
+  name: String!
+  password: String!
+  passwordConfirmation: String!
+  securityToken: String!
+}
+
+type SignUpResponse {
+  message: String!
+  success: Boolean!
+  userId: Float
 }
 
 """Sort Directions"""
@@ -1540,4 +1583,13 @@ type UserSumAggregate {
   id: Float
   organizationId: Float
   placeId: Float
+}
+
+input VerifyEmailInput {
+  token: String!
+}
+
+type VerifyEmailResponse {
+  message: String!
+  success: Boolean!
 }

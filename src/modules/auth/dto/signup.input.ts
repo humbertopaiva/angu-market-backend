@@ -1,3 +1,4 @@
+// src/modules/auth/dto/signup.input.ts
 import { Field, InputType } from '@nestjs/graphql';
 import { IsEmail, IsString, MinLength } from 'class-validator';
 
@@ -20,4 +21,8 @@ export class SignUpInput {
   @IsString()
   @MinLength(6, { message: 'A confirmação de senha deve ter pelo menos 6 caracteres' })
   passwordConfirmation: string;
+
+  @Field()
+  @IsString({ message: 'Token de segurança é obrigatório' })
+  securityToken: string;
 }
