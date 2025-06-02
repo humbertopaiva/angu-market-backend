@@ -17,9 +17,196 @@ input BooleanFieldComparison {
   isNot: Boolean
 }
 
+type Category {
+  color: String
+  companies: [Company!]
+  createdAt: DateTime!
+  deletedAt: DateTime
+  description: String!
+  icon: String
+  id: ID!
+  isActive: Boolean!
+  keywords: String
+  name: String!
+  order: Float!
+  place: Place!
+  placeId: Float!
+  segments: [Segment!]
+  slug: String!
+  subcategories: [Subcategory!]
+  updatedAt: DateTime!
+  uuid: String!
+}
+
+input CategoryAggregateFilter {
+  and: [CategoryAggregateFilter!]
+  color: StringFieldComparison
+  createdAt: DateFieldComparison
+  deletedAt: DateFieldComparison
+  description: StringFieldComparison
+  icon: StringFieldComparison
+  id: IDFilterComparison
+  isActive: BooleanFieldComparison
+  keywords: StringFieldComparison
+  name: StringFieldComparison
+  or: [CategoryAggregateFilter!]
+  order: NumberFieldComparison
+  placeId: NumberFieldComparison
+  slug: StringFieldComparison
+  updatedAt: DateFieldComparison
+  uuid: StringFieldComparison
+}
+
+type CategoryAggregateGroupBy {
+  color: String
+  createdAt: DateTime
+  deletedAt: DateTime
+  description: String
+  icon: String
+  id: ID
+  isActive: Boolean
+  keywords: String
+  name: String
+  order: Float
+  placeId: Float
+  slug: String
+  updatedAt: DateTime
+  uuid: String
+}
+
+type CategoryAggregateResponse {
+  avg: CategoryAvgAggregate
+  count: CategoryCountAggregate
+  groupBy: CategoryAggregateGroupBy
+  max: CategoryMaxAggregate
+  min: CategoryMinAggregate
+  sum: CategorySumAggregate
+}
+
+type CategoryAvgAggregate {
+  id: Float
+  order: Float
+  placeId: Float
+}
+
+type CategoryConnection {
+  """Array of edges."""
+  edges: [CategoryEdge!]!
+
+  """Paging information"""
+  pageInfo: PageInfo!
+}
+
+type CategoryCountAggregate {
+  color: Int
+  createdAt: Int
+  deletedAt: Int
+  description: Int
+  icon: Int
+  id: Int
+  isActive: Int
+  keywords: Int
+  name: Int
+  order: Int
+  placeId: Int
+  slug: Int
+  updatedAt: Int
+  uuid: Int
+}
+
+type CategoryEdge {
+  """Cursor for this node."""
+  cursor: ConnectionCursor!
+
+  """The node containing the Category"""
+  node: Category!
+}
+
+input CategoryFilter {
+  and: [CategoryFilter!]
+  color: StringFieldComparison
+  createdAt: DateFieldComparison
+  deletedAt: DateFieldComparison
+  description: StringFieldComparison
+  icon: StringFieldComparison
+  id: IDFilterComparison
+  isActive: BooleanFieldComparison
+  keywords: StringFieldComparison
+  name: StringFieldComparison
+  or: [CategoryFilter!]
+  order: NumberFieldComparison
+  placeId: NumberFieldComparison
+  slug: StringFieldComparison
+  updatedAt: DateFieldComparison
+  uuid: StringFieldComparison
+}
+
+type CategoryMaxAggregate {
+  color: String
+  createdAt: DateTime
+  deletedAt: DateTime
+  description: String
+  icon: String
+  id: ID
+  keywords: String
+  name: String
+  order: Float
+  placeId: Float
+  slug: String
+  updatedAt: DateTime
+  uuid: String
+}
+
+type CategoryMinAggregate {
+  color: String
+  createdAt: DateTime
+  deletedAt: DateTime
+  description: String
+  icon: String
+  id: ID
+  keywords: String
+  name: String
+  order: Float
+  placeId: Float
+  slug: String
+  updatedAt: DateTime
+  uuid: String
+}
+
+input CategorySort {
+  direction: SortDirection!
+  field: CategorySortFields!
+  nulls: SortNulls
+}
+
+enum CategorySortFields {
+  color
+  createdAt
+  deletedAt
+  description
+  icon
+  id
+  isActive
+  keywords
+  name
+  order
+  placeId
+  slug
+  updatedAt
+  uuid
+}
+
+type CategorySumAggregate {
+  id: Float
+  order: Float
+  placeId: Float
+}
+
 type Company {
   address: String
   banner: String
+  category: Category
+  categoryId: Float
   cnpj: String
   createdAt: DateTime!
   deletedAt: DateTime
@@ -36,6 +223,9 @@ type Company {
   place: Place!
   placeId: Float!
   slug: String!
+  subcategory: Subcategory
+  subcategoryId: Float
+  tags: String
   updatedAt: DateTime!
   users: [User!]
   uuid: String!
@@ -46,6 +236,7 @@ input CompanyAggregateFilter {
   address: StringFieldComparison
   and: [CompanyAggregateFilter!]
   banner: StringFieldComparison
+  categoryId: NumberFieldComparison
   cnpj: StringFieldComparison
   createdAt: DateFieldComparison
   deletedAt: DateFieldComparison
@@ -62,6 +253,8 @@ input CompanyAggregateFilter {
   phone: StringFieldComparison
   placeId: NumberFieldComparison
   slug: StringFieldComparison
+  subcategoryId: NumberFieldComparison
+  tags: StringFieldComparison
   updatedAt: DateFieldComparison
   uuid: StringFieldComparison
   website: StringFieldComparison
@@ -70,6 +263,7 @@ input CompanyAggregateFilter {
 type CompanyAggregateGroupBy {
   address: String
   banner: String
+  categoryId: Float
   cnpj: String
   createdAt: DateTime
   deletedAt: DateTime
@@ -85,6 +279,8 @@ type CompanyAggregateGroupBy {
   phone: String
   placeId: Float
   slug: String
+  subcategoryId: Float
+  tags: String
   updatedAt: DateTime
   uuid: String
   website: String
@@ -100,10 +296,12 @@ type CompanyAggregateResponse {
 }
 
 type CompanyAvgAggregate {
+  categoryId: Float
   id: Float
   latitude: Float
   longitude: Float
   placeId: Float
+  subcategoryId: Float
 }
 
 type CompanyConnection {
@@ -117,6 +315,7 @@ type CompanyConnection {
 type CompanyCountAggregate {
   address: Int
   banner: Int
+  categoryId: Int
   cnpj: Int
   createdAt: Int
   deletedAt: Int
@@ -132,6 +331,8 @@ type CompanyCountAggregate {
   phone: Int
   placeId: Int
   slug: Int
+  subcategoryId: Int
+  tags: Int
   updatedAt: Int
   uuid: Int
   website: Int
@@ -141,6 +342,7 @@ input CompanyDeleteFilter {
   address: StringFieldComparison
   and: [CompanyDeleteFilter!]
   banner: StringFieldComparison
+  categoryId: NumberFieldComparison
   cnpj: StringFieldComparison
   createdAt: DateFieldComparison
   deletedAt: DateFieldComparison
@@ -157,6 +359,8 @@ input CompanyDeleteFilter {
   phone: StringFieldComparison
   placeId: NumberFieldComparison
   slug: StringFieldComparison
+  subcategoryId: NumberFieldComparison
+  tags: StringFieldComparison
   updatedAt: DateFieldComparison
   uuid: StringFieldComparison
   website: StringFieldComparison
@@ -165,6 +369,8 @@ input CompanyDeleteFilter {
 type CompanyDeleteResponse {
   address: String
   banner: String
+  category: Category
+  categoryId: Float
   cnpj: String
   createdAt: DateTime
   deletedAt: DateTime
@@ -181,6 +387,9 @@ type CompanyDeleteResponse {
   place: Place
   placeId: Float
   slug: String
+  subcategory: Subcategory
+  subcategoryId: Float
+  tags: String
   updatedAt: DateTime
   users: [User!]
   uuid: String
@@ -199,6 +408,7 @@ input CompanyFilter {
   address: StringFieldComparison
   and: [CompanyFilter!]
   banner: StringFieldComparison
+  categoryId: NumberFieldComparison
   cnpj: StringFieldComparison
   createdAt: DateFieldComparison
   deletedAt: DateFieldComparison
@@ -215,6 +425,8 @@ input CompanyFilter {
   phone: StringFieldComparison
   placeId: NumberFieldComparison
   slug: StringFieldComparison
+  subcategoryId: NumberFieldComparison
+  tags: StringFieldComparison
   updatedAt: DateFieldComparison
   uuid: StringFieldComparison
   website: StringFieldComparison
@@ -223,6 +435,7 @@ input CompanyFilter {
 type CompanyMaxAggregate {
   address: String
   banner: String
+  categoryId: Float
   cnpj: String
   createdAt: DateTime
   deletedAt: DateTime
@@ -237,6 +450,8 @@ type CompanyMaxAggregate {
   phone: String
   placeId: Float
   slug: String
+  subcategoryId: Float
+  tags: String
   updatedAt: DateTime
   uuid: String
   website: String
@@ -245,6 +460,7 @@ type CompanyMaxAggregate {
 type CompanyMinAggregate {
   address: String
   banner: String
+  categoryId: Float
   cnpj: String
   createdAt: DateTime
   deletedAt: DateTime
@@ -259,6 +475,8 @@ type CompanyMinAggregate {
   phone: String
   placeId: Float
   slug: String
+  subcategoryId: Float
+  tags: String
   updatedAt: DateTime
   uuid: String
   website: String
@@ -273,6 +491,7 @@ input CompanySort {
 enum CompanySortFields {
   address
   banner
+  categoryId
   cnpj
   createdAt
   deletedAt
@@ -288,22 +507,27 @@ enum CompanySortFields {
   phone
   placeId
   slug
+  subcategoryId
+  tags
   updatedAt
   uuid
   website
 }
 
 type CompanySumAggregate {
+  categoryId: Float
   id: Float
   latitude: Float
   longitude: Float
   placeId: Float
+  subcategoryId: Float
 }
 
 input CompanyUpdateFilter {
   address: StringFieldComparison
   and: [CompanyUpdateFilter!]
   banner: StringFieldComparison
+  categoryId: NumberFieldComparison
   cnpj: StringFieldComparison
   createdAt: DateFieldComparison
   deletedAt: DateFieldComparison
@@ -320,6 +544,8 @@ input CompanyUpdateFilter {
   phone: StringFieldComparison
   placeId: NumberFieldComparison
   slug: StringFieldComparison
+  subcategoryId: NumberFieldComparison
+  tags: StringFieldComparison
   updatedAt: DateFieldComparison
   uuid: StringFieldComparison
   website: StringFieldComparison
@@ -327,6 +553,19 @@ input CompanyUpdateFilter {
 
 """Cursor for paging through collections"""
 scalar ConnectionCursor
+
+input CreateCategoryInput {
+  color: String
+  description: String!
+  icon: String
+  isActive: Boolean
+  keywords: String
+  name: String!
+  order: Float
+  placeId: Int!
+  segmentIds: [Int!]
+  slug: String!
+}
 
 input CreateCompanyInput {
   address: String
@@ -402,8 +641,27 @@ input CreatePlaceInput {
 }
 
 input CreateSegmentInput {
-  """Example field (placeholder)"""
-  exampleField: Int!
+  categoryIds: [Int!]
+  color: String
+  description: String!
+  icon: String
+  isActive: Boolean
+  name: String!
+  order: Float
+  placeId: Int!
+  slug: String!
+}
+
+input CreateSubcategoryInput {
+  categoryId: Int!
+  description: String!
+  icon: String
+  isActive: Boolean
+  keywords: String
+  name: String!
+  order: Float
+  placeId: Int!
+  slug: String!
 }
 
 input CreateUserInput {
@@ -521,7 +779,10 @@ input LoginInput {
 }
 
 type Mutation {
+  addCategoriesToSegment(categoryIds: [Int!]!, segmentId: Int!): Segment!
+  addSegmentsToCategory(categoryId: Int!, segmentIds: [Int!]!): Category!
   assignRole(assignRoleInput: AssignRoleInput!): UserRole!
+  createCategory(createCategoryInput: CreateCategoryInput!): Category!
   createCompany(createCompanyInput: CreateCompanyInput!): Company!
   createManyCompanies(input: CreateManyCompaniesInput!): [Company!]!
   createManyOrganizations(input: CreateManyOrganizationsInput!): [Organization!]!
@@ -532,6 +793,7 @@ type Mutation {
   createOrganization(createOrganizationInput: CreateOrganizationInput!): Organization!
   createPlace(createPlaceInput: CreatePlaceInput!): Place!
   createSegment(createSegmentInput: CreateSegmentInput!): Segment!
+  createSubcategory(createSubcategoryInput: CreateSubcategoryInput!): Subcategory!
   createUser(createUserInput: CreateUserInput!): User!
   deleteManyCompanies(input: DeleteManyCompaniesInput!): DeleteManyResponse!
   deleteManyOrganizations(input: DeleteManyOrganizationsInput!): DeleteManyResponse!
@@ -541,17 +803,22 @@ type Mutation {
   deleteOnePlace(input: DeleteOnePlaceInput!): PlaceDeleteResponse!
   deleteOneUser(input: DeleteOneUserInput!): UserDeleteResponse!
   login(loginInput: LoginInput!): AuthResponse!
+  removeCategoriesFromSegment(categoryIds: [Int!]!, segmentId: Int!): Segment!
+  removeCategory(id: Int!): Category!
   removeCompany(id: Int!): Company!
   removeOrganization(id: Int!): Organization!
   removePlace(id: Int!): Place!
   removeRole(roleId: Float!, userId: Float!): Boolean!
   removeSegment(id: Int!): Segment!
+  removeSegmentsFromCategory(categoryId: Int!, segmentIds: [Int!]!): Category!
+  removeSubcategory(id: Int!): Subcategory!
   removeUser(id: Int!): User!
   requestPasswordReset(requestPasswordResetInput: RequestPasswordResetInput!): RequestPasswordResetResponse!
   resendVerificationEmail(resendVerificationInput: ResendVerificationInput!): VerifyEmailResponse!
   resetPassword(resetPasswordInput: ResetPasswordInput!): ResetPasswordResponse!
   signUp(signUpInput: SignUpInput!): SignUpResponse!
   testAuth: String!
+  updateCategory(updateCategoryInput: UpdateCategoryInput!): Category!
   updateCompany(updateCompanyInput: UpdateCompanyInput!): Company!
   updateManyCompanies(input: UpdateManyCompaniesInput!): UpdateManyResponse!
   updateManyOrganizations(input: UpdateManyOrganizationsInput!): UpdateManyResponse!
@@ -562,6 +829,7 @@ type Mutation {
   updateOrganization(updateOrganizationInput: UpdateOrganizationInput!): Organization!
   updatePlace(updatePlaceInput: UpdatePlaceInput!): Place!
   updateSegment(updateSegmentInput: UpdateSegmentInput!): Segment!
+  updateSubcategory(updateSubcategoryInput: UpdateSubcategoryInput!): Subcategory!
   updateUser(updateUserInput: UpdateUserInput!): User!
   verifyEmail(verifyEmailInput: VerifyEmailInput!): VerifyEmailResponse!
 }
@@ -805,6 +1073,7 @@ type PageInfo {
 
 type Place {
   banner: String
+  categories: [Category!]
   city: String!
   companies: [Company!]
   createdAt: DateTime!
@@ -820,8 +1089,10 @@ type Place {
   organization: Organization!
   organizationId: Float!
   postalCode: String
+  segments: [Segment!]
   slug: String!
   state: String!
+  subcategories: [Subcategory!]
   updatedAt: DateTime!
   users: [User!]
   uuid: String!
@@ -941,6 +1212,7 @@ input PlaceDeleteFilter {
 
 type PlaceDeleteResponse {
   banner: String
+  categories: [Category!]
   city: String
   companies: [Company!]
   createdAt: DateTime
@@ -956,8 +1228,10 @@ type PlaceDeleteResponse {
   organization: Organization
   organizationId: Float
   postalCode: String
+  segments: [Segment!]
   slug: String
   state: String
+  subcategories: [Subcategory!]
   updatedAt: DateTime
   users: [User!]
   uuid: String
@@ -1092,6 +1366,27 @@ input PlaceUpdateFilter {
 }
 
 type Query {
+  categories(
+    """Specify to filter the records returned."""
+    filter: CategoryFilter! = {}
+
+    """Limit or page results."""
+    paging: CursorPaging! = {first: 10}
+
+    """Specify to sort results."""
+    sorting: [CategorySort!]! = []
+  ): CategoryConnection!
+  categoriesByPlace(placeId: Int!): [Category!]!
+  categoriesBySegment(segmentId: Int!): [Category!]!
+  category(
+    """The id of the record to find."""
+    id: ID!
+  ): Category
+  categoryAggregate(
+    """Filter to find records to aggregate on"""
+    filter: CategoryAggregateFilter
+  ): [CategoryAggregateResponse!]!
+  categoryBySlug(placeId: Int!, slug: String!): Category!
   companies(
     """Specify to filter the records returned."""
     filter: CompanyFilter! = {}
@@ -1153,8 +1448,47 @@ type Query {
     sorting: [PlaceSort!]! = []
   ): PlaceConnection!
   placesByOrganization(organizationId: Int!): [Place!]!
-  segment(id: Int!): Segment!
-  segments: [Segment!]!
+  segment(
+    """The id of the record to find."""
+    id: ID!
+  ): Segment
+  segmentAggregate(
+    """Filter to find records to aggregate on"""
+    filter: SegmentAggregateFilter
+  ): [SegmentAggregateResponse!]!
+  segmentBySlug(placeId: Int!, slug: String!): Segment!
+  segments(
+    """Specify to filter the records returned."""
+    filter: SegmentFilter! = {}
+
+    """Limit or page results."""
+    paging: CursorPaging! = {first: 10}
+
+    """Specify to sort results."""
+    sorting: [SegmentSort!]! = []
+  ): SegmentConnection!
+  segmentsByPlace(placeId: Int!): [Segment!]!
+  subcategories(
+    """Specify to filter the records returned."""
+    filter: SubcategoryFilter! = {}
+
+    """Limit or page results."""
+    paging: CursorPaging! = {first: 10}
+
+    """Specify to sort results."""
+    sorting: [SubcategorySort!]! = []
+  ): SubcategoryConnection!
+  subcategoriesByCategory(categoryId: Int!): [Subcategory!]!
+  subcategoriesByPlace(placeId: Int!): [Subcategory!]!
+  subcategory(
+    """The id of the record to find."""
+    id: ID!
+  ): Subcategory
+  subcategoryAggregate(
+    """Filter to find records to aggregate on"""
+    filter: SubcategoryAggregateFilter
+  ): [SubcategoryAggregateResponse!]!
+  subcategoryBySlug(placeId: Int!, slug: String!): Subcategory!
   user(
     """The id of the record to find."""
     id: ID!
@@ -1222,8 +1556,178 @@ enum RoleType {
 }
 
 type Segment {
-  """Example field (placeholder)"""
-  exampleField: Int!
+  categories: [Category!]
+  color: String
+  createdAt: DateTime!
+  deletedAt: DateTime
+  description: String!
+  icon: String
+  id: ID!
+  isActive: Boolean!
+  name: String!
+  order: Float!
+  place: Place!
+  placeId: Float!
+  slug: String!
+  updatedAt: DateTime!
+  uuid: String!
+}
+
+input SegmentAggregateFilter {
+  and: [SegmentAggregateFilter!]
+  color: StringFieldComparison
+  createdAt: DateFieldComparison
+  deletedAt: DateFieldComparison
+  description: StringFieldComparison
+  icon: StringFieldComparison
+  id: IDFilterComparison
+  isActive: BooleanFieldComparison
+  name: StringFieldComparison
+  or: [SegmentAggregateFilter!]
+  order: NumberFieldComparison
+  placeId: NumberFieldComparison
+  slug: StringFieldComparison
+  updatedAt: DateFieldComparison
+  uuid: StringFieldComparison
+}
+
+type SegmentAggregateGroupBy {
+  color: String
+  createdAt: DateTime
+  deletedAt: DateTime
+  description: String
+  icon: String
+  id: ID
+  isActive: Boolean
+  name: String
+  order: Float
+  placeId: Float
+  slug: String
+  updatedAt: DateTime
+  uuid: String
+}
+
+type SegmentAggregateResponse {
+  avg: SegmentAvgAggregate
+  count: SegmentCountAggregate
+  groupBy: SegmentAggregateGroupBy
+  max: SegmentMaxAggregate
+  min: SegmentMinAggregate
+  sum: SegmentSumAggregate
+}
+
+type SegmentAvgAggregate {
+  id: Float
+  order: Float
+  placeId: Float
+}
+
+type SegmentConnection {
+  """Array of edges."""
+  edges: [SegmentEdge!]!
+
+  """Paging information"""
+  pageInfo: PageInfo!
+}
+
+type SegmentCountAggregate {
+  color: Int
+  createdAt: Int
+  deletedAt: Int
+  description: Int
+  icon: Int
+  id: Int
+  isActive: Int
+  name: Int
+  order: Int
+  placeId: Int
+  slug: Int
+  updatedAt: Int
+  uuid: Int
+}
+
+type SegmentEdge {
+  """Cursor for this node."""
+  cursor: ConnectionCursor!
+
+  """The node containing the Segment"""
+  node: Segment!
+}
+
+input SegmentFilter {
+  and: [SegmentFilter!]
+  color: StringFieldComparison
+  createdAt: DateFieldComparison
+  deletedAt: DateFieldComparison
+  description: StringFieldComparison
+  icon: StringFieldComparison
+  id: IDFilterComparison
+  isActive: BooleanFieldComparison
+  name: StringFieldComparison
+  or: [SegmentFilter!]
+  order: NumberFieldComparison
+  placeId: NumberFieldComparison
+  slug: StringFieldComparison
+  updatedAt: DateFieldComparison
+  uuid: StringFieldComparison
+}
+
+type SegmentMaxAggregate {
+  color: String
+  createdAt: DateTime
+  deletedAt: DateTime
+  description: String
+  icon: String
+  id: ID
+  name: String
+  order: Float
+  placeId: Float
+  slug: String
+  updatedAt: DateTime
+  uuid: String
+}
+
+type SegmentMinAggregate {
+  color: String
+  createdAt: DateTime
+  deletedAt: DateTime
+  description: String
+  icon: String
+  id: ID
+  name: String
+  order: Float
+  placeId: Float
+  slug: String
+  updatedAt: DateTime
+  uuid: String
+}
+
+input SegmentSort {
+  direction: SortDirection!
+  field: SegmentSortFields!
+  nulls: SortNulls
+}
+
+enum SegmentSortFields {
+  color
+  createdAt
+  deletedAt
+  description
+  icon
+  id
+  isActive
+  name
+  order
+  placeId
+  slug
+  updatedAt
+  uuid
+}
+
+type SegmentSumAggregate {
+  id: Float
+  order: Float
+  placeId: Float
 }
 
 input SignUpInput {
@@ -1267,6 +1771,206 @@ input StringFieldComparison {
   notILike: String
   notIn: [String!]
   notLike: String
+}
+
+type Subcategory {
+  category: Category!
+  categoryId: Float!
+  companies: [Company!]
+  createdAt: DateTime!
+  deletedAt: DateTime
+  description: String!
+  icon: String
+  id: ID!
+  isActive: Boolean!
+  keywords: String
+  name: String!
+  order: Float!
+  place: Place!
+  placeId: Float!
+  slug: String!
+  updatedAt: DateTime!
+  uuid: String!
+}
+
+input SubcategoryAggregateFilter {
+  and: [SubcategoryAggregateFilter!]
+  categoryId: NumberFieldComparison
+  createdAt: DateFieldComparison
+  deletedAt: DateFieldComparison
+  description: StringFieldComparison
+  icon: StringFieldComparison
+  id: IDFilterComparison
+  isActive: BooleanFieldComparison
+  keywords: StringFieldComparison
+  name: StringFieldComparison
+  or: [SubcategoryAggregateFilter!]
+  order: NumberFieldComparison
+  placeId: NumberFieldComparison
+  slug: StringFieldComparison
+  updatedAt: DateFieldComparison
+  uuid: StringFieldComparison
+}
+
+type SubcategoryAggregateGroupBy {
+  categoryId: Float
+  createdAt: DateTime
+  deletedAt: DateTime
+  description: String
+  icon: String
+  id: ID
+  isActive: Boolean
+  keywords: String
+  name: String
+  order: Float
+  placeId: Float
+  slug: String
+  updatedAt: DateTime
+  uuid: String
+}
+
+type SubcategoryAggregateResponse {
+  avg: SubcategoryAvgAggregate
+  count: SubcategoryCountAggregate
+  groupBy: SubcategoryAggregateGroupBy
+  max: SubcategoryMaxAggregate
+  min: SubcategoryMinAggregate
+  sum: SubcategorySumAggregate
+}
+
+type SubcategoryAvgAggregate {
+  categoryId: Float
+  id: Float
+  order: Float
+  placeId: Float
+}
+
+type SubcategoryConnection {
+  """Array of edges."""
+  edges: [SubcategoryEdge!]!
+
+  """Paging information"""
+  pageInfo: PageInfo!
+}
+
+type SubcategoryCountAggregate {
+  categoryId: Int
+  createdAt: Int
+  deletedAt: Int
+  description: Int
+  icon: Int
+  id: Int
+  isActive: Int
+  keywords: Int
+  name: Int
+  order: Int
+  placeId: Int
+  slug: Int
+  updatedAt: Int
+  uuid: Int
+}
+
+type SubcategoryEdge {
+  """Cursor for this node."""
+  cursor: ConnectionCursor!
+
+  """The node containing the Subcategory"""
+  node: Subcategory!
+}
+
+input SubcategoryFilter {
+  and: [SubcategoryFilter!]
+  categoryId: NumberFieldComparison
+  createdAt: DateFieldComparison
+  deletedAt: DateFieldComparison
+  description: StringFieldComparison
+  icon: StringFieldComparison
+  id: IDFilterComparison
+  isActive: BooleanFieldComparison
+  keywords: StringFieldComparison
+  name: StringFieldComparison
+  or: [SubcategoryFilter!]
+  order: NumberFieldComparison
+  placeId: NumberFieldComparison
+  slug: StringFieldComparison
+  updatedAt: DateFieldComparison
+  uuid: StringFieldComparison
+}
+
+type SubcategoryMaxAggregate {
+  categoryId: Float
+  createdAt: DateTime
+  deletedAt: DateTime
+  description: String
+  icon: String
+  id: ID
+  keywords: String
+  name: String
+  order: Float
+  placeId: Float
+  slug: String
+  updatedAt: DateTime
+  uuid: String
+}
+
+type SubcategoryMinAggregate {
+  categoryId: Float
+  createdAt: DateTime
+  deletedAt: DateTime
+  description: String
+  icon: String
+  id: ID
+  keywords: String
+  name: String
+  order: Float
+  placeId: Float
+  slug: String
+  updatedAt: DateTime
+  uuid: String
+}
+
+input SubcategorySort {
+  direction: SortDirection!
+  field: SubcategorySortFields!
+  nulls: SortNulls
+}
+
+enum SubcategorySortFields {
+  categoryId
+  createdAt
+  deletedAt
+  description
+  icon
+  id
+  isActive
+  keywords
+  name
+  order
+  placeId
+  slug
+  updatedAt
+  uuid
+}
+
+type SubcategorySumAggregate {
+  categoryId: Float
+  id: Float
+  order: Float
+  placeId: Float
+}
+
+input UpdateCategoryInput {
+  color: String
+  description: String
+  icon: String
+  id: Int!
+  isActive: Boolean
+  keywords: String
+  name: String
+  order: Float
+  placeId: Int
+  segmentIds: [Int!]
+  slug: String
 }
 
 input UpdateCompanyInput {
@@ -1369,9 +2073,29 @@ input UpdatePlaceInput {
 }
 
 input UpdateSegmentInput {
-  """Example field (placeholder)"""
-  exampleField: Int
+  categoryIds: [Int!]
+  color: String
+  description: String
+  icon: String
   id: Int!
+  isActive: Boolean
+  name: String
+  order: Float
+  placeId: Int
+  slug: String
+}
+
+input UpdateSubcategoryInput {
+  categoryId: Int
+  description: String
+  icon: String
+  id: Int!
+  isActive: Boolean
+  keywords: String
+  name: String
+  order: Float
+  placeId: Int
+  slug: String
 }
 
 input UpdateUserInput {

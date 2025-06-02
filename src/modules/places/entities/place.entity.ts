@@ -6,9 +6,10 @@ import { Organization } from '../../organizations/entities/organization.entity';
 import { Company } from '../../companies/entities/company.entity';
 import { User } from '../../users/entities/user.entity';
 import { Segment } from '../../segments/entities/segment.entity';
-import { Category } from '../../segments/entities/category.entity';
-import { Subcategory } from '../../segments/entities/subcategory.entity';
+
 import { BaseEntity } from '@/modules/common/entities/base.entity';
+import { Category } from '@/modules/segments/entities/company-category.entity';
+import { Subcategory } from '@/modules/segments/entities/company-subcategory.entity';
 
 @Entity()
 @ObjectType()
