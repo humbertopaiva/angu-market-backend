@@ -3,6 +3,8 @@ import { ObjectType, Field } from '@nestjs/graphql';
 import { FilterableField } from '@nestjs-query/query-graphql';
 import { Place } from '../../places/entities/place.entity';
 import { User } from '../../users/entities/user.entity';
+import { Category } from '../../segments/entities/category.entity';
+import { Subcategory } from '../../segments/entities/subcategory.entity';
 import { BaseEntity } from '@/modules/common/entities/base.entity';
 
 @Entity()
@@ -12,7 +14,7 @@ export class Company extends BaseEntity {
   @FilterableField()
   name: string;
 
-  @Column({ unique: true })
+  @Column()
   @FilterableField()
   slug: string;
 
@@ -73,4 +75,28 @@ export class Company extends BaseEntity {
   @OneToMany(() => User, user => user.company)
   @Field(() => [User], { nullable: true })
   users?: User[];
+
+  // Relacionamentos para categorização (devem ser do mesmo place)
+  @ManyToOne(() => Category, category => category.companies, { nullable: true })
+  @JoinColumn({ name: 'categoryId' })
+  @Field(() => Category, { nullable: true })
+  category?: Category;
+
+  @Column({ nullable: true })
+  @FilterableField({ nullable: true })
+  categoryId?: number;
+
+  @ManyToOne(() => Subcategory, subcategory => subcategory.companies, { nullable: true })
+  @JoinColumn({ name: 'subcategoryId' })
+  @Field(() => Subcategory, { nullable: true })
+  subcategory?: Subcategory;
+
+  @Column({ nullable: true })
+  @FilterableField({ nullable: true })
+  subcategoryId?: number;
+
+  // Tags para busca adicional (opcional)
+  @Column({ nullable: true, type: 'text' })
+  @FilterableField({ nullable: true })
+  tags?: string; // Tags separadas por vírgula para facilitar buscas
 }

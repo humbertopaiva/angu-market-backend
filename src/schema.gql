@@ -401,6 +401,11 @@ input CreatePlaceInput {
   state: String!
 }
 
+input CreateSegmentInput {
+  """Example field (placeholder)"""
+  exampleField: Int!
+}
+
 input CreateUserInput {
   avatar: String
   companyId: Int
@@ -526,6 +531,7 @@ type Mutation {
   createOnePlace(input: CreateOnePlaceInput!): Place!
   createOrganization(createOrganizationInput: CreateOrganizationInput!): Organization!
   createPlace(createPlaceInput: CreatePlaceInput!): Place!
+  createSegment(createSegmentInput: CreateSegmentInput!): Segment!
   createUser(createUserInput: CreateUserInput!): User!
   deleteManyCompanies(input: DeleteManyCompaniesInput!): DeleteManyResponse!
   deleteManyOrganizations(input: DeleteManyOrganizationsInput!): DeleteManyResponse!
@@ -539,6 +545,7 @@ type Mutation {
   removeOrganization(id: Int!): Organization!
   removePlace(id: Int!): Place!
   removeRole(roleId: Float!, userId: Float!): Boolean!
+  removeSegment(id: Int!): Segment!
   removeUser(id: Int!): User!
   requestPasswordReset(requestPasswordResetInput: RequestPasswordResetInput!): RequestPasswordResetResponse!
   resendVerificationEmail(resendVerificationInput: ResendVerificationInput!): VerifyEmailResponse!
@@ -554,6 +561,7 @@ type Mutation {
   updateOnePlace(input: UpdateOnePlaceInput!): Place!
   updateOrganization(updateOrganizationInput: UpdateOrganizationInput!): Organization!
   updatePlace(updatePlaceInput: UpdatePlaceInput!): Place!
+  updateSegment(updateSegmentInput: UpdateSegmentInput!): Segment!
   updateUser(updateUserInput: UpdateUserInput!): User!
   verifyEmail(verifyEmailInput: VerifyEmailInput!): VerifyEmailResponse!
 }
@@ -1145,6 +1153,8 @@ type Query {
     sorting: [PlaceSort!]! = []
   ): PlaceConnection!
   placesByOrganization(organizationId: Int!): [Place!]!
+  segment(id: Int!): Segment!
+  segments: [Segment!]!
   user(
     """The id of the record to find."""
     id: ID!
@@ -1209,6 +1219,11 @@ enum RoleType {
   PLACE_ADMIN
   PUBLIC_USER
   SUPER_ADMIN
+}
+
+type Segment {
+  """Example field (placeholder)"""
+  exampleField: Int!
 }
 
 input SignUpInput {
@@ -1351,6 +1366,12 @@ input UpdatePlaceInput {
   postalCode: String
   slug: String
   state: String
+}
+
+input UpdateSegmentInput {
+  """Example field (placeholder)"""
+  exampleField: Int
+  id: Int!
 }
 
 input UpdateUserInput {

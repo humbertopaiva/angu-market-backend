@@ -5,6 +5,9 @@ import { FilterableField } from '@nestjs-query/query-graphql';
 import { Organization } from '../../organizations/entities/organization.entity';
 import { Company } from '../../companies/entities/company.entity';
 import { User } from '../../users/entities/user.entity';
+import { Segment } from '../../segments/entities/segment.entity';
+import { Category } from '../../segments/entities/category.entity';
+import { Subcategory } from '../../segments/entities/subcategory.entity';
 import { BaseEntity } from '@/modules/common/entities/base.entity';
 
 @Entity()
@@ -71,4 +74,17 @@ export class Place extends BaseEntity {
   @OneToMany(() => User, user => user.place)
   @Field(() => [User], { nullable: true })
   users?: User[];
+
+  // Novos relacionamentos para categorização
+  @OneToMany(() => Segment, segment => segment.place)
+  @Field(() => [Segment], { nullable: true })
+  segments?: Segment[];
+
+  @OneToMany(() => Category, category => category.place)
+  @Field(() => [Category], { nullable: true })
+  categories?: Category[];
+
+  @OneToMany(() => Subcategory, subcategory => subcategory.place)
+  @Field(() => [Subcategory], { nullable: true })
+  subcategories?: Subcategory[];
 }

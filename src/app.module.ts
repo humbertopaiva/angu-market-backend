@@ -10,6 +10,9 @@ import { AuthModule } from './modules/auth/auth.module';
 import { OrganizationsModule } from './modules/organizations/organizations.module';
 import { PlacesModule } from './modules/places/places.module';
 import { CompaniesModule } from './modules/companies/companies.module';
+import { SegmentsModule } from './segments/segments.module';
+import { CompanyCategoriesModule } from './company-categories/company-categories.module';
+import { CompanySubcategoriesModule } from './company-subcategories/company-subcategories.module';
 
 @Module({
   imports: [
@@ -37,6 +40,9 @@ import { CompaniesModule } from './modules/companies/companies.module';
     OrganizationsModule,
     PlacesModule,
     CompaniesModule,
+    SegmentsModule,
+    CompanyCategoriesModule,
+    CompanySubcategoriesModule,
   ],
   providers: [AppResolver],
 })
