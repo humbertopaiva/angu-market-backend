@@ -81,8 +81,8 @@ export class FileUploadResolver {
   }
 
   @Query(() => String)
-  @UseGuards(JwtAuthGuard)
   getFileUrl(@Args('key') key: string): string {
+    // Usuários públicos podem visualizar URLs de arquivos (apenas ler)
     return this.fileUploadService.getFileUrl(key);
   }
 

@@ -67,8 +67,27 @@ export class FileUploadService {
   }
 
   // Validar se o usuário pode fazer upload no caminho especificado
-  private async canUploadToPath(customPath: string | undefined, user: User): Promise<boolean> {
-    // Se não tem caminho personalizado, sempre pode (vai para pasta pessoal)
+  private canUploadToPath(customPath: string | undefined, user: User): boolean {
+    // Verificar roles do usuário
+    const roles = user.userRoles?.map(ur => ur.role?.name).filter(Boolean) || [];
+
+    // Usuários públicos NÃO podem fazer upload de nada
+    if (
+      roles.includes(RoleType.PUBLIC_USER) &&
+      !roles.some(role =>
+        [
+          'SUPER_ADMIN',
+          'ORGANIZATION_ADMIN',
+          'PLACE_ADMIN',
+          'COMPANY_ADMIN',
+          'COMPANY_STAFF',
+        ].includes(role),
+      )
+    ) {
+      return false;
+    }
+
+    // Se não tem caminho personalizado, vai para pasta pessoal - permitir para usuários não-públicos
     if (!customPath) {
       return true;
     }
@@ -113,7 +132,7 @@ export class FileUploadService {
       }
 
       // Validar se o usuário pode fazer upload no caminho especificado
-      if (!(await this.canUploadToPath(customPath, user))) {
+      if (!this.canUploadToPath(customPath, user)) {
         throw new ForbiddenException('Você não tem permissão para fazer upload neste local');
       }
 
@@ -177,28 +196,63 @@ export class FileUploadService {
   }
 
   // Verificar se o usuário pode acessar/deletar o arquivo
-  private canAccessFile(key: string, user: User): Promise<boolean> {
-    // Se o arquivo está no diretório pessoal do usuário, permitir
+  private canAccessFile(key: string, user: User): boolean {
+    // Verificar roles do usuário
+    const roles = user.userRoles?.map(ur => ur.role?.name).filter(Boolean) || [];
+
+    // Super admin pode acessar tudo
+    if (roles.includes(RoleType.SUPER_ADMIN)) {
+      return true;
+    }
+
+    // Usuários públicos NÃO podem deletar arquivos
+    if (
+      roles.includes(RoleType.PUBLIC_USER) &&
+      !roles.some(role =>
+        [
+          'SUPER_ADMIN',
+          'ORGANIZATION_ADMIN',
+          'PLACE_ADMIN',
+          'COMPANY_ADMIN',
+          'COMPANY_STAFF',
+        ].includes(role),
+      )
+    ) {
+      return false;
+    }
+
+    // Se o arquivo está no diretório pessoal do usuário, permitir (exceto PUBLIC_USER)
     if (
       key.includes(`/users/${user.id}/`) ||
       (key.includes(`uploads/`) && key.includes(`/${user.id}/`))
     ) {
-      return Promise.resolve(true);
+      return (
+        !roles.includes(RoleType.PUBLIC_USER) ||
+        roles.some(role =>
+          [
+            'SUPER_ADMIN',
+            'ORGANIZATION_ADMIN',
+            'PLACE_ADMIN',
+            'COMPANY_ADMIN',
+            'COMPANY_STAFF',
+          ].includes(role),
+        )
+      );
     }
 
     // Se o usuário tem organização e o arquivo está na pasta da organização
     if (user.organizationId && key.includes(`organizations/${user.organizationId}/`)) {
-      return Promise.resolve(true);
+      return true;
     }
 
     // Se o usuário tem place e o arquivo está na pasta do place
     if (user.placeId && key.includes(`places/${user.placeId}/`)) {
-      return Promise.resolve(true);
+      return true;
     }
 
     // Se o usuário tem empresa e o arquivo está na pasta da empresa
     if (user.companyId && key.includes(`companies/${user.companyId}/`)) {
-      return Promise.resolve(true);
+      return true;
     }
 
     // Verificar se o arquivo está em um caminho hierárquico permitido
@@ -206,53 +260,43 @@ export class FileUploadService {
     if (user.organizationId && user.placeId && user.companyId) {
       const expectedPath = `organizations/${user.organizationId}/places/${user.placeId}/companies/${user.companyId}/`;
       if (key.includes(expectedPath)) {
-        return Promise.resolve(true);
+        return true;
       }
     }
 
-    // Verificar se é admin da organização/place/empresa (baseado nas roles)
-    if (user.userRoles) {
-      const roles = user.userRoles.map(ur => ur.role?.name).filter(Boolean);
-
-      // Super admin pode acessar tudo
-      if (roles.includes(RoleType.SUPER_ADMIN)) {
-        return Promise.resolve(true);
-      }
-
-      // Organization admin pode acessar arquivos da sua organização
-      if (
-        roles.includes(RoleType.ORGANIZATION_ADMIN) &&
-        user.organizationId &&
-        key.includes(`organizations/${user.organizationId}/`)
-      ) {
-        return Promise.resolve(true);
-      }
-
-      // Place admin pode acessar arquivos do seu place
-      if (
-        roles.includes(RoleType.PLACE_ADMIN) &&
-        user.placeId &&
-        key.includes(`places/${user.placeId}/`)
-      ) {
-        return Promise.resolve(true);
-      }
-
-      // Company admin pode acessar arquivos da sua empresa
-      if (
-        roles.includes(RoleType.COMPANY_ADMIN) &&
-        user.companyId &&
-        key.includes(`companies/${user.companyId}/`)
-      ) {
-        return Promise.resolve(true);
-      }
+    // Organization admin pode acessar arquivos da sua organização
+    if (
+      roles.includes(RoleType.ORGANIZATION_ADMIN) &&
+      user.organizationId &&
+      key.includes(`organizations/${user.organizationId}/`)
+    ) {
+      return true;
     }
 
-    return Promise.resolve(false);
+    // Place admin pode acessar arquivos do seu place
+    if (
+      roles.includes(RoleType.PLACE_ADMIN) &&
+      user.placeId &&
+      key.includes(`places/${user.placeId}/`)
+    ) {
+      return true;
+    }
+
+    // Company admin pode acessar arquivos da sua empresa
+    if (
+      roles.includes(RoleType.COMPANY_ADMIN) &&
+      user.companyId &&
+      key.includes(`companies/${user.companyId}/`)
+    ) {
+      return true;
+    }
+
+    return false;
   }
 
   async deleteFile(key: string, user: User): Promise<boolean> {
     try {
-      if (!(await this.canAccessFile(key, user))) {
+      if (!this.canAccessFile(key, user)) {
         this.logger.warn(`Unauthorized delete attempt by user ${user.id} for file ${key}`);
         throw new ForbiddenException('Você não tem permissão para deletar este arquivo');
       }
