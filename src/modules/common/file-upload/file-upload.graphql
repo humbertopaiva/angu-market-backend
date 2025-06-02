@@ -1,0 +1,26 @@
+input PresignedUrlInput {
+  folder: String!
+  filename: String!
+  contentType: String
+  customPath: String
+}
+
+type PresignedUrlResponse {
+  presignedUrl: String!
+  key: String!
+  fileUrl: String!
+}
+
+input DeleteFileInput {
+  key: String!
+}
+
+extend type Mutation {
+  getPresignedUploadUrl(input: PresignedUrlInput!): PresignedUrlResponse!
+  deleteFile(input: DeleteFileInput!): Boolean!
+}
+
+extend type Query {
+  getFileUrl(key: String!): String!
+  generateCustomPath(type: String!, id: Int!): String!
+}
