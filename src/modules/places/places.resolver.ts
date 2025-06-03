@@ -1,6 +1,6 @@
 // src/modules/places/places.resolver.ts
 import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
-import { UseGuards } from '@nestjs/common';
+import { UseGuards, Logger } from '@nestjs/common';
 
 import { PlacesService } from './places.service';
 import { Place } from './entities/place.entity';
@@ -10,16 +10,35 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { RoleType } from '../auth/entities/role.entity';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { User } from '../users/entities/user.entity';
 
 @Resolver(() => Place)
 export class PlacesResolver {
+  private readonly logger = new Logger(PlacesResolver.name);
+
   constructor(private readonly placesService: PlacesService) {}
 
-  // Apenas super admin pode criar places
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleType.SUPER_ADMIN)
   @Mutation(() => Place)
-  createPlace(@Args('createPlaceInput') createPlaceInput: CreatePlaceInput) {
+  async createPlace(
+    @Args('createPlaceInput') createPlaceInput: CreatePlaceInput,
+    @CurrentUser() currentUser: User,
+  ) {
+    this.logger.debug('CreatePlace mutation called by user:', {
+      userId: currentUser?.id,
+      email: currentUser?.email,
+      roles: currentUser?.userRoles?.map(ur => ur.role?.name) || [],
+    });
+
+    if (!currentUser) {
+      this.logger.error('CurrentUser is null or undefined');
+      throw new Error('User not authenticated');
+    }
+
+    this.logger.debug('Creating place with input:', createPlaceInput);
+
     return this.placesService.create(createPlaceInput);
   }
 
@@ -38,13 +57,11 @@ export class PlacesResolver {
     return this.placesService.findBySlug(slug);
   }
 
-  // Atualizada para não precisar de organizationId
   @Query(() => [Place], { name: 'placesByOrganization' })
   findByOrganization() {
     return this.placesService.findByOrganization();
   }
 
-  // Apenas super admin pode atualizar places
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleType.SUPER_ADMIN)
   @Mutation(() => Place)
@@ -52,7 +69,6 @@ export class PlacesResolver {
     return this.placesService.update(updatePlaceInput.id, updatePlaceInput);
   }
 
-  // Apenas super admin pode remover places
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleType.SUPER_ADMIN)
   @Mutation(() => Place)
