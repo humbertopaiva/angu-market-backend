@@ -18,7 +18,7 @@ services:
     networks:
       - new-project-network
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U postgres -d new_project']
+      test: ['CMD-SHELL', 'pg_isready -U postgres -d angu_market']
       interval: 10s
       timeout: 5s
       retries: 5
