@@ -595,11 +595,6 @@ input CreateManyOrganizationsInput {
   organizations: [CreateOrganizationInput!]!
 }
 
-input CreateManyPlacesInput {
-  """Array of records to create"""
-  places: [CreatePlaceInput!]!
-}
-
 input CreateOneCompanyInput {
   """The record to create"""
   company: CreateCompanyInput!
@@ -608,11 +603,6 @@ input CreateOneCompanyInput {
 input CreateOneOrganizationInput {
   """The record to create"""
   organization: CreateOrganizationInput!
-}
-
-input CreateOnePlaceInput {
-  """The record to create"""
-  place: CreatePlaceInput!
 }
 
 input CreateOrganizationInput {
@@ -634,7 +624,6 @@ input CreatePlaceInput {
   longitude: Float
   name: String!
   neighborhood: String
-  organizationId: Int!
   postalCode: String
   slug: String!
   state: String!
@@ -726,11 +715,6 @@ input DeleteManyOrganizationsInput {
   filter: OrganizationDeleteFilter!
 }
 
-input DeleteManyPlacesInput {
-  """Filter to find records to delete"""
-  filter: PlaceDeleteFilter!
-}
-
 type DeleteManyResponse {
   """The number of records deleted."""
   deletedCount: Int!
@@ -742,11 +726,6 @@ input DeleteOneCompanyInput {
 }
 
 input DeleteOneOrganizationInput {
-  """The id of the record to delete."""
-  id: ID!
-}
-
-input DeleteOnePlaceInput {
   """The id of the record to delete."""
   id: ID!
 }
@@ -786,27 +765,21 @@ type Mutation {
   createCompany(createCompanyInput: CreateCompanyInput!): Company!
   createManyCompanies(input: CreateManyCompaniesInput!): [Company!]!
   createManyOrganizations(input: CreateManyOrganizationsInput!): [Organization!]!
-  createManyPlaces(input: CreateManyPlacesInput!): [Place!]!
   createOneCompany(input: CreateOneCompanyInput!): Company!
   createOneOrganization(input: CreateOneOrganizationInput!): Organization!
-  createOnePlace(input: CreateOnePlaceInput!): Place!
-  createOrganization(createOrganizationInput: CreateOrganizationInput!): Organization!
   createPlace(createPlaceInput: CreatePlaceInput!): Place!
   createSegment(createSegmentInput: CreateSegmentInput!): Segment!
   createSubcategory(createSubcategoryInput: CreateSubcategoryInput!): Subcategory!
   createUser(createUserInput: CreateUserInput!): User!
   deleteManyCompanies(input: DeleteManyCompaniesInput!): DeleteManyResponse!
   deleteManyOrganizations(input: DeleteManyOrganizationsInput!): DeleteManyResponse!
-  deleteManyPlaces(input: DeleteManyPlacesInput!): DeleteManyResponse!
   deleteOneCompany(input: DeleteOneCompanyInput!): CompanyDeleteResponse!
   deleteOneOrganization(input: DeleteOneOrganizationInput!): OrganizationDeleteResponse!
-  deleteOnePlace(input: DeleteOnePlaceInput!): PlaceDeleteResponse!
   deleteOneUser(input: DeleteOneUserInput!): UserDeleteResponse!
   login(loginInput: LoginInput!): AuthResponse!
   removeCategoriesFromSegment(categoryIds: [Int!]!, segmentId: Int!): Segment!
   removeCategory(id: Int!): Category!
   removeCompany(id: Int!): Company!
-  removeOrganization(id: Int!): Organization!
   removePlace(id: Int!): Place!
   removeRole(roleId: Float!, userId: Float!): Boolean!
   removeSegment(id: Int!): Segment!
@@ -820,13 +793,11 @@ type Mutation {
   testAuth: String!
   updateCategory(updateCategoryInput: UpdateCategoryInput!): Category!
   updateCompany(updateCompanyInput: UpdateCompanyInput!): Company!
+  updateMainOrganization(updateMainOrganizationInput: UpdateMainOrganizationInput!): Organization!
   updateManyCompanies(input: UpdateManyCompaniesInput!): UpdateManyResponse!
   updateManyOrganizations(input: UpdateManyOrganizationsInput!): UpdateManyResponse!
-  updateManyPlaces(input: UpdateManyPlacesInput!): UpdateManyResponse!
   updateOneCompany(input: UpdateOneCompanyInput!): Company!
   updateOneOrganization(input: UpdateOneOrganizationInput!): Organization!
-  updateOnePlace(input: UpdateOnePlaceInput!): Place!
-  updateOrganization(updateOrganizationInput: UpdateOrganizationInput!): Organization!
   updatePlace(updatePlaceInput: UpdatePlaceInput!): Place!
   updateSegment(updateSegmentInput: UpdateSegmentInput!): Segment!
   updateSubcategory(updateSubcategoryInput: UpdateSubcategoryInput!): Subcategory!
@@ -1187,56 +1158,6 @@ type PlaceCountAggregate {
   uuid: Int
 }
 
-input PlaceDeleteFilter {
-  and: [PlaceDeleteFilter!]
-  banner: StringFieldComparison
-  city: StringFieldComparison
-  createdAt: DateFieldComparison
-  deletedAt: DateFieldComparison
-  description: StringFieldComparison
-  id: IDFilterComparison
-  isActive: BooleanFieldComparison
-  latitude: NumberFieldComparison
-  logo: StringFieldComparison
-  longitude: NumberFieldComparison
-  name: StringFieldComparison
-  neighborhood: StringFieldComparison
-  or: [PlaceDeleteFilter!]
-  organizationId: NumberFieldComparison
-  postalCode: StringFieldComparison
-  slug: StringFieldComparison
-  state: StringFieldComparison
-  updatedAt: DateFieldComparison
-  uuid: StringFieldComparison
-}
-
-type PlaceDeleteResponse {
-  banner: String
-  categories: [Category!]
-  city: String
-  companies: [Company!]
-  createdAt: DateTime
-  deletedAt: DateTime
-  description: String
-  id: ID
-  isActive: Boolean
-  latitude: Float
-  logo: String
-  longitude: Float
-  name: String
-  neighborhood: String
-  organization: Organization
-  organizationId: Float
-  postalCode: String
-  segments: [Segment!]
-  slug: String
-  state: String
-  subcategories: [Subcategory!]
-  updatedAt: DateTime
-  users: [User!]
-  uuid: String
-}
-
 type PlaceEdge {
   """Cursor for this node."""
   cursor: ConnectionCursor!
@@ -1342,29 +1263,6 @@ type PlaceSumAggregate {
   organizationId: Float
 }
 
-input PlaceUpdateFilter {
-  and: [PlaceUpdateFilter!]
-  banner: StringFieldComparison
-  city: StringFieldComparison
-  createdAt: DateFieldComparison
-  deletedAt: DateFieldComparison
-  description: StringFieldComparison
-  id: IDFilterComparison
-  isActive: BooleanFieldComparison
-  latitude: NumberFieldComparison
-  logo: StringFieldComparison
-  longitude: NumberFieldComparison
-  name: StringFieldComparison
-  neighborhood: StringFieldComparison
-  or: [PlaceUpdateFilter!]
-  organizationId: NumberFieldComparison
-  postalCode: StringFieldComparison
-  slug: StringFieldComparison
-  state: StringFieldComparison
-  updatedAt: DateFieldComparison
-  uuid: StringFieldComparison
-}
-
 type Query {
   categories(
     """Specify to filter the records returned."""
@@ -1408,7 +1306,9 @@ type Query {
   ): [CompanyAggregateResponse!]!
   companyBySlug(slug: String!): Company!
   hello: String!
+  mainOrganization: Organization!
   me: User!
+  myCompanies: [Company!]!
   organization(
     """The id of the record to find."""
     id: ID!
@@ -1447,7 +1347,7 @@ type Query {
     """Specify to sort results."""
     sorting: [PlaceSort!]! = []
   ): PlaceConnection!
-  placesByOrganization(organizationId: Int!): [Place!]!
+  placesByOrganization: [Place!]!
   segment(
     """The id of the record to find."""
     id: ID!
@@ -1508,6 +1408,8 @@ type Query {
     """Specify to sort results."""
     sorting: [UserSort!]! = []
   ): UserConnection!
+  usersByCompany(companyId: Int!): [User!]!
+  usersByPlace(placeId: Int!): [User!]!
 }
 
 input RequestPasswordResetInput {
@@ -1992,6 +1894,15 @@ input UpdateCompanyInput {
   website: String
 }
 
+input UpdateMainOrganizationInput {
+  banner: String
+  description: String
+  isActive: Boolean
+  logo: String
+  name: String
+  slug: String
+}
+
 input UpdateManyCompaniesInput {
   """Filter used to find fields to update"""
   filter: CompanyUpdateFilter!
@@ -2006,14 +1917,6 @@ input UpdateManyOrganizationsInput {
 
   """The update to apply to all records found using the filter"""
   update: UpdateOrganizationInput!
-}
-
-input UpdateManyPlacesInput {
-  """Filter used to find fields to update"""
-  filter: PlaceUpdateFilter!
-
-  """The update to apply to all records found using the filter"""
-  update: UpdatePlaceInput!
 }
 
 type UpdateManyResponse {
@@ -2037,14 +1940,6 @@ input UpdateOneOrganizationInput {
   update: UpdateOrganizationInput!
 }
 
-input UpdateOnePlaceInput {
-  """The id of the record to update"""
-  id: ID!
-
-  """The update to apply."""
-  update: UpdatePlaceInput!
-}
-
 input UpdateOrganizationInput {
   banner: String
   description: String
@@ -2066,7 +1961,6 @@ input UpdatePlaceInput {
   longitude: Float
   name: String
   neighborhood: String
-  organizationId: Int
   postalCode: String
   slug: String
   state: String

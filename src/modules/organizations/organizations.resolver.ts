@@ -4,7 +4,7 @@ import { UseGuards } from '@nestjs/common';
 
 import { OrganizationsService } from './organizations.service';
 import { Organization } from './entities/organization.entity';
-import { UpdateOrganizationInput } from './dto/update-organization.input';
+import { UpdateMainOrganizationInput } from './dto/update-main-organization.input';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -19,9 +19,9 @@ export class OrganizationsResolver {
   @Roles(RoleType.SUPER_ADMIN)
   @Mutation(() => Organization)
   updateMainOrganization(
-    @Args('updateOrganizationInput') updateOrganizationInput: Omit<UpdateOrganizationInput, 'id'>,
+    @Args('updateMainOrganizationInput') updateMainOrganizationInput: UpdateMainOrganizationInput,
   ) {
-    return this.organizationsService.updateMain(updateOrganizationInput);
+    return this.organizationsService.updateMain(updateMainOrganizationInput);
   }
 
   @Query(() => Organization, { name: 'mainOrganization' })
