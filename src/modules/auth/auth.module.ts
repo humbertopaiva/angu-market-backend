@@ -13,6 +13,7 @@ import { Role } from './entities/role.entity';
 import { UserRole } from './entities/user-role.entity';
 import { PasswordResetToken } from './entities/password-reset-token.entity';
 import { EmailModule } from '../common/email/email.module';
+import { SystemModule } from '../common/config/system.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { EmailModule } from '../common/email/email.module';
     }),
     TypeOrmModule.forFeature([User, Role, UserRole, PasswordResetToken]),
     EmailModule,
+    SystemModule,
   ],
   providers: [AuthService, AuthResolver, JwtStrategy],
   exports: [AuthService],

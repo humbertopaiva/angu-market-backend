@@ -17,6 +17,7 @@ import { Role, RoleType } from './entities/role.entity';
 import { UserRole } from './entities/user-role.entity';
 import { PasswordResetToken } from './entities/password-reset-token.entity';
 import { EmailService } from '../common/email/email.service';
+import { SystemService } from '../common/config/system.service';
 
 import { LoginInput } from './dto/login.input';
 import { SignUpInput } from './dto/signup.input';
@@ -45,6 +46,7 @@ export class AuthService {
     private jwtService: JwtService,
     private emailService: EmailService,
     private configService: ConfigService,
+    private systemService: SystemService,
   ) {}
 
   async signUp(signUpInput: SignUpInput): Promise<SignUpResponse> {
@@ -77,6 +79,9 @@ export class AuthService {
       throw new BadRequestException('Usuário já existe com este email');
     }
 
+    // Obter organização principal
+    const mainOrganization = await this.systemService.getMainOrganization();
+
     // Hash da senha
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -85,7 +90,7 @@ export class AuthService {
     const tokenExpiration = new Date();
     tokenExpiration.setHours(tokenExpiration.getHours() + 24); // 24 horas
 
-    // Criar o usuário
+    // Criar o usuário (sempre associado à organização principal)
     const user = this.userRepository.create({
       name,
       email,
@@ -94,6 +99,7 @@ export class AuthService {
       tokenExpiration,
       isVerified: false,
       isActive: false, // Usuário inativo até verificar email
+      organizationId: mainOrganization.id,
     });
 
     const savedUser = await this.userRepository.save(user);
@@ -119,8 +125,6 @@ export class AuthService {
     });
 
     if (!emailSent) {
-      // Se o email não foi enviado, ainda assim retornamos sucesso
-      // mas podemos logar o erro
       console.warn(`Failed to send verification email to ${email}`);
     }
 

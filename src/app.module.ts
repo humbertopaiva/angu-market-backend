@@ -5,12 +5,13 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 
 import { AppResolver } from './app.resolver';
 import { GraphQLModule } from './graphql.module';
+import { SystemModule } from './modules/common/config/system.module';
 import { UsersModule } from './modules/users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { OrganizationsModule } from './modules/organizations/organizations.module';
 import { PlacesModule } from './modules/places/places.module';
 import { CompaniesModule } from './modules/companies/companies.module';
-import { SegmentationModule } from './modules/segments/segmentation.module'; // ÚNICO MÓDULO NECESSÁRIO
+import { SegmentationModule } from './modules/segments/segmentation.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { SegmentationModule } from './modules/segments/segmentation.module'; // 
         logging: configService.get('NODE_ENV') !== 'production',
       }),
     }),
+    SystemModule,
     UsersModule,
     AuthModule,
     OrganizationsModule,

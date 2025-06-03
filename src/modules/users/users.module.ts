@@ -1,3 +1,4 @@
+// src/modules/users/users.module.ts
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { NestjsQueryGraphQLModule } from '@nestjs-query/query-graphql';
@@ -8,10 +9,12 @@ import { UsersResolver } from './users.resolver';
 import { User } from './entities/user.entity';
 import { Role } from '../auth/entities/role.entity';
 import { UserRole } from '../auth/entities/user-role.entity';
+import { SystemModule } from '../common/config/system.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([User, Role, UserRole]),
+    SystemModule,
     NestjsQueryGraphQLModule.forFeature({
       imports: [NestjsQueryTypeOrmModule.forFeature([User])],
       resolvers: [
@@ -19,7 +22,7 @@ import { UserRole } from '../auth/entities/user-role.entity';
           DTOClass: User,
           EntityClass: User,
           enableAggregate: true,
-          create: { disabled: true },
+          create: { disabled: true }, // Usar custom resolver
           update: { disabled: true },
           delete: { many: { disabled: true } },
         },

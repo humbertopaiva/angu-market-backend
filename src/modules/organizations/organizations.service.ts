@@ -1,9 +1,9 @@
+// src/modules/organizations/organizations.service.ts
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import { Organization } from './entities/organization.entity';
-import { CreateOrganizationInput } from './dto/create-organization.input';
 import { UpdateOrganizationInput } from './dto/update-organization.input';
 
 @Injectable()
@@ -13,22 +13,37 @@ export class OrganizationsService {
     private organizationRepository: Repository<Organization>,
   ) {}
 
-  async create(createOrganizationInput: CreateOrganizationInput): Promise<Organization> {
-    const { slug } = createOrganizationInput;
-
-    // Verifica se já existe uma organização com o mesmo slug
-    const existingOrganization = await this.organizationRepository.findOne({
-      where: { slug },
+  async findMain(): Promise<Organization> {
+    const organization = await this.organizationRepository.findOne({
+      where: { slug: 'main-organization' },
+      relations: ['places', 'users'],
     });
 
-    if (existingOrganization) {
-      throw new BadRequestException(`Já existe uma organização com o slug: ${slug}`);
+    if (!organization) {
+      throw new NotFoundException('Organização principal não encontrada');
     }
 
-    const organization = this.organizationRepository.create(createOrganizationInput);
-    return this.organizationRepository.save(organization);
+    return organization;
   }
 
+  async updateMain(
+    updateOrganizationInput: Omit<UpdateOrganizationInput, 'id'>,
+  ): Promise<Organization> {
+    const organization = await this.findMain();
+
+    // Não permitir alterar o slug da organização principal
+    if (updateOrganizationInput.slug && updateOrganizationInput.slug !== 'main-organization') {
+      throw new BadRequestException('Não é possível alterar o slug da organização principal');
+    }
+
+    const updateData = { ...updateOrganizationInput };
+    delete updateData.slug; // Remover slug do update
+
+    await this.organizationRepository.update(organization.id, updateData);
+    return this.findMain();
+  }
+
+  // Métodos mantidos para compatibilidade
   async findAll(): Promise<Organization[]> {
     return this.organizationRepository.find({
       relations: ['places'],
@@ -58,36 +73,6 @@ export class OrganizationsService {
       throw new NotFoundException(`Organização com slug ${slug} não encontrada`);
     }
 
-    return organization;
-  }
-
-  async update(
-    id: number,
-    updateOrganizationInput: UpdateOrganizationInput,
-  ): Promise<Organization> {
-    const { slug } = updateOrganizationInput;
-
-    // Verifica se a organização existe
-    const organization = await this.findOne(id);
-
-    // Se está atualizando o slug, verifica se já existe outra organização com o mesmo slug
-    if (slug && slug !== organization.slug) {
-      const existingOrganization = await this.organizationRepository.findOne({
-        where: { slug },
-      });
-
-      if (existingOrganization && existingOrganization.id !== id) {
-        throw new BadRequestException(`Já existe uma organização com o slug: ${slug}`);
-      }
-    }
-
-    await this.organizationRepository.update(id, updateOrganizationInput);
-    return this.findOne(id);
-  }
-
-  async remove(id: number): Promise<Organization> {
-    const organization = await this.findOne(id);
-    await this.organizationRepository.remove(organization);
     return organization;
   }
 }

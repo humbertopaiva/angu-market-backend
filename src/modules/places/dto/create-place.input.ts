@@ -1,5 +1,6 @@
-import { InputType, Field, Int } from '@nestjs/graphql';
-import { IsNotEmpty, IsString, IsOptional, IsNumber, IsBoolean, IsDecimal } from 'class-validator';
+// src/modules/places/dto/create-place.input.ts
+import { InputType, Field } from '@nestjs/graphql';
+import { IsNotEmpty, IsString, IsOptional, IsBoolean, IsDecimal } from 'class-validator';
 
 @InputType()
 export class CreatePlaceInput {
@@ -37,11 +38,6 @@ export class CreatePlaceInput {
   @IsOptional()
   @IsString()
   postalCode?: string;
-
-  @Field(() => Int)
-  @IsNotEmpty()
-  @IsNumber()
-  organizationId: number;
 
   @Field({ nullable: true })
   @IsOptional()
