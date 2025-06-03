@@ -217,7 +217,7 @@ export class AuthService {
   async validateUser(email: string, password: string): Promise<User> {
     const user = await this.userRepository.findOne({
       where: { email },
-      select: ['id', 'email', 'password', 'isActive', 'isVerified'],
+      select: ['id', 'email', 'password', 'isActive', 'isVerified', 'uuid', 'name'], // Adicionar uuid e name
     });
 
     if (!user) {
@@ -240,9 +240,17 @@ export class AuthService {
     // Atualiza o último login
     await this.userRepository.update(user.id, { lastLogin: new Date() });
 
-    // Retorna o usuário sem a senha
-    user.password = '';
-    return user;
+    // Buscar o usuário completo com todas as relações INCLUINDO o UUID
+    const fullUser = await this.userRepository.findOne({
+      where: { id: user.id },
+      relations: ['organization', 'place', 'company', 'userRoles', 'userRoles.role'],
+    });
+
+    if (!fullUser) {
+      throw new UnauthorizedException('Usuário não encontrado após validação.');
+    }
+
+    return fullUser;
   }
 
   async login(loginInput: LoginInput) {

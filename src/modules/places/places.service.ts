@@ -19,7 +19,7 @@ export class PlacesService {
   async create(createPlaceInput: CreatePlaceInput): Promise<Place> {
     const { slug, ...placeData } = createPlaceInput;
 
-    // Obter organização principal
+    // Obter organização principal automaticamente
     const mainOrganization = await this.systemService.getMainOrganization();
 
     // Verificar se já existe um place com o mesmo slug
@@ -34,7 +34,7 @@ export class PlacesService {
     const place = this.placeRepository.create({
       ...placeData,
       slug,
-      organizationId: mainOrganization.id,
+      organizationId: mainOrganization.id, // Adicionar automaticamente
     });
 
     return this.placeRepository.save(place);

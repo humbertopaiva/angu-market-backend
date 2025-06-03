@@ -1,4 +1,4 @@
-import { Entity, Column, ManyToOne, OneToMany, JoinColumn } from 'typeorm';
+import { Entity, Column, ManyToOne, OneToMany, JoinColumn, BeforeInsert } from 'typeorm';
 import { ObjectType, Field } from '@nestjs/graphql';
 import { FilterableField } from '@nestjs-query/query-graphql';
 import { Organization } from '../../organizations/entities/organization.entity';
@@ -6,6 +6,7 @@ import { Place } from '../../places/entities/place.entity';
 import { Company } from '../../companies/entities/company.entity';
 import { UserRole } from '../../auth/entities/user-role.entity';
 import { BaseEntity } from '@/modules/common/entities/base.entity';
+import { v4 as uuidv4 } from 'uuid';
 
 @Entity()
 @ObjectType()
@@ -76,4 +77,11 @@ export class User extends BaseEntity {
   @OneToMany(() => UserRole, userRole => userRole.user)
   @Field(() => [UserRole], { nullable: true })
   userRoles?: UserRole[];
+
+  @BeforeInsert()
+  generateUUID() {
+    if (!this.uuid) {
+      this.uuid = uuidv4();
+    }
+  }
 }
