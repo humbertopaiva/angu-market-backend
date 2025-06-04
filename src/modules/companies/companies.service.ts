@@ -4,6 +4,7 @@ import {
   NotFoundException,
   BadRequestException,
   ForbiddenException,
+  Logger,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -16,47 +17,128 @@ import { RoleType } from '../auth/entities/role.entity';
 
 @Injectable()
 export class CompaniesService {
+  private readonly logger = new Logger(CompaniesService.name);
+
   constructor(
     @InjectRepository(Company)
     private companyRepository: Repository<Company>,
   ) {}
 
   private validatePlaceAccess(placeId: number, user: User): void {
+    this.logger.debug('=== VALIDATE PLACE ACCESS DEBUG START ===');
+    this.logger.debug('PlaceId:', placeId);
+    this.logger.debug('User:', {
+      id: user?.id,
+      email: user?.email,
+      placeId: user?.placeId,
+      userRoles:
+        user?.userRoles?.map(ur => ({
+          id: ur.id,
+          roleId: ur.roleId,
+          roleName: ur.role?.name,
+        })) || 'no userRoles',
+    });
+
     const userRoles = user.userRoles?.map(ur => ur.role.name) || [];
+    this.logger.debug('Extracted user roles:', userRoles);
 
     // Super admin pode acessar qualquer place
     if (userRoles.includes(RoleType.SUPER_ADMIN)) {
+      this.logger.debug('User is SUPER_ADMIN, access granted');
       return;
     }
 
     // Place admin só pode gerenciar empresas de seu place
     if (userRoles.includes(RoleType.PLACE_ADMIN)) {
+      this.logger.debug('User is PLACE_ADMIN, checking place access');
+      this.logger.debug('User placeId:', user.placeId);
+      this.logger.debug('Requested placeId:', placeId);
+
       if (user.placeId !== placeId) {
+        this.logger.error('Place admin trying to access different place');
         throw new ForbiddenException('Você não tem permissão para gerenciar empresas deste place');
       }
+      this.logger.debug('Place admin has access to this place');
       return;
     }
 
+    this.logger.error('User has no valid roles for company management');
     throw new ForbiddenException('Você não tem permissão para gerenciar empresas');
   }
 
   async create(createCompanyInput: CreateCompanyInput, currentUser: User): Promise<Company> {
-    const { slug, placeId } = createCompanyInput;
-
-    // Validar acesso ao place
-    this.validatePlaceAccess(placeId, currentUser);
-
-    // Verifica se já existe uma empresa com o mesmo slug
-    const existingCompany = await this.companyRepository.findOne({
-      where: { slug },
+    this.logger.debug('=== CREATE COMPANY DEBUG START ===');
+    this.logger.debug('CreateCompanyInput:', createCompanyInput);
+    this.logger.debug('CurrentUser:', {
+      id: currentUser?.id,
+      email: currentUser?.email,
+      placeId: currentUser?.placeId,
     });
 
-    if (existingCompany) {
-      throw new BadRequestException(`Já existe uma empresa com o slug: ${slug}`);
-    }
+    const { slug, placeId, ...companyData } = createCompanyInput;
 
-    const company = this.companyRepository.create(createCompanyInput);
-    return this.companyRepository.save(company);
+    try {
+      // Validar acesso ao place
+      this.logger.debug('Validating place access...');
+      this.validatePlaceAccess(placeId, currentUser);
+      this.logger.debug('Place access validated successfully');
+
+      // Verificar se já existe uma empresa com o mesmo slug
+      this.logger.debug('Checking for existing company with slug:', slug);
+      const existingCompany = await this.companyRepository.findOne({
+        where: { slug },
+      });
+
+      if (existingCompany) {
+        this.logger.error('Company with slug already exists:', slug);
+        throw new BadRequestException(`Já existe uma empresa com o slug: ${slug}`);
+      }
+      this.logger.debug('No existing company found with slug:', slug);
+
+      // Filtrar campos undefined/null antes de criar
+      const cleanedData = Object.fromEntries(
+        Object.entries(companyData).filter(
+          ([, value]) => value !== undefined && value !== null && value !== '',
+        ),
+      );
+
+      // Se latitude/longitude são 0, remover para não causar problemas
+      if (cleanedData.latitude === 0) delete cleanedData.latitude;
+      if (cleanedData.longitude === 0) delete cleanedData.longitude;
+
+      this.logger.debug('Cleaned company data:', cleanedData);
+
+      const company = this.companyRepository.create({
+        ...cleanedData,
+        slug,
+        placeId,
+      });
+
+      this.logger.debug('Company entity created, saving...');
+      const savedCompany = await this.companyRepository.save(company);
+
+      this.logger.debug('Company saved successfully:', {
+        id: savedCompany.id,
+        name: savedCompany.name,
+        slug: savedCompany.slug,
+        placeId: savedCompany.placeId,
+      });
+
+      // Buscar empresa completa com relacionamentos
+      const completeCompany = await this.companyRepository.findOne({
+        where: { id: savedCompany.id },
+        relations: ['place', 'category', 'subcategory'],
+      });
+
+      this.logger.debug('=== CREATE COMPANY DEBUG END ===');
+      return completeCompany || savedCompany;
+    } catch (error) {
+      this.logger.error('=== CREATE COMPANY ERROR ===');
+      this.logger.error('Error type:', error.constructor.name);
+      this.logger.error('Error message:', error.message);
+      this.logger.error('Error stack:', error.stack);
+      throw error;
+    }
   }
 
   async findAll(): Promise<Company[]> {
