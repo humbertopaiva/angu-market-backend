@@ -37,7 +37,7 @@ export abstract class BaseEntity {
   isActive: boolean;
 
   @BeforeInsert()
-  generateUUID() {
+  private generateUUID() {
     if (!this.uuid) {
       this.uuid = uuidv4();
     }

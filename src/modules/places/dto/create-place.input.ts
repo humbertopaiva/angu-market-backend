@@ -1,6 +1,6 @@
 // src/modules/places/dto/create-place.input.ts
 import { InputType, Field } from '@nestjs/graphql';
-import { IsNotEmpty, IsString, IsOptional, IsBoolean, IsDecimal } from 'class-validator';
+import { IsNotEmpty, IsString, IsOptional, IsBoolean, IsNumber } from 'class-validator';
 
 @InputType()
 export class CreatePlaceInput {
@@ -41,12 +41,12 @@ export class CreatePlaceInput {
 
   @Field({ nullable: true })
   @IsOptional()
-  @IsDecimal()
+  @IsNumber()
   latitude?: number;
 
   @Field({ nullable: true })
   @IsOptional()
-  @IsDecimal()
+  @IsNumber()
   longitude?: number;
 
   @Field({ nullable: true })

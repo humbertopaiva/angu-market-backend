@@ -246,12 +246,45 @@ export class SystemService implements OnModuleInit {
   }
 
   async getMainOrganization(): Promise<Organization> {
-    const organization = await this.organizationRepository.findOne({
-      where: { slug: 'main-organization' },
-    });
-    if (!organization) {
-      throw new Error('Main organization not found');
+    const logger = new Logger('SystemService.getMainOrganization');
+
+    logger.debug('=== GET MAIN ORGANIZATION DEBUG START ===');
+
+    try {
+      const organization = await this.organizationRepository.findOne({
+        where: { slug: 'main-organization' },
+      });
+
+      if (!organization) {
+        logger.error('Main organization not found in database');
+        logger.debug('Available organizations:');
+
+        // Debug: listar todas as organizações
+        const allOrgs = await this.organizationRepository.find();
+        allOrgs.forEach((org, index) => {
+          logger.debug(`Organization ${index}:`, {
+            id: org.id,
+            name: org.name,
+            slug: org.slug,
+            isActive: org.isActive,
+          });
+        });
+
+        throw new Error('Main organization not found');
+      }
+
+      logger.debug('Main organization found:', {
+        id: organization.id,
+        name: organization.name,
+        slug: organization.slug,
+        isActive: organization.isActive,
+      });
+
+      logger.debug('=== GET MAIN ORGANIZATION DEBUG END ===');
+      return organization;
+    } catch (error) {
+      logger.error('Error getting main organization:', error.message);
+      throw error;
     }
-    return organization;
   }
 }

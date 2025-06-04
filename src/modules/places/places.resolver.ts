@@ -26,25 +26,47 @@ export class PlacesResolver {
     @Args('createPlaceInput') createPlaceInput: CreatePlaceInput,
     @CurrentUser() currentUser: User,
   ) {
-    this.logger.debug('CreatePlace mutation called by user:', {
-      userId: currentUser?.id,
+    this.logger.debug('=== CREATE PLACE DEBUG START ===');
+    this.logger.debug('Current user:', {
+      id: currentUser?.id,
       email: currentUser?.email,
-      roles: currentUser?.userRoles?.map(ur => ur.role?.name) || [],
+      userRoles:
+        currentUser?.userRoles?.map(ur => ({
+          id: ur.id,
+          roleId: ur.roleId,
+          roleName: ur.role?.name,
+        })) || 'no userRoles',
     });
+
+    this.logger.debug('CreatePlaceInput:', createPlaceInput);
 
     if (!currentUser) {
       this.logger.error('CurrentUser is null or undefined');
       throw new Error('User not authenticated');
     }
 
-    this.logger.debug('Creating place with input:', createPlaceInput);
-
-    return this.placesService.create(createPlaceInput);
+    try {
+      const result = await this.placesService.create(createPlaceInput);
+      this.logger.debug('Place created successfully:', { id: result.id, name: result.name });
+      return result;
+    } catch (error) {
+      this.logger.error('Error creating place:', error.message);
+      this.logger.error('Error stack:', error.stack);
+      throw error;
+    }
   }
 
   @Query(() => [Place], { name: 'places' })
-  findAll() {
-    return this.placesService.findAll();
+  async findAll() {
+    this.logger.debug('FindAll places called');
+    try {
+      const places = await this.placesService.findAll();
+      this.logger.debug(`Found ${places.length} places`);
+      return places;
+    } catch (error) {
+      this.logger.error('Error finding places:', error.message);
+      throw error;
+    }
   }
 
   @Query(() => Place, { name: 'place' })
@@ -58,8 +80,16 @@ export class PlacesResolver {
   }
 
   @Query(() => [Place], { name: 'placesByOrganization' })
-  findByOrganization() {
-    return this.placesService.findByOrganization();
+  async findByOrganization() {
+    this.logger.debug('FindByOrganization called');
+    try {
+      const places = await this.placesService.findByOrganization();
+      this.logger.debug(`Found ${places.length} places by organization`);
+      return places;
+    } catch (error) {
+      this.logger.error('Error finding places by organization:', error.message);
+      throw error;
+    }
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)

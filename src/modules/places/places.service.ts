@@ -1,5 +1,5 @@
 // src/modules/places/places.service.ts
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
@@ -10,6 +10,8 @@ import { SystemService } from '../common/config/system.service';
 
 @Injectable()
 export class PlacesService {
+  private readonly logger = new Logger(PlacesService.name);
+
   constructor(
     @InjectRepository(Place)
     private placeRepository: Repository<Place>,
@@ -17,33 +19,75 @@ export class PlacesService {
   ) {}
 
   async create(createPlaceInput: CreatePlaceInput): Promise<Place> {
+    this.logger.debug('=== PLACES SERVICE CREATE DEBUG START ===');
+    this.logger.debug('CreatePlaceInput received:', createPlaceInput);
+
     const { slug, ...placeData } = createPlaceInput;
 
-    // Obter organização principal automaticamente
-    const mainOrganization = await this.systemService.getMainOrganization();
+    try {
+      // Obter organização principal automaticamente
+      this.logger.debug('Getting main organization...');
+      const mainOrganization = await this.systemService.getMainOrganization();
+      this.logger.debug('Main organization found:', {
+        id: mainOrganization.id,
+        name: mainOrganization.name,
+        slug: mainOrganization.slug,
+      });
 
-    // Verificar se já existe um place com o mesmo slug
-    const existingPlace = await this.placeRepository.findOne({
-      where: { slug },
-    });
+      // Verificar se já existe um place com o mesmo slug
+      this.logger.debug('Checking for existing place with slug:', slug);
+      const existingPlace = await this.placeRepository.findOne({
+        where: { slug },
+      });
 
-    if (existingPlace) {
-      throw new BadRequestException(`Já existe um place com o slug: ${slug}`);
+      if (existingPlace) {
+        this.logger.error('Place with slug already exists:', slug);
+        throw new BadRequestException(`Já existe um place com o slug: ${slug}`);
+      }
+      this.logger.debug('No existing place found with slug:', slug);
+
+      // Criar a entidade sem especificar o UUID (será gerado automaticamente)
+      const place = this.placeRepository.create({
+        ...placeData,
+        slug,
+        organizationId: mainOrganization.id,
+      });
+
+      this.logger.debug('Place entity created, saving...');
+
+      const savedPlace = await this.placeRepository.save(place);
+      this.logger.debug('Place saved successfully:', {
+        id: savedPlace.id,
+        uuid: savedPlace.uuid,
+        name: savedPlace.name,
+        slug: savedPlace.slug,
+        organizationId: savedPlace.organizationId,
+      });
+
+      this.logger.debug('=== PLACES SERVICE CREATE DEBUG END ===');
+      return savedPlace;
+    } catch (error) {
+      this.logger.error('=== PLACES SERVICE CREATE ERROR ===');
+      this.logger.error('Error type:', error.constructor.name);
+      this.logger.error('Error message:', error.message);
+      this.logger.error('Error stack:', error.stack);
+      throw error;
     }
-
-    const place = this.placeRepository.create({
-      ...placeData,
-      slug,
-      organizationId: mainOrganization.id, // Adicionar automaticamente
-    });
-
-    return this.placeRepository.save(place);
   }
 
   async findAll(): Promise<Place[]> {
-    return this.placeRepository.find({
-      relations: ['organization', 'companies'],
-    });
+    this.logger.debug('=== PLACES SERVICE FIND ALL DEBUG START ===');
+    try {
+      const places = await this.placeRepository.find({
+        relations: ['organization', 'companies'],
+      });
+      this.logger.debug(`Found ${places.length} places`);
+      this.logger.debug('=== PLACES SERVICE FIND ALL DEBUG END ===');
+      return places;
+    } catch (error) {
+      this.logger.error('Error in findAll:', error.message);
+      throw error;
+    }
   }
 
   async findOne(id: number): Promise<Place> {
@@ -73,12 +117,26 @@ export class PlacesService {
   }
 
   async findByOrganization(): Promise<Place[]> {
-    const mainOrganization = await this.systemService.getMainOrganization();
+    this.logger.debug('=== PLACES SERVICE FIND BY ORGANIZATION DEBUG START ===');
+    try {
+      const mainOrganization = await this.systemService.getMainOrganization();
+      this.logger.debug('Main organization:', {
+        id: mainOrganization.id,
+        name: mainOrganization.name,
+      });
 
-    return this.placeRepository.find({
-      where: { organizationId: mainOrganization.id },
-      relations: ['companies'],
-    });
+      const places = await this.placeRepository.find({
+        where: { organizationId: mainOrganization.id },
+        relations: ['companies'],
+      });
+
+      this.logger.debug(`Found ${places.length} places for organization`);
+      this.logger.debug('=== PLACES SERVICE FIND BY ORGANIZATION DEBUG END ===');
+      return places;
+    } catch (error) {
+      this.logger.error('Error in findByOrganization:', error.message);
+      throw error;
+    }
   }
 
   async update(id: number, updatePlaceInput: UpdatePlaceInput): Promise<Place> {
@@ -86,9 +144,6 @@ export class PlacesService {
 
     // Verifica se o place existe
     const place = await this.findOne(id);
-
-    // Não permitir alterar organizationId
-    // Removido porque organizationId não está presente em UpdatePlaceInput
 
     // Se está atualizando o slug, verifica se já existe outro place com o mesmo slug
     if (slug && slug !== place.slug) {
@@ -107,7 +162,11 @@ export class PlacesService {
 
   async remove(id: number): Promise<Place> {
     const place = await this.findOne(id);
-    await this.placeRepository.remove(place);
+
+    // Use soft delete em vez de hard delete
+    await this.placeRepository.softDelete(id);
+
+    // Retorna o place como estava antes da deleção
     return place;
   }
 }
