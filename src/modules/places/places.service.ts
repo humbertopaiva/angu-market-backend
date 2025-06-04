@@ -160,13 +160,9 @@ export class PlacesService {
     return this.findOne(id);
   }
 
-  async remove(id: number): Promise<Place> {
-    const place = await this.findOne(id);
-
+  async remove(id: number) {
     // Use soft delete em vez de hard delete
-    await this.placeRepository.softDelete(id);
-
-    // Retorna o place como estava antes da deleção
-    return place;
+    const place = await this.findOne(id);
+    await this.placeRepository.remove(place);
   }
 }
