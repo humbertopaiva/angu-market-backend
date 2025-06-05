@@ -7,13 +7,16 @@ import {
   Logger,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { IsNull, Repository } from 'typeorm';
+import * as bcrypt from 'bcrypt';
 
 import { Company } from './entities/company.entity';
-import { CreateCompanyInput } from './dto/create-company.input';
+
 import { UpdateCompanyInput } from './dto/update-company.input';
 import { User } from '../users/entities/user.entity';
-import { RoleType } from '../auth/entities/role.entity';
+import { Role, RoleType } from '../auth/entities/role.entity';
+import { UserRole } from '../auth/entities/user-role.entity';
+import { CreateCompanyInput } from './dto/create-company.input';
 
 @Injectable()
 export class CompaniesService {
@@ -22,6 +25,12 @@ export class CompaniesService {
   constructor(
     @InjectRepository(Company)
     private companyRepository: Repository<Company>,
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
+    @InjectRepository(Role)
+    private roleRepository: Repository<Role>,
+    @InjectRepository(UserRole)
+    private userRoleRepository: Repository<UserRole>,
   ) {}
 
   private validatePlaceAccess(placeId: number, user: User): void {
@@ -141,13 +150,203 @@ export class CompaniesService {
     }
   }
 
+  // Novo método para criar empresa com usuários
+  async createWithUsers(
+    createCompanyInput: CreateCompanyInput,
+    currentUser: User,
+  ): Promise<Company> {
+    this.logger.debug('=== CREATE COMPANY WITH USERS DEBUG START ===');
+    this.logger.debug('CreateCompanyInput:', createCompanyInput);
+
+    const { users, ...companyData } = createCompanyInput;
+
+    try {
+      // Criar a empresa primeiro (usar método existente)
+      const company = await this.create(companyData as any, currentUser);
+      this.logger.debug('Company created:', { id: company.id, name: company.name });
+
+      // Processar usuários se fornecidos
+      if (users && users.length > 0) {
+        await this.processCompanyUsers(users, company.id);
+      }
+
+      // Retornar empresa completa com usuários
+      const completeCompany = await this.companyRepository.findOne({
+        where: { id: company.id },
+        relations: {
+          place: true,
+          users: {
+            userRoles: {
+              role: true,
+            },
+          },
+          category: true,
+          subcategory: true,
+        },
+      });
+
+      this.logger.debug('=== CREATE COMPANY WITH USERS DEBUG END ===');
+      return completeCompany || company;
+    } catch (error) {
+      this.logger.error('=== CREATE COMPANY WITH USERS ERROR ===');
+      this.logger.error('Error:', error.message);
+      throw error;
+    }
+  }
+
+  private async processCompanyUsers(users: any[], companyId: number): Promise<void> {
+    this.logger.debug('Processing company users:', { count: users.length, companyId });
+
+    for (const userData of users) {
+      try {
+        if (userData.existingUserId) {
+          // Atribuir usuário existente à empresa
+          await this.assignExistingUserToCompany(userData.existingUserId, companyId);
+        } else if (userData.name && userData.email && userData.password) {
+          // Criar novo usuário para a empresa
+          await this.createNewUserForCompany(userData, companyId);
+        }
+      } catch (error) {
+        this.logger.error(`Error processing user: ${error.message}`);
+        // Continuar processando outros usuários mesmo se um falhar
+      }
+    }
+  }
+
+  private async assignExistingUserToCompany(userId: number, companyId: number): Promise<void> {
+    this.logger.debug('Assigning existing user to company:', { userId, companyId });
+
+    // Buscar o usuário
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+      relations: ['userRoles', 'userRoles.role'],
+    });
+
+    if (!user) {
+      throw new BadRequestException(`Usuário com ID ${userId} não encontrado`);
+    }
+
+    // Buscar a empresa para verificar o place
+    const company = await this.companyRepository.findOne({
+      where: { id: companyId },
+      relations: ['place'],
+    });
+
+    if (!company) {
+      throw new BadRequestException(`Empresa com ID ${companyId} não encontrada`);
+    }
+
+    // Validar permissões (usuário deve ser do mesmo place)
+    if (user.placeId !== company.placeId) {
+      throw new BadRequestException('Usuário deve ser do mesmo place da empresa');
+    }
+
+    // Atualizar o usuário para ser da empresa
+    await this.userRepository.update(userId, { companyId });
+
+    // Verificar se o usuário já tem uma role adequada para empresa
+    const userRoles = user.userRoles?.map(ur => ur.role.name) || [];
+    const companyRoles = [RoleType.COMPANY_ADMIN, RoleType.COMPANY_STAFF];
+
+    if (!userRoles.some(role => companyRoles.includes(role))) {
+      // Atribuir role de COMPANY_STAFF por padrão
+      const staffRole = await this.roleRepository.findOne({
+        where: { name: RoleType.COMPANY_STAFF },
+      });
+
+      if (staffRole) {
+        const userRole = this.userRoleRepository.create({
+          userId: user.id,
+          roleId: staffRole.id,
+        });
+        await this.userRoleRepository.save(userRole);
+      }
+    }
+
+    this.logger.debug('User assigned to company successfully');
+  }
+
+  private async createNewUserForCompany(userData: any, companyId: number): Promise<void> {
+    this.logger.debug('Creating new user for company:', {
+      userData: { ...userData, password: '[HIDDEN]' },
+      companyId,
+    });
+
+    // Verificar se email já existe
+    const existingUser = await this.userRepository.findOne({
+      where: { email: userData.email },
+    });
+
+    if (existingUser) {
+      throw new BadRequestException(`Usuário com email ${userData.email} já existe`);
+    }
+
+    // Buscar empresa para obter placeId e organizationId
+    const company = await this.companyRepository.findOne({
+      where: { id: companyId },
+      relations: ['place', 'place.organization'],
+    });
+
+    if (!company) {
+      throw new BadRequestException(`Empresa com ID ${companyId} não encontrada`);
+    }
+
+    // Hash da senha
+    const hashedPassword = await bcrypt.hash(userData.password, 10);
+
+    // Criar o usuário
+    const user = this.userRepository.create({
+      name: userData.name,
+      email: userData.email,
+      password: hashedPassword,
+      phone: userData.phone || null,
+      isVerified: true, // Usuários criados por admin são verificados automaticamente
+      isActive: userData.isActive !== false,
+      organizationId: company.place.organization?.id || company.place.organizationId,
+      placeId: company.placeId,
+      companyId: companyId,
+    });
+
+    const savedUser = await this.userRepository.save(user);
+    this.logger.debug('User created:', { id: savedUser.id, email: savedUser.email });
+
+    // Atribuir role apropriada
+    const roleName =
+      userData.role === 'COMPANY_ADMIN' ? RoleType.COMPANY_ADMIN : RoleType.COMPANY_STAFF;
+    const role = await this.roleRepository.findOne({
+      where: { name: roleName },
+    });
+
+    if (role) {
+      const userRole = this.userRoleRepository.create({
+        userId: savedUser.id,
+        roleId: role.id,
+      });
+      await this.userRoleRepository.save(userRole);
+      this.logger.debug('Role assigned:', { userId: savedUser.id, roleName });
+    }
+  }
+
+  // Método para buscar usuários disponíveis para uma empresa (mesmo place)
+  async getAvailableUsersForCompany(placeId: number): Promise<User[]> {
+    return this.userRepository.find({
+      where: {
+        placeId,
+        companyId: IsNull(),
+        isActive: true,
+      },
+      relations: ['userRoles', 'userRoles.role'],
+      order: { name: 'ASC' },
+    });
+  }
+
   async findAll(): Promise<Company[]> {
     this.logger.debug('=== FIND ALL COMPANIES DEBUG START ===');
 
     try {
       const companies = await this.companyRepository.find({
         relations: {
-          place: true, // CORREÇÃO: Usar sintaxe de objetos para relações
+          place: true,
           category: true,
           subcategory: true,
         },
@@ -287,7 +486,6 @@ export class CompaniesService {
   }
 
   async remove(id: number, currentUser: User): Promise<void> {
-    // MUDANÇA: Era Promise<Company>, agora é Promise<void>
     this.logger.debug('=== REMOVE COMPANY DEBUG START ===');
     this.logger.debug('Company ID to remove:', id);
 
@@ -307,7 +505,5 @@ export class CompaniesService {
 
     this.logger.debug('Company removed successfully');
     this.logger.debug('=== REMOVE COMPANY DEBUG END ===');
-
-    // MUDANÇA: Não retorna nada (void)
   }
 }

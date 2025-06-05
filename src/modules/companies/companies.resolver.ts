@@ -1,6 +1,6 @@
 // src/modules/companies/companies.resolver.ts - COMPLETAMENTE CORRIGIDO
 import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
-import { UseGuards, Logger } from '@nestjs/common';
+import { UseGuards, Logger, ForbiddenException } from '@nestjs/common';
 
 import { CompaniesService } from './companies.service';
 import { Company } from './entities/company.entity';
@@ -129,5 +129,50 @@ export class CompaniesResolver {
       this.logger.error('Error removing company:', error.message);
       throw error;
     }
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RoleType.SUPER_ADMIN, RoleType.PLACE_ADMIN)
+  @Mutation(() => Company)
+  async createCompanyWithUsers(
+    @Args('createCompanyInput') createCompanyInput: CreateCompanyInput,
+    @CurrentUser() currentUser: User,
+  ) {
+    this.logger.debug('=== CREATE COMPANY WITH USERS RESOLVER DEBUG START ===');
+    this.logger.debug('CreateCompanyEnhancedInput:', createCompanyInput);
+
+    try {
+      const result = await this.companiesService.createWithUsers(createCompanyInput, currentUser);
+      this.logger.debug('Company with users created successfully:', {
+        id: result.id,
+        name: result.name,
+        usersCount: result.users?.length || 0,
+      });
+      return result;
+    } catch (error) {
+      this.logger.error('Error creating company with users:', error.message);
+      throw error;
+    }
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RoleType.SUPER_ADMIN, RoleType.PLACE_ADMIN)
+  @Query(() => [User], { name: 'availableUsersForCompany' })
+  async getAvailableUsersForCompany(
+    @Args('placeId', { type: () => Int }) placeId: number,
+    @CurrentUser() currentUser: User,
+  ) {
+    this.logger.debug('Getting available users for company in place:', placeId);
+
+    // Validar acesso ao place
+    const userRoles = currentUser.userRoles?.map(ur => ur.role.name) || [];
+
+    if (!userRoles.includes(RoleType.SUPER_ADMIN)) {
+      if (userRoles.includes(RoleType.PLACE_ADMIN) && currentUser.placeId !== placeId) {
+        throw new ForbiddenException('Você não tem permissão para acessar usuários deste place');
+      }
+    }
+
+    return this.companiesService.getAvailableUsersForCompany(placeId);
   }
 }

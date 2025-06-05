@@ -24,6 +24,8 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
 import { Roles } from './decorators/roles.decorator';
 import { CurrentUser } from './decorators/current-user.decorator';
+import { CompanyAuthResponse } from './dto/company-auth-response';
+import { CompanyLoginInput } from './dto/company-login.input';
 
 @Resolver()
 export class AuthResolver {
@@ -116,5 +118,13 @@ export class AuthResolver {
   testAuth(): string {
     this.logger.log('TestAuth mutation called');
     return 'Auth resolver is working!';
+  }
+
+  @Mutation(() => CompanyAuthResponse)
+  async companyLogin(
+    @Args('companyLoginInput') companyLoginInput: CompanyLoginInput,
+  ): Promise<CompanyAuthResponse> {
+    this.logger.log('Company login mutation called');
+    return this.authService.companyLogin(companyLoginInput);
   }
 }

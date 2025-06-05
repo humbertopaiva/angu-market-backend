@@ -31,6 +31,8 @@ import { SignUpResponse } from './dto/signup-response';
 import { RequestPasswordResetResponse } from './dto/request-password-reset-response';
 import { ResetPasswordResponse } from './dto/reset-password-response';
 import { VerifyEmailResponse } from './dto/verify-email-response';
+import { Company } from '../companies/entities/company.entity';
+import { CompanyLoginInput } from './dto/company-login.input';
 
 @Injectable()
 export class AuthService {
@@ -41,6 +43,8 @@ export class AuthService {
     private roleRepository: Repository<Role>,
     @InjectRepository(UserRole)
     private userRoleRepository: Repository<UserRole>,
+    @InjectRepository(Company)
+    private companyRepository: Repository<Company>,
     @InjectRepository(PasswordResetToken)
     private passwordResetTokenRepository: Repository<PasswordResetToken>,
     private jwtService: JwtService,
@@ -132,6 +136,79 @@ export class AuthService {
       success: true,
       message: 'Usuário criado com sucesso! Verifique seu email para ativar a conta.',
       userId: savedUser.id,
+    };
+  }
+
+  async companyLogin(companyLoginInput: CompanyLoginInput) {
+    const { companySlug, email, password } = companyLoginInput;
+
+    // Buscar a empresa pelo slug
+    const company = await this.companyRepository.findOne({
+      where: { slug: companySlug, isActive: true },
+      relations: ['place'],
+    });
+
+    if (!company) {
+      throw new UnauthorizedException('Empresa não encontrada ou inativa');
+    }
+
+    // Buscar o usuário pelo email e que seja da empresa
+    const user = await this.userRepository.findOne({
+      where: {
+        email,
+        companyId: company.id,
+        isActive: true,
+        isVerified: true,
+      },
+      relations: ['organization', 'place', 'company', 'userRoles', 'userRoles.role'],
+      select: ['id', 'email', 'password', 'isActive', 'isVerified', 'uuid', 'name'],
+    });
+
+    if (!user) {
+      throw new UnauthorizedException('Usuário não encontrado ou não tem acesso a esta empresa');
+    }
+
+    // Verificar se o usuário tem role adequada para empresa
+    const userRoles = user.userRoles?.map(ur => ur.role.name) || [];
+    const companyRoles = [RoleType.COMPANY_ADMIN, RoleType.COMPANY_STAFF];
+
+    if (!userRoles.some(role => companyRoles.includes(role))) {
+      throw new UnauthorizedException('Usuário não tem permissão para acessar empresas');
+    }
+
+    // Validar senha
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Credenciais inválidas');
+    }
+
+    // Atualizar último login
+    await this.userRepository.update(user.id, { lastLogin: new Date() });
+
+    // Buscar o usuário completo com todas as relações
+    const fullUser = await this.userRepository.findOne({
+      where: { id: user.id },
+      relations: ['organization', 'place', 'company', 'userRoles', 'userRoles.role'],
+    });
+
+    if (!fullUser) {
+      throw new UnauthorizedException('Usuário não encontrado após validação.');
+    }
+
+    // Gerar token JWT
+    const roles = userRoles;
+    const payload = {
+      sub: fullUser.id,
+      email: fullUser.email,
+      roles,
+      companyId: company.id,
+      companySlug: company.slug,
+    };
+
+    return {
+      accessToken: this.jwtService.sign(payload),
+      user: fullUser,
+      company,
     };
   }
 

@@ -8,7 +8,51 @@ import {
   IsUrl,
   IsBoolean,
   IsDecimal,
+  IsArray,
+  ValidateNested,
+  MinLength,
 } from 'class-validator';
+import { Type } from 'class-transformer';
+
+@InputType()
+export class CreateCompanyUserInput {
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsNumber()
+  existingUserId?: number; // Para atribuir usuário existente
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty()
+  name?: string; // Para criar novo usuário
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsEmail()
+  email?: string; // Para criar novo usuário
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  @MinLength(6)
+  password?: string; // Para criar novo usuário
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  phone?: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  role?: 'COMPANY_ADMIN' | 'COMPANY_STAFF'; // Tipo de role para o usuário
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsBoolean()
+  isActive?: boolean;
+}
 
 @InputType()
 export class CreateCompanyInput {
@@ -86,4 +130,12 @@ export class CreateCompanyInput {
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;
+
+  // Novo campo para usuários
+  @Field(() => [CreateCompanyUserInput], { nullable: true })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CreateCompanyUserInput)
+  users?: CreateCompanyUserInput[];
 }
