@@ -232,325 +232,6 @@ type Company {
   website: String
 }
 
-input CompanyAggregateFilter {
-  address: StringFieldComparison
-  and: [CompanyAggregateFilter!]
-  banner: StringFieldComparison
-  categoryId: NumberFieldComparison
-  cnpj: StringFieldComparison
-  createdAt: DateFieldComparison
-  deletedAt: DateFieldComparison
-  description: StringFieldComparison
-  email: StringFieldComparison
-  id: IDFilterComparison
-  isActive: BooleanFieldComparison
-  latitude: NumberFieldComparison
-  logo: StringFieldComparison
-  longitude: NumberFieldComparison
-  name: StringFieldComparison
-  openingHours: StringFieldComparison
-  or: [CompanyAggregateFilter!]
-  phone: StringFieldComparison
-  placeId: NumberFieldComparison
-  slug: StringFieldComparison
-  subcategoryId: NumberFieldComparison
-  tags: StringFieldComparison
-  updatedAt: DateFieldComparison
-  uuid: StringFieldComparison
-  website: StringFieldComparison
-}
-
-type CompanyAggregateGroupBy {
-  address: String
-  banner: String
-  categoryId: Float
-  cnpj: String
-  createdAt: DateTime
-  deletedAt: DateTime
-  description: String
-  email: String
-  id: ID
-  isActive: Boolean
-  latitude: Float
-  logo: String
-  longitude: Float
-  name: String
-  openingHours: String
-  phone: String
-  placeId: Float
-  slug: String
-  subcategoryId: Float
-  tags: String
-  updatedAt: DateTime
-  uuid: String
-  website: String
-}
-
-type CompanyAggregateResponse {
-  avg: CompanyAvgAggregate
-  count: CompanyCountAggregate
-  groupBy: CompanyAggregateGroupBy
-  max: CompanyMaxAggregate
-  min: CompanyMinAggregate
-  sum: CompanySumAggregate
-}
-
-type CompanyAvgAggregate {
-  categoryId: Float
-  id: Float
-  latitude: Float
-  longitude: Float
-  placeId: Float
-  subcategoryId: Float
-}
-
-type CompanyConnection {
-  """Array of edges."""
-  edges: [CompanyEdge!]!
-
-  """Paging information"""
-  pageInfo: PageInfo!
-}
-
-type CompanyCountAggregate {
-  address: Int
-  banner: Int
-  categoryId: Int
-  cnpj: Int
-  createdAt: Int
-  deletedAt: Int
-  description: Int
-  email: Int
-  id: Int
-  isActive: Int
-  latitude: Int
-  logo: Int
-  longitude: Int
-  name: Int
-  openingHours: Int
-  phone: Int
-  placeId: Int
-  slug: Int
-  subcategoryId: Int
-  tags: Int
-  updatedAt: Int
-  uuid: Int
-  website: Int
-}
-
-input CompanyDeleteFilter {
-  address: StringFieldComparison
-  and: [CompanyDeleteFilter!]
-  banner: StringFieldComparison
-  categoryId: NumberFieldComparison
-  cnpj: StringFieldComparison
-  createdAt: DateFieldComparison
-  deletedAt: DateFieldComparison
-  description: StringFieldComparison
-  email: StringFieldComparison
-  id: IDFilterComparison
-  isActive: BooleanFieldComparison
-  latitude: NumberFieldComparison
-  logo: StringFieldComparison
-  longitude: NumberFieldComparison
-  name: StringFieldComparison
-  openingHours: StringFieldComparison
-  or: [CompanyDeleteFilter!]
-  phone: StringFieldComparison
-  placeId: NumberFieldComparison
-  slug: StringFieldComparison
-  subcategoryId: NumberFieldComparison
-  tags: StringFieldComparison
-  updatedAt: DateFieldComparison
-  uuid: StringFieldComparison
-  website: StringFieldComparison
-}
-
-type CompanyDeleteResponse {
-  address: String
-  banner: String
-  category: Category
-  categoryId: Float
-  cnpj: String
-  createdAt: DateTime
-  deletedAt: DateTime
-  description: String
-  email: String
-  id: ID
-  isActive: Boolean
-  latitude: Float
-  logo: String
-  longitude: Float
-  name: String
-  openingHours: String
-  phone: String
-  place: Place
-  placeId: Float
-  slug: String
-  subcategory: Subcategory
-  subcategoryId: Float
-  tags: String
-  updatedAt: DateTime
-  users: [User!]
-  uuid: String
-  website: String
-}
-
-type CompanyEdge {
-  """Cursor for this node."""
-  cursor: ConnectionCursor!
-
-  """The node containing the Company"""
-  node: Company!
-}
-
-input CompanyFilter {
-  address: StringFieldComparison
-  and: [CompanyFilter!]
-  banner: StringFieldComparison
-  categoryId: NumberFieldComparison
-  cnpj: StringFieldComparison
-  createdAt: DateFieldComparison
-  deletedAt: DateFieldComparison
-  description: StringFieldComparison
-  email: StringFieldComparison
-  id: IDFilterComparison
-  isActive: BooleanFieldComparison
-  latitude: NumberFieldComparison
-  logo: StringFieldComparison
-  longitude: NumberFieldComparison
-  name: StringFieldComparison
-  openingHours: StringFieldComparison
-  or: [CompanyFilter!]
-  phone: StringFieldComparison
-  placeId: NumberFieldComparison
-  slug: StringFieldComparison
-  subcategoryId: NumberFieldComparison
-  tags: StringFieldComparison
-  updatedAt: DateFieldComparison
-  uuid: StringFieldComparison
-  website: StringFieldComparison
-}
-
-type CompanyMaxAggregate {
-  address: String
-  banner: String
-  categoryId: Float
-  cnpj: String
-  createdAt: DateTime
-  deletedAt: DateTime
-  description: String
-  email: String
-  id: ID
-  latitude: Float
-  logo: String
-  longitude: Float
-  name: String
-  openingHours: String
-  phone: String
-  placeId: Float
-  slug: String
-  subcategoryId: Float
-  tags: String
-  updatedAt: DateTime
-  uuid: String
-  website: String
-}
-
-type CompanyMinAggregate {
-  address: String
-  banner: String
-  categoryId: Float
-  cnpj: String
-  createdAt: DateTime
-  deletedAt: DateTime
-  description: String
-  email: String
-  id: ID
-  latitude: Float
-  logo: String
-  longitude: Float
-  name: String
-  openingHours: String
-  phone: String
-  placeId: Float
-  slug: String
-  subcategoryId: Float
-  tags: String
-  updatedAt: DateTime
-  uuid: String
-  website: String
-}
-
-input CompanySort {
-  direction: SortDirection!
-  field: CompanySortFields!
-  nulls: SortNulls
-}
-
-enum CompanySortFields {
-  address
-  banner
-  categoryId
-  cnpj
-  createdAt
-  deletedAt
-  description
-  email
-  id
-  isActive
-  latitude
-  logo
-  longitude
-  name
-  openingHours
-  phone
-  placeId
-  slug
-  subcategoryId
-  tags
-  updatedAt
-  uuid
-  website
-}
-
-type CompanySumAggregate {
-  categoryId: Float
-  id: Float
-  latitude: Float
-  longitude: Float
-  placeId: Float
-  subcategoryId: Float
-}
-
-input CompanyUpdateFilter {
-  address: StringFieldComparison
-  and: [CompanyUpdateFilter!]
-  banner: StringFieldComparison
-  categoryId: NumberFieldComparison
-  cnpj: StringFieldComparison
-  createdAt: DateFieldComparison
-  deletedAt: DateFieldComparison
-  description: StringFieldComparison
-  email: StringFieldComparison
-  id: IDFilterComparison
-  isActive: BooleanFieldComparison
-  latitude: NumberFieldComparison
-  logo: StringFieldComparison
-  longitude: NumberFieldComparison
-  name: StringFieldComparison
-  openingHours: StringFieldComparison
-  or: [CompanyUpdateFilter!]
-  phone: StringFieldComparison
-  placeId: NumberFieldComparison
-  slug: StringFieldComparison
-  subcategoryId: NumberFieldComparison
-  tags: StringFieldComparison
-  updatedAt: DateFieldComparison
-  uuid: StringFieldComparison
-  website: StringFieldComparison
-}
-
 """Cursor for paging through collections"""
 scalar ConnectionCursor
 
@@ -585,19 +266,9 @@ input CreateCompanyInput {
   website: String
 }
 
-input CreateManyCompaniesInput {
-  """Array of records to create"""
-  companies: [CreateCompanyInput!]!
-}
-
 input CreateManyOrganizationsInput {
   """Array of records to create"""
   organizations: [CreateOrganizationInput!]!
-}
-
-input CreateOneCompanyInput {
-  """The record to create"""
-  company: CreateCompanyInput!
 }
 
 input CreateOneOrganizationInput {
@@ -705,11 +376,6 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
-input DeleteManyCompaniesInput {
-  """Filter to find records to delete"""
-  filter: CompanyDeleteFilter!
-}
-
 input DeleteManyOrganizationsInput {
   """Filter to find records to delete"""
   filter: OrganizationDeleteFilter!
@@ -718,11 +384,6 @@ input DeleteManyOrganizationsInput {
 type DeleteManyResponse {
   """The number of records deleted."""
   deletedCount: Int!
-}
-
-input DeleteOneCompanyInput {
-  """The id of the record to delete."""
-  id: ID!
 }
 
 input DeleteOneOrganizationInput {
@@ -763,23 +424,19 @@ type Mutation {
   assignRole(assignRoleInput: AssignRoleInput!): UserRole!
   createCategory(createCategoryInput: CreateCategoryInput!): Category!
   createCompany(createCompanyInput: CreateCompanyInput!): Company!
-  createManyCompanies(input: CreateManyCompaniesInput!): [Company!]!
   createManyOrganizations(input: CreateManyOrganizationsInput!): [Organization!]!
-  createOneCompany(input: CreateOneCompanyInput!): Company!
   createOneOrganization(input: CreateOneOrganizationInput!): Organization!
   createPlace(createPlaceInput: CreatePlaceInput!): Place!
   createSegment(createSegmentInput: CreateSegmentInput!): Segment!
   createSubcategory(createSubcategoryInput: CreateSubcategoryInput!): Subcategory!
   createUser(createUserInput: CreateUserInput!): User!
-  deleteManyCompanies(input: DeleteManyCompaniesInput!): DeleteManyResponse!
   deleteManyOrganizations(input: DeleteManyOrganizationsInput!): DeleteManyResponse!
-  deleteOneCompany(input: DeleteOneCompanyInput!): CompanyDeleteResponse!
   deleteOneOrganization(input: DeleteOneOrganizationInput!): OrganizationDeleteResponse!
   deleteOneUser(input: DeleteOneUserInput!): UserDeleteResponse!
   login(loginInput: LoginInput!): AuthResponse!
   removeCategoriesFromSegment(categoryIds: [Int!]!, segmentId: Int!): Segment!
   removeCategory(id: Int!): Category!
-  removeCompany(id: Int!): Company!
+  removeCompany(id: Int!): Boolean!
   removePlace(id: Int!): Place!
   removeRole(roleId: Float!, userId: Float!): Boolean!
   removeSegment(id: Int!): Segment!
@@ -794,9 +451,7 @@ type Mutation {
   updateCategory(updateCategoryInput: UpdateCategoryInput!): Category!
   updateCompany(updateCompanyInput: UpdateCompanyInput!): Company!
   updateMainOrganization(updateMainOrganizationInput: UpdateMainOrganizationInput!): Organization!
-  updateManyCompanies(input: UpdateManyCompaniesInput!): UpdateManyResponse!
   updateManyOrganizations(input: UpdateManyOrganizationsInput!): UpdateManyResponse!
-  updateOneCompany(input: UpdateOneCompanyInput!): Company!
   updateOneOrganization(input: UpdateOneOrganizationInput!): Organization!
   updatePlace(updatePlaceInput: UpdatePlaceInput!): Place!
   updateSegment(updateSegmentInput: UpdateSegmentInput!): Segment!
@@ -1285,25 +940,9 @@ type Query {
     filter: CategoryAggregateFilter
   ): [CategoryAggregateResponse!]!
   categoryBySlug(placeId: Int!, slug: String!): Category!
-  companies(
-    """Specify to filter the records returned."""
-    filter: CompanyFilter! = {}
-
-    """Limit or page results."""
-    paging: CursorPaging! = {first: 10}
-
-    """Specify to sort results."""
-    sorting: [CompanySort!]! = []
-  ): CompanyConnection!
+  companies: [Company!]!
   companiesByPlace(placeId: Int!): [Company!]!
-  company(
-    """The id of the record to find."""
-    id: ID!
-  ): Company
-  companyAggregate(
-    """Filter to find records to aggregate on"""
-    filter: CompanyAggregateFilter
-  ): [CompanyAggregateResponse!]!
+  company(id: Int!): Company!
   companyBySlug(slug: String!): Company!
   hello: String!
   mainOrganization: Organization!
@@ -1903,14 +1542,6 @@ input UpdateMainOrganizationInput {
   slug: String
 }
 
-input UpdateManyCompaniesInput {
-  """Filter used to find fields to update"""
-  filter: CompanyUpdateFilter!
-
-  """The update to apply to all records found using the filter"""
-  update: UpdateCompanyInput!
-}
-
 input UpdateManyOrganizationsInput {
   """Filter used to find fields to update"""
   filter: OrganizationUpdateFilter!
@@ -1922,14 +1553,6 @@ input UpdateManyOrganizationsInput {
 type UpdateManyResponse {
   """The number of records updated."""
   updatedCount: Int!
-}
-
-input UpdateOneCompanyInput {
-  """The id of the record to update"""
-  id: ID!
-
-  """The update to apply."""
-  update: UpdateCompanyInput!
 }
 
 input UpdateOneOrganizationInput {

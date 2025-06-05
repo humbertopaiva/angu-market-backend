@@ -142,15 +142,54 @@ export class CompaniesService {
   }
 
   async findAll(): Promise<Company[]> {
-    return this.companyRepository.find({
-      relations: ['place'],
-    });
+    this.logger.debug('=== FIND ALL COMPANIES DEBUG START ===');
+
+    try {
+      const companies = await this.companyRepository.find({
+        relations: {
+          place: true, // CORREÇÃO: Usar sintaxe de objetos para relações
+          category: true,
+          subcategory: true,
+        },
+        order: {
+          createdAt: 'DESC',
+        },
+      });
+
+      this.logger.debug(`Found ${companies.length} companies`);
+
+      // Log das empresas encontradas para debug
+      companies.forEach((company, index) => {
+        this.logger.debug(`Company ${index + 1}:`, {
+          id: company.id,
+          name: company.name,
+          slug: company.slug,
+          placeId: company.placeId,
+          placeName: company.place?.name || 'No place loaded',
+          isActive: company.isActive,
+        });
+      });
+
+      this.logger.debug('=== FIND ALL COMPANIES DEBUG END ===');
+      return companies;
+    } catch (error) {
+      this.logger.error('=== FIND ALL COMPANIES ERROR ===');
+      this.logger.error('Error type:', error.constructor.name);
+      this.logger.error('Error message:', error.message);
+      this.logger.error('Error stack:', error.stack);
+      throw error;
+    }
   }
 
   async findOne(id: number): Promise<Company> {
     const company = await this.companyRepository.findOne({
       where: { id },
-      relations: ['place', 'users', 'category', 'subcategory'],
+      relations: {
+        place: true,
+        users: true,
+        category: true,
+        subcategory: true,
+      },
     });
 
     if (!company) {
@@ -163,7 +202,12 @@ export class CompaniesService {
   async findBySlug(slug: string): Promise<Company> {
     const company = await this.companyRepository.findOne({
       where: { slug },
-      relations: ['place', 'users', 'category', 'subcategory'],
+      relations: {
+        place: true,
+        users: true,
+        category: true,
+        subcategory: true,
+      },
     });
 
     if (!company) {
@@ -176,7 +220,14 @@ export class CompaniesService {
   async findByPlace(placeId: number): Promise<Company[]> {
     return this.companyRepository.find({
       where: { placeId },
-      relations: ['category', 'subcategory'],
+      relations: {
+        place: true,
+        category: true,
+        subcategory: true,
+      },
+      order: {
+        createdAt: 'DESC',
+      },
     });
   }
 
@@ -235,13 +286,28 @@ export class CompaniesService {
     return this.findOne(id);
   }
 
-  async remove(id: number, currentUser: User): Promise<Company> {
+  async remove(id: number, currentUser: User): Promise<void> {
+    // MUDANÇA: Era Promise<Company>, agora é Promise<void>
+    this.logger.debug('=== REMOVE COMPANY DEBUG START ===');
+    this.logger.debug('Company ID to remove:', id);
+
+    // Buscar a empresa para validar acesso
     const company = await this.findOne(id);
+    this.logger.debug('Company found for deletion:', {
+      id: company.id,
+      name: company.name,
+      slug: company.slug,
+    });
 
     // Validar acesso
     this.validatePlaceAccess(company.placeId, currentUser);
 
+    // Deletar a empresa
     await this.companyRepository.remove(company);
-    return company;
+
+    this.logger.debug('Company removed successfully');
+    this.logger.debug('=== REMOVE COMPANY DEBUG END ===');
+
+    // MUDANÇA: Não retorna nada (void)
   }
 }

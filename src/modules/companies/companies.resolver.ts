@@ -1,6 +1,6 @@
-// src/modules/companies/companies.resolver.ts
+// src/modules/companies/companies.resolver.ts - COMPLETAMENTE CORRIGIDO
 import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
-import { UseGuards } from '@nestjs/common';
+import { UseGuards, Logger } from '@nestjs/common';
 
 import { CompaniesService } from './companies.service';
 import { Company } from './entities/company.entity';
@@ -15,22 +15,66 @@ import { User } from '../users/entities/user.entity';
 
 @Resolver(() => Company)
 export class CompaniesResolver {
+  private readonly logger = new Logger(CompaniesResolver.name);
+
   constructor(private readonly companiesService: CompaniesService) {}
 
   // Super admin e place admin podem criar empresas
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleType.SUPER_ADMIN, RoleType.PLACE_ADMIN)
   @Mutation(() => Company)
-  createCompany(
+  async createCompany(
     @Args('createCompanyInput') createCompanyInput: CreateCompanyInput,
     @CurrentUser() currentUser: User,
   ) {
-    return this.companiesService.create(createCompanyInput, currentUser);
+    this.logger.debug('=== CREATE COMPANY RESOLVER DEBUG START ===');
+    this.logger.debug('CreateCompanyInput:', createCompanyInput);
+    this.logger.debug('Current user:', {
+      id: currentUser?.id,
+      email: currentUser?.email,
+    });
+
+    try {
+      const result = await this.companiesService.create(createCompanyInput, currentUser);
+      this.logger.debug('Company created successfully:', {
+        id: result.id,
+        name: result.name,
+        placeId: result.placeId,
+        placeName: result.place?.name,
+      });
+      return result;
+    } catch (error) {
+      this.logger.error('Error creating company:', error.message);
+      throw error;
+    }
   }
 
+  // Query principal para listagem de empresas
   @Query(() => [Company], { name: 'companies' })
-  findAll() {
-    return this.companiesService.findAll();
+  async findAll() {
+    this.logger.debug('=== COMPANIES RESOLVER FIND ALL DEBUG START ===');
+
+    try {
+      const companies = await this.companiesService.findAll();
+      this.logger.debug(`Resolver returning ${companies.length} companies`);
+
+      // Log das empresas que serão retornadas
+      companies.forEach((company, index) => {
+        this.logger.debug(`Company ${index + 1} in resolver:`, {
+          id: company.id,
+          name: company.name,
+          placeId: company.placeId,
+          placeName: company.place?.name || 'No place data',
+        });
+      });
+
+      this.logger.debug('=== COMPANIES RESOLVER FIND ALL DEBUG END ===');
+      return companies;
+    } catch (error) {
+      this.logger.error('=== COMPANIES RESOLVER FIND ALL ERROR ===');
+      this.logger.error('Error:', error.message);
+      throw error;
+    }
   }
 
   // Nova query para empresas do usuário atual
@@ -67,8 +111,23 @@ export class CompaniesResolver {
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleType.SUPER_ADMIN, RoleType.PLACE_ADMIN)
-  @Mutation(() => Company)
-  removeCompany(@Args('id', { type: () => Int }) id: number, @CurrentUser() currentUser: User) {
-    return this.companiesService.remove(id, currentUser);
+  @Mutation(() => Boolean) // MUDANÇA: Era Company, agora é Boolean
+  async removeCompany(
+    @Args('id', { type: () => Int }) id: number,
+    @CurrentUser() currentUser: User,
+  ): Promise<boolean> {
+    // MUDANÇA: Era Promise<Company>, agora é Promise<boolean>
+    this.logger.debug('=== REMOVE COMPANY RESOLVER DEBUG START ===');
+    this.logger.debug('Company ID to remove:', id);
+
+    try {
+      await this.companiesService.remove(id, currentUser);
+      this.logger.debug('Company removed successfully');
+      this.logger.debug('=== REMOVE COMPANY RESOLVER DEBUG END ===');
+      return true; // MUDANÇA: Retorna true em vez da empresa
+    } catch (error) {
+      this.logger.error('Error removing company:', error.message);
+      throw error;
+    }
   }
 }

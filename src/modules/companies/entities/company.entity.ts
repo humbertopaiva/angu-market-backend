@@ -1,3 +1,4 @@
+// src/modules/companies/entities/company.entity.ts - CORRIGIDO
 import { Entity, Column, ManyToOne, OneToMany, JoinColumn } from 'typeorm';
 import { ObjectType, Field } from '@nestjs/graphql';
 import { FilterableField } from '@nestjs-query/query-graphql';
