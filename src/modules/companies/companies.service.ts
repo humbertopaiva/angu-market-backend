@@ -506,4 +506,225 @@ export class CompaniesService {
     this.logger.debug('Company removed successfully');
     this.logger.debug('=== REMOVE COMPANY DEBUG END ===');
   }
+
+  /**
+   * Atribuir um usuário como admin de uma empresa
+   */
+  async assignCompanyAdmin(companyId: number, userId: number, currentUser: User): Promise<Company> {
+    this.logger.debug('=== ASSIGN COMPANY ADMIN SERVICE DEBUG START ===');
+    this.logger.debug('Company ID:', companyId);
+    this.logger.debug('User ID:', userId);
+
+    try {
+      // Buscar a empresa
+      const company = await this.companyRepository.findOne({
+        where: { id: companyId },
+        relations: ['place'],
+      });
+
+      if (!company) {
+        throw new BadRequestException(`Empresa com ID ${companyId} não encontrada`);
+      }
+
+      // Validar acesso ao place da empresa
+      this.validatePlaceAccess(company.placeId, currentUser);
+
+      // Buscar o usuário
+      const user = await this.userRepository.findOne({
+        where: { id: userId },
+        relations: ['userRoles', 'userRoles.role'],
+      });
+
+      if (!user) {
+        throw new BadRequestException(`Usuário com ID ${userId} não encontrado`);
+      }
+
+      // Validar que o usuário é do mesmo place
+      if (user.placeId !== company.placeId) {
+        throw new BadRequestException('Usuário deve ser do mesmo place da empresa');
+      }
+
+      // Verificar se o usuário já tem uma empresa
+      if (user.companyId && user.companyId !== companyId) {
+        throw new BadRequestException('Usuário já está associado a outra empresa');
+      }
+
+      // Buscar a role de COMPANY_ADMIN
+      const adminRole = await this.roleRepository.findOne({
+        where: { name: RoleType.COMPANY_ADMIN },
+      });
+
+      if (!adminRole) {
+        throw new BadRequestException('Role de COMPANY_ADMIN não encontrada');
+      }
+
+      // Remover roles de empresa existentes (caso o usuário já seja admin/staff de alguma empresa)
+      const existingCompanyRoles =
+        user.userRoles?.filter(ur =>
+          [RoleType.COMPANY_ADMIN, RoleType.COMPANY_STAFF].includes(ur.role.name),
+        ) || [];
+
+      for (const userRole of existingCompanyRoles) {
+        await this.userRoleRepository.remove(userRole);
+      }
+
+      // Atribuir a empresa ao usuário
+      await this.userRepository.update(userId, { companyId });
+
+      // Atribuir a role de COMPANY_ADMIN
+      const newUserRole = this.userRoleRepository.create({
+        userId,
+        roleId: adminRole.id,
+      });
+      await this.userRoleRepository.save(newUserRole);
+
+      this.logger.debug('Company admin assigned successfully');
+
+      // Retornar empresa completa com relacionamentos
+      return this.findOne(companyId);
+    } catch (error) {
+      this.logger.error('=== ASSIGN COMPANY ADMIN SERVICE ERROR ===');
+      this.logger.error('Error:', error.message);
+      throw error;
+    }
+  }
+
+  /**
+   * Remover um usuário como admin de uma empresa
+   */
+  async removeCompanyAdmin(companyId: number, userId: number, currentUser: User): Promise<Company> {
+    this.logger.debug('=== REMOVE COMPANY ADMIN SERVICE DEBUG START ===');
+    this.logger.debug('Company ID:', companyId);
+    this.logger.debug('User ID:', userId);
+
+    try {
+      // Buscar a empresa
+      const company = await this.findOne(companyId);
+
+      // Validar acesso ao place da empresa
+      this.validatePlaceAccess(company.placeId, currentUser);
+
+      // Buscar o usuário
+      const user = await this.userRepository.findOne({
+        where: { id: userId, companyId },
+        relations: ['userRoles', 'userRoles.role'],
+      });
+
+      if (!user) {
+        throw new BadRequestException('Usuário não é admin desta empresa');
+      }
+
+      // Remover roles de empresa
+      const companyRoles =
+        user.userRoles?.filter(ur =>
+          [RoleType.COMPANY_ADMIN, RoleType.COMPANY_STAFF].includes(ur.role.name),
+        ) || [];
+
+      for (const userRole of companyRoles) {
+        await this.userRoleRepository.remove(userRole);
+      }
+
+      // Remover associação com a empresa
+      await this.userRepository.update(userId, { companyId: undefined });
+
+      // Buscar role de PUBLIC_USER para atribuir ao usuário
+      const publicRole = await this.roleRepository.findOne({
+        where: { name: RoleType.PUBLIC_USER },
+      });
+
+      if (publicRole) {
+        const newUserRole = this.userRoleRepository.create({
+          userId,
+          roleId: publicRole.id,
+        });
+        await this.userRoleRepository.save(newUserRole);
+      }
+
+      this.logger.debug('Company admin removed successfully');
+
+      // Retornar empresa completa com relacionamentos
+      return this.findOne(companyId);
+    } catch (error) {
+      this.logger.error('=== REMOVE COMPANY ADMIN SERVICE ERROR ===');
+      this.logger.error('Error:', error.message);
+      throw error;
+    }
+  }
+
+  /**
+   * Buscar usuários disponíveis para serem admin de empresa
+   */
+  async getAvailableCompanyAdmins(placeId: number): Promise<User[]> {
+    this.logger.debug('Getting available company admins for place:', placeId);
+
+    try {
+      // Buscar usuários do place que:
+      // 1. Não têm empresa associada OU
+      // 2. Têm apenas role de PUBLIC_USER ou COMPANY_STAFF
+      const users = await this.userRepository
+        .createQueryBuilder('user')
+        .leftJoinAndSelect('user.userRoles', 'userRole')
+        .leftJoinAndSelect('userRole.role', 'role')
+        .leftJoinAndSelect('user.company', 'company')
+        .where('user.placeId = :placeId', { placeId })
+        .andWhere('user.isActive = :isActive', { isActive: true })
+        .andWhere('user.isVerified = :isVerified', { isVerified: true })
+        .orderBy('user.name', 'ASC')
+        .getMany();
+
+      // Filtrar usuários que podem se tornar company admin
+      const availableUsers = users.filter(user => {
+        const userRoles = user.userRoles?.map(ur => ur.role.name) || [];
+
+        // Não pode ser super admin ou place admin
+        if (userRoles.includes(RoleType.SUPER_ADMIN) || userRoles.includes(RoleType.PLACE_ADMIN)) {
+          return false;
+        }
+
+        // Se já é company admin, pode ser reatribuído
+        // Se é public user ou company staff, pode ser promovido
+        return true;
+      });
+
+      this.logger.debug(`Found ${availableUsers.length} available users`);
+      return availableUsers;
+    } catch (error) {
+      this.logger.error('Error getting available company admins:', error.message);
+      throw error;
+    }
+  }
+
+  /**
+   * Buscar empresas que não têm admin
+   */
+  async getCompaniesWithoutAdmin(placeId?: number): Promise<Company[]> {
+    this.logger.debug('Getting companies without admin');
+
+    try {
+      let query = this.companyRepository
+        .createQueryBuilder('company')
+        .leftJoinAndSelect('company.place', 'place')
+        .leftJoin('company.users', 'user')
+        .leftJoin('user.userRoles', 'userRole')
+        .leftJoin('userRole.role', 'role')
+        .where('role.name = :roleName OR role.name IS NULL', { roleName: RoleType.COMPANY_ADMIN })
+        .groupBy('company.id')
+        .addGroupBy('place.id')
+        .having('COUNT(CASE WHEN role.name = :roleName THEN 1 END) = 0', {
+          roleName: RoleType.COMPANY_ADMIN,
+        })
+        .orderBy('company.name', 'ASC');
+
+      if (placeId) {
+        query = query.andWhere('company.placeId = :placeId', { placeId });
+      }
+
+      const companies = await query.getMany();
+      this.logger.debug(`Found ${companies.length} companies without admin`);
+      return companies;
+    } catch (error) {
+      this.logger.error('Error getting companies without admin:', error.message);
+      throw error;
+    }
+  }
 }

@@ -444,6 +444,7 @@ input LoginInput {
 type Mutation {
   addCategoriesToSegment(categoryIds: [Int!]!, segmentId: Int!): Segment!
   addSegmentsToCategory(categoryId: Int!, segmentIds: [Int!]!): Category!
+  assignCompanyAdmin(companyId: Int!, userId: Int!): Company!
   assignRole(assignRoleInput: AssignRoleInput!): UserRole!
   companyLogin(companyLoginInput: CompanyLoginInput!): CompanyAuthResponse!
   createCategory(createCategoryInput: CreateCategoryInput!): Category!
@@ -462,6 +463,7 @@ type Mutation {
   removeCategoriesFromSegment(categoryIds: [Int!]!, segmentId: Int!): Segment!
   removeCategory(id: Int!): Category!
   removeCompany(id: Int!): Boolean!
+  removeCompanyAdmin(companyId: Int!, userId: Int!): Company!
   removePlace(id: Int!): Place!
   removeRole(roleId: Float!, userId: Float!): Boolean!
   removeSegment(id: Int!): Segment!
@@ -944,6 +946,7 @@ type PlaceSumAggregate {
 }
 
 type Query {
+  availableCompanyAdmins(placeId: Int!): [User!]!
   availableUsersForCompany(placeId: Int!): [User!]!
   categories(
     """Specify to filter the records returned."""
@@ -968,8 +971,11 @@ type Query {
   categoryBySlug(placeId: Int!, slug: String!): Category!
   companies: [Company!]!
   companiesByPlace(placeId: Int!): [Company!]!
+  companiesWithUserCount(placeId: Int): [Company!]!
+  companiesWithoutAdmin(placeId: Int): [Company!]!
   company(id: Int!): Company!
   companyBySlug(slug: String!): Company!
+  companyDetails(id: Int!): Company!
   hello: String!
   mainOrganization: Organization!
   me: User!
