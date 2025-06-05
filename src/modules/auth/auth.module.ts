@@ -1,4 +1,4 @@
-// src/modules/auth/auth.module.ts
+// src/modules/auth/auth.module.ts - CORRIGIDO
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
@@ -12,6 +12,8 @@ import { User } from '../users/entities/user.entity';
 import { Role } from './entities/role.entity';
 import { UserRole } from './entities/user-role.entity';
 import { PasswordResetToken } from './entities/password-reset-token.entity';
+// ADIÇÃO: Importar Company entity
+import { Company } from '../companies/entities/company.entity';
 import { EmailModule } from '../common/email/email.module';
 import { SystemModule } from '../common/config/system.module';
 
@@ -28,7 +30,7 @@ import { SystemModule } from '../common/config/system.module';
         },
       }),
     }),
-    TypeOrmModule.forFeature([User, Role, UserRole, PasswordResetToken]),
+    TypeOrmModule.forFeature([User, Role, UserRole, PasswordResetToken, Company]),
     EmailModule,
     SystemModule,
   ],

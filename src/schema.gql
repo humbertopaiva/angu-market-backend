@@ -232,6 +232,18 @@ type Company {
   website: String
 }
 
+type CompanyAuthResponse {
+  accessToken: String!
+  company: Company!
+  user: User!
+}
+
+input CompanyLoginInput {
+  companySlug: String!
+  email: String!
+  password: String!
+}
+
 """Cursor for paging through collections"""
 scalar ConnectionCursor
 
@@ -263,7 +275,18 @@ input CreateCompanyInput {
   phone: String
   placeId: Int!
   slug: String!
+  users: [CreateCompanyUserInput!]
   website: String
+}
+
+input CreateCompanyUserInput {
+  email: String
+  existingUserId: Float
+  isActive: Boolean
+  name: String
+  password: String
+  phone: String
+  role: String
 }
 
 input CreateManyOrganizationsInput {
@@ -422,8 +445,10 @@ type Mutation {
   addCategoriesToSegment(categoryIds: [Int!]!, segmentId: Int!): Segment!
   addSegmentsToCategory(categoryId: Int!, segmentIds: [Int!]!): Category!
   assignRole(assignRoleInput: AssignRoleInput!): UserRole!
+  companyLogin(companyLoginInput: CompanyLoginInput!): CompanyAuthResponse!
   createCategory(createCategoryInput: CreateCategoryInput!): Category!
   createCompany(createCompanyInput: CreateCompanyInput!): Company!
+  createCompanyWithUsers(createCompanyInput: CreateCompanyInput!): Company!
   createManyOrganizations(input: CreateManyOrganizationsInput!): [Organization!]!
   createOneOrganization(input: CreateOneOrganizationInput!): Organization!
   createPlace(createPlaceInput: CreatePlaceInput!): Place!
@@ -919,6 +944,7 @@ type PlaceSumAggregate {
 }
 
 type Query {
+  availableUsersForCompany(placeId: Int!): [User!]!
   categories(
     """Specify to filter the records returned."""
     filter: CategoryFilter! = {}
@@ -1530,6 +1556,7 @@ input UpdateCompanyInput {
   phone: String
   placeId: Int
   slug: String
+  users: [CreateCompanyUserInput!]
   website: String
 }
 
