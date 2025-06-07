@@ -347,6 +347,11 @@ export class CompaniesService {
       const companies = await this.companyRepository.find({
         relations: {
           place: true,
+          users: {
+            userRoles: {
+              role: true,
+            },
+          },
           category: true,
           subcategory: true,
         },
@@ -365,6 +370,11 @@ export class CompaniesService {
           slug: company.slug,
           placeId: company.placeId,
           placeName: company.place?.name || 'No place loaded',
+          usersCount: company.users?.length || 0,
+          adminsCount:
+            company.users?.filter(user =>
+              user.userRoles?.some(ur => ur.role.name === RoleType.COMPANY_ADMIN),
+            ).length || 0,
           isActive: company.isActive,
         });
       });
@@ -381,11 +391,18 @@ export class CompaniesService {
   }
 
   async findOne(id: number): Promise<Company> {
+    this.logger.debug('=== FIND ONE COMPANY DEBUG START ===');
+    this.logger.debug('Company ID:', id);
+
     const company = await this.companyRepository.findOne({
       where: { id },
       relations: {
         place: true,
-        users: true,
+        users: {
+          userRoles: {
+            role: true,
+          },
+        },
         category: true,
         subcategory: true,
       },
@@ -395,6 +412,17 @@ export class CompaniesService {
       throw new NotFoundException(`Empresa com ID ${id} não encontrada`);
     }
 
+    this.logger.debug('Company found:', {
+      id: company.id,
+      name: company.name,
+      usersCount: company.users?.length || 0,
+      adminsCount:
+        company.users?.filter(user =>
+          user.userRoles?.some(ur => ur.role.name === RoleType.COMPANY_ADMIN),
+        ).length || 0,
+    });
+
+    this.logger.debug('=== FIND ONE COMPANY DEBUG END ===');
     return company;
   }
 
@@ -403,7 +431,11 @@ export class CompaniesService {
       where: { slug },
       relations: {
         place: true,
-        users: true,
+        users: {
+          userRoles: {
+            role: true,
+          },
+        },
         category: true,
         subcategory: true,
       },
@@ -417,10 +449,18 @@ export class CompaniesService {
   }
 
   async findByPlace(placeId: number): Promise<Company[]> {
-    return this.companyRepository.find({
+    this.logger.debug('=== FIND BY PLACE DEBUG START ===');
+    this.logger.debug('Place ID:', placeId);
+
+    const companies = await this.companyRepository.find({
       where: { placeId },
       relations: {
         place: true,
+        users: {
+          userRoles: {
+            role: true,
+          },
+        },
         category: true,
         subcategory: true,
       },
@@ -428,6 +468,24 @@ export class CompaniesService {
         createdAt: 'DESC',
       },
     });
+
+    this.logger.debug(`Found ${companies.length} companies for place ${placeId}`);
+
+    // Log das empresas por place
+    companies.forEach((company, index) => {
+      this.logger.debug(`Company ${index + 1} in place:`, {
+        id: company.id,
+        name: company.name,
+        usersCount: company.users?.length || 0,
+        adminsCount:
+          company.users?.filter(user =>
+            user.userRoles?.some(ur => ur.role.name === RoleType.COMPANY_ADMIN),
+          ).length || 0,
+      });
+    });
+
+    this.logger.debug('=== FIND BY PLACE DEBUG END ===');
+    return companies;
   }
 
   async findByUser(user: User): Promise<Company[]> {
@@ -726,5 +784,58 @@ export class CompaniesService {
       this.logger.error('Error getting companies without admin:', error.message);
       throw error;
     }
+  }
+
+  /**
+   * Buscar empresa com todos os detalhes dos usuários e roles
+   * Método específico para gestão de admins
+   */
+  async findOneWithUsersDetails(id: number): Promise<Company> {
+    this.logger.debug('=== FIND ONE WITH USERS DETAILS DEBUG START ===');
+    this.logger.debug('Company ID:', id);
+
+    const company = await this.companyRepository
+      .createQueryBuilder('company')
+      .leftJoinAndSelect('company.place', 'place')
+      .leftJoinAndSelect('company.users', 'user')
+      .leftJoinAndSelect('user.userRoles', 'userRole')
+      .leftJoinAndSelect('userRole.role', 'role')
+      .leftJoinAndSelect('user.company', 'userCompany')
+      .leftJoinAndSelect('company.category', 'category')
+      .leftJoinAndSelect('company.subcategory', 'subcategory')
+      .where('company.id = :id', { id })
+      .andWhere('user.isActive = :isActive OR user.id IS NULL', { isActive: true })
+      .andWhere('userRole.isActive = :roleActive OR userRole.id IS NULL', { roleActive: true })
+      .getOne();
+
+    if (!company) {
+      throw new NotFoundException(`Empresa com ID ${id} não encontrada`);
+    }
+
+    this.logger.debug('Company found with users details:', {
+      id: company.id,
+      name: company.name,
+      usersCount: company.users?.length || 0,
+    });
+
+    // Debug dos usuários e suas roles
+    if (company.users) {
+      company.users.forEach((user, index) => {
+        const roles = user.userRoles?.map(ur => ur.role?.name).filter(Boolean) || [];
+        this.logger.debug(`User ${index + 1}:`, {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          companyId: user.companyId,
+          rolesCount: user.userRoles?.length || 0,
+          roles: roles,
+          isAdmin: roles.includes(RoleType.COMPANY_ADMIN),
+          isStaff: roles.includes(RoleType.COMPANY_STAFF),
+        });
+      });
+    }
+
+    this.logger.debug('=== FIND ONE WITH USERS DETAILS DEBUG END ===');
+    return company;
   }
 }

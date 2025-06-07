@@ -403,6 +403,7 @@ export class CompaniesResolver {
       }
     }
 
-    return this.companiesService.findOne(id);
+    // Use o método específico que carrega todos os detalhes dos usuários
+    return this.companiesService.findOneWithUsersDetails(id);
   }
 }
