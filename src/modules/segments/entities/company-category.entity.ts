@@ -5,59 +5,79 @@ import { BaseEntity } from '@/modules/common/entities/base.entity';
 
 import { Company } from '../../companies/entities/company.entity';
 import { Place } from '../../places/entities/place.entity';
-import { Segment } from '@/modules/segments/entities/segment.entity';
-import { Subcategory } from '@/modules/segments/entities/company-subcategory.entity';
+import { Segment } from './segment.entity';
+import { Subcategory } from './company-subcategory.entity';
 
-@Entity()
-@ObjectType()
+@Entity('category') // IMPORTANTE: Nome explícito da tabela
+@ObjectType('Category') // IMPORTANTE: Nome explícito do tipo GraphQL
 export class Category extends BaseEntity {
-  @Column()
+  @Column({ type: 'varchar', length: 255 })
   @FilterableField()
+  @Field() // DUPLA DECORAÇÃO PARA GARANTIR
   name: string;
 
-  @Column()
+  @Column({ type: 'varchar', length: 255, unique: false })
   @FilterableField()
+  @Field()
   slug: string;
 
-  @Column()
+  @Column({ type: 'text' })
   @FilterableField()
+  @Field()
   description: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', length: 100, nullable: true })
   @FilterableField({ nullable: true })
-  icon?: string; // Ícone da categoria
+  @Field({ nullable: true })
+  icon?: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', length: 7, nullable: true })
   @FilterableField({ nullable: true })
-  color?: string; // Cor tema da categoria
+  @Field({ nullable: true })
+  color?: string;
 
-  @Column({ default: 0 })
+  @Column({ type: 'int', default: 0 })
   @FilterableField()
-  order: number; // Ordem de exibição
+  @Field()
+  order: number;
 
-  @Column({ nullable: true })
+  @Column({ type: 'text', nullable: true })
   @FilterableField({ nullable: true })
-  keywords?: string; // Palavras-chave para busca (separadas por vírgula)
+  @Field({ nullable: true })
+  keywords?: string;
 
   // Relacionamentos
-  @ManyToOne(() => Place, place => place.categories)
+  @ManyToOne(() => Place, place => place.categories, {
+    eager: false,
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'placeId' })
   @Field(() => Place)
   place: Place;
 
-  @Column()
+  @Column({ type: 'int' })
   @FilterableField()
+  @Field()
   placeId: number;
 
-  @ManyToMany(() => Segment, segment => segment.categories)
+  @ManyToMany(() => Segment, segment => segment.categories, {
+    eager: false,
+    cascade: false,
+  })
   @Field(() => [Segment], { nullable: true })
   segments?: Segment[];
 
-  @OneToMany(() => Subcategory, subcategory => subcategory.category)
+  @OneToMany(() => Subcategory, subcategory => subcategory.category, {
+    cascade: false,
+    eager: false,
+  })
   @Field(() => [Subcategory], { nullable: true })
   subcategories?: Subcategory[];
 
-  @OneToMany(() => Company, company => company.category)
+  @OneToMany(() => Company, company => company.category, {
+    cascade: false,
+    eager: false,
+  })
   @Field(() => [Company], { nullable: true })
   companies?: Company[];
 }

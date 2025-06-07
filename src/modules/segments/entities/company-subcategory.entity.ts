@@ -7,53 +7,70 @@ import { Company } from '../../companies/entities/company.entity';
 import { Place } from '../../places/entities/place.entity';
 import { Category } from './company-category.entity';
 
-@Entity()
-@ObjectType()
+@Entity('subcategory') // IMPORTANTE: Nome explícito da tabela
+@ObjectType('Subcategory') // IMPORTANTE: Nome explícito do tipo GraphQL
 export class Subcategory extends BaseEntity {
-  @Column()
+  @Column({ type: 'varchar', length: 255 })
   @FilterableField()
+  @Field() // DUPLA DECORAÇÃO PARA GARANTIR
   name: string;
 
-  @Column()
+  @Column({ type: 'varchar', length: 255, unique: false })
   @FilterableField()
+  @Field()
   slug: string;
 
-  @Column()
+  @Column({ type: 'text' })
   @FilterableField()
+  @Field()
   description: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', length: 100, nullable: true })
   @FilterableField({ nullable: true })
-  icon?: string; // Ícone da subcategoria
+  @Field({ nullable: true })
+  icon?: string;
 
-  @Column({ default: 0 })
+  @Column({ type: 'int', default: 0 })
   @FilterableField()
-  order: number; // Ordem de exibição
+  @Field()
+  order: number;
 
-  @Column({ nullable: true })
+  @Column({ type: 'text', nullable: true })
   @FilterableField({ nullable: true })
-  keywords?: string; // Palavras-chave para busca (separadas por vírgula)
+  @Field({ nullable: true })
+  keywords?: string;
 
   // Relacionamentos
-  @ManyToOne(() => Place, place => place.subcategories)
+  @ManyToOne(() => Place, place => place.subcategories, {
+    eager: false,
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'placeId' })
   @Field(() => Place)
   place: Place;
 
-  @Column()
+  @Column({ type: 'int' })
   @FilterableField()
+  @Field()
   placeId: number;
 
-  @ManyToOne(() => Category, category => category.subcategories)
+  @ManyToOne(() => Category, category => category.subcategories, {
+    eager: false,
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'categoryId' })
   @Field(() => Category)
   category: Category;
 
-  @Column()
+  @Column({ type: 'int' })
   @FilterableField()
+  @Field()
   categoryId: number;
 
-  @OneToMany(() => Company, company => company.subcategory)
+  @OneToMany(() => Company, company => company.subcategory, {
+    cascade: false,
+    eager: false,
+  })
   @Field(() => [Company], { nullable: true })
   companies?: Company[];
 }
