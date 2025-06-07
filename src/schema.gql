@@ -918,11 +918,18 @@ enum RoleType {
 
 type Segment {
   categories: [Category!]
+  color: String
   createdAt: DateTime!
   deletedAt: DateTime
+  description: String!
+  icon: String
   id: ID!
   isActive: Boolean!
+  name: String!
+  order: Float!
   place: Place!
+  placeId: Float!
+  slug: String!
   updatedAt: DateTime!
   uuid: String!
 }

@@ -1,49 +1,62 @@
 import { Entity, Column, ManyToMany, ManyToOne, JoinTable, JoinColumn } from 'typeorm';
 import { ObjectType, Field } from '@nestjs/graphql';
-// import { FilterableField } from '@nestjs-query/query-graphql';
+import { FilterableField } from '@nestjs-query/query-graphql';
 import { BaseEntity } from '@/modules/common/entities/base.entity';
 
 import { Place } from '../../places/entities/place.entity';
-import { Category } from '@/modules/segments/entities/company-category.entity';
+import { Category } from './company-category.entity';
 
-@Entity()
-@ObjectType()
+@Entity('segment') // IMPORTANTE: Nome explícito da tabela
+@ObjectType('Segment') // IMPORTANTE: Nome explícito do tipo GraphQL
 export class Segment extends BaseEntity {
-  // @Column()
-  // @FilterableField()
+  @Column({ type: 'varchar', length: 255 })
+  @FilterableField()
+  @Field() // DUPLA DECORAÇÃO PARA GARANTIR
   name: string;
 
-  @Column()
-  // @FilterableField()
+  @Column({ type: 'varchar', length: 255, unique: false })
+  @FilterableField()
+  @Field()
   slug: string;
 
-  @Column()
-  // @FilterableField()
+  @Column({ type: 'text' })
+  @FilterableField()
+  @Field()
   description: string;
 
-  @Column({ nullable: true })
-  // @FilterableField({ nullable: true })
-  icon?: string; // Ícone do segmento
+  @Column({ type: 'varchar', length: 100, nullable: true })
+  @FilterableField({ nullable: true })
+  @Field({ nullable: true })
+  icon?: string;
 
-  @Column({ nullable: true })
-  // @FilterableField({ nullable: true })
-  color?: string; // Cor tema do segmento (ex: #FF5722)
+  @Column({ type: 'varchar', length: 7, nullable: true })
+  @FilterableField({ nullable: true })
+  @Field({ nullable: true })
+  color?: string;
 
-  @Column({ default: 0 })
-  // @FilterableField()
-  order: number; // Ordem de exibição
+  @Column({ type: 'int', default: 0 })
+  @FilterableField()
+  @Field()
+  order: number;
 
   // Relacionamentos
-  @ManyToOne(() => Place, place => place.segments)
+  @ManyToOne(() => Place, place => place.segments, {
+    eager: false, // NÃO carregar automaticamente
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'placeId' })
   @Field(() => Place)
   place: Place;
 
-  @Column()
-  // @FilterableField()
+  @Column({ type: 'int' })
+  @FilterableField()
+  @Field()
   placeId: number;
 
-  @ManyToMany(() => Category, category => category.segments, { cascade: true })
+  @ManyToMany(() => Category, category => category.segments, {
+    cascade: false, // Evitar problemas de cascata
+    eager: false,
+  })
   @JoinTable({
     name: 'segment_categories',
     joinColumn: { name: 'segmentId', referencedColumnName: 'id' },

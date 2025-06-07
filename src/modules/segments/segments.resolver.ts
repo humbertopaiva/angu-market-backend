@@ -1,5 +1,5 @@
 import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
-import { UseGuards } from '@nestjs/common';
+import { UseGuards, Logger } from '@nestjs/common';
 import { Segment } from './entities/segment.entity';
 import { CreateSegmentInput } from './dto/create-segment.input';
 import { UpdateSegmentInput } from './dto/update-segment.input';
@@ -13,77 +13,183 @@ import { SegmentsService } from './segments.service';
 
 @Resolver(() => Segment)
 export class SegmentsResolver {
+  private readonly logger = new Logger(SegmentsResolver.name);
+
   constructor(private readonly segmentsService: SegmentsService) {}
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(RoleType.PLACE_ADMIN)
+  @Roles(RoleType.SUPER_ADMIN, RoleType.PLACE_ADMIN)
   @Mutation(() => Segment)
-  createSegment(
+  async createSegment(
     @Args('createSegmentInput') createSegmentInput: CreateSegmentInput,
     @CurrentUser() currentUser: User,
   ) {
-    return this.segmentsService.create(createSegmentInput, currentUser);
+    this.logger.debug('=== RESOLVER: CREATE SEGMENT ===');
+    this.logger.debug('Input:', createSegmentInput);
+    this.logger.debug('User:', currentUser?.email);
+
+    try {
+      const result = await this.segmentsService.create(createSegmentInput, currentUser);
+      this.logger.debug('Segment created successfully');
+      return result;
+    } catch (error) {
+      this.logger.error('Error in createSegment resolver:', error);
+      throw error;
+    }
   }
 
+  // QUERY PÚBLICA - SEM AUTENTICAÇÃO
   @Query(() => [Segment], { name: 'segments' })
-  findAllSegments() {
-    return this.segmentsService.findAll();
+  async findAllSegments() {
+    this.logger.debug('=== RESOLVER: FIND ALL SEGMENTS ===');
+
+    try {
+      const segments = await this.segmentsService.findAll();
+      this.logger.debug(`Resolver returning ${segments.length} segments`);
+      return segments;
+    } catch (error) {
+      this.logger.error('Error in findAllSegments resolver:', error);
+      throw error;
+    }
   }
 
   @Query(() => [Segment], { name: 'segmentsByPlace' })
-  findSegmentsByPlace(@Args('placeId', { type: () => Int }) placeId: number) {
-    return this.segmentsService.findByPlace(placeId);
+  async findSegmentsByPlace(@Args('placeId', { type: () => Int }) placeId: number) {
+    this.logger.debug('=== RESOLVER: FIND SEGMENTS BY PLACE ===');
+    this.logger.debug('PlaceId:', placeId);
+
+    try {
+      const segments = await this.segmentsService.findByPlace(placeId);
+      this.logger.debug(`Resolver returning ${segments.length} segments for place ${placeId}`);
+      return segments;
+    } catch (error) {
+      this.logger.error('Error in findSegmentsByPlace resolver:', error);
+      throw error;
+    }
   }
 
   @Query(() => Segment, { name: 'segment' })
-  findOneSegment(@Args('id', { type: () => Int }) id: number) {
-    return this.segmentsService.findOne(id);
+  async findOneSegment(@Args('id', { type: () => Int }) id: number) {
+    this.logger.debug('=== RESOLVER: FIND ONE SEGMENT ===');
+    this.logger.debug('SegmentId:', id);
+
+    try {
+      const segment = await this.segmentsService.findOne(id);
+      this.logger.debug('Segment found');
+      return segment;
+    } catch (error) {
+      this.logger.error('Error in findOneSegment resolver:', error);
+      throw error;
+    }
   }
 
   @Query(() => Segment, { name: 'segmentBySlug' })
-  findSegmentBySlug(
+  async findSegmentBySlug(
     @Args('slug', { type: () => String }) slug: string,
     @Args('placeId', { type: () => Int }) placeId: number,
   ) {
-    return this.segmentsService.findBySlug(slug, placeId);
+    this.logger.debug('=== RESOLVER: FIND SEGMENT BY SLUG ===');
+    this.logger.debug('Slug:', slug, 'PlaceId:', placeId);
+
+    try {
+      const segment = await this.segmentsService.findBySlug(slug, placeId);
+      this.logger.debug('Segment found by slug');
+      return segment;
+    } catch (error) {
+      this.logger.error('Error in findSegmentBySlug resolver:', error);
+      throw error;
+    }
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(RoleType.PLACE_ADMIN)
+  @Roles(RoleType.SUPER_ADMIN, RoleType.PLACE_ADMIN)
   @Mutation(() => Segment)
-  updateSegment(
+  async updateSegment(
     @Args('updateSegmentInput') updateSegmentInput: UpdateSegmentInput,
     @CurrentUser() currentUser: User,
   ) {
-    return this.segmentsService.update(updateSegmentInput.id, updateSegmentInput, currentUser);
+    this.logger.debug('=== RESOLVER: UPDATE SEGMENT ===');
+    this.logger.debug('Input:', updateSegmentInput);
+
+    try {
+      const result = await this.segmentsService.update(
+        updateSegmentInput.id,
+        updateSegmentInput,
+        currentUser,
+      );
+      this.logger.debug('Segment updated successfully');
+      return result;
+    } catch (error) {
+      this.logger.error('Error in updateSegment resolver:', error);
+      throw error;
+    }
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(RoleType.PLACE_ADMIN)
+  @Roles(RoleType.SUPER_ADMIN, RoleType.PLACE_ADMIN)
   @Mutation(() => Segment)
-  removeSegment(@Args('id', { type: () => Int }) id: number, @CurrentUser() currentUser: User) {
-    return this.segmentsService.remove(id, currentUser);
+  async removeSegment(
+    @Args('id', { type: () => Int }) id: number,
+    @CurrentUser() currentUser: User,
+  ) {
+    this.logger.debug('=== RESOLVER: REMOVE SEGMENT ===');
+    this.logger.debug('SegmentId:', id);
+
+    try {
+      const result = await this.segmentsService.remove(id, currentUser);
+      this.logger.debug('Segment removed successfully');
+      return result;
+    } catch (error) {
+      this.logger.error('Error in removeSegment resolver:', error);
+      throw error;
+    }
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(RoleType.PLACE_ADMIN)
+  @Roles(RoleType.SUPER_ADMIN, RoleType.PLACE_ADMIN)
   @Mutation(() => Segment)
-  addCategoriesToSegment(
+  async addCategoriesToSegment(
     @Args('segmentId', { type: () => Int }) segmentId: number,
     @Args('categoryIds', { type: () => [Int] }) categoryIds: number[],
     @CurrentUser() currentUser: User,
   ) {
-    return this.segmentsService.addCategoriesToSegment(segmentId, categoryIds, currentUser);
+    this.logger.debug('=== RESOLVER: ADD CATEGORIES TO SEGMENT ===');
+
+    try {
+      const result = await this.segmentsService.addCategoriesToSegment(
+        segmentId,
+        categoryIds,
+        currentUser,
+      );
+      this.logger.debug('Categories added to segment successfully');
+      return result;
+    } catch (error) {
+      this.logger.error('Error in addCategoriesToSegment resolver:', error);
+      throw error;
+    }
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(RoleType.PLACE_ADMIN)
+  @Roles(RoleType.SUPER_ADMIN, RoleType.PLACE_ADMIN)
   @Mutation(() => Segment)
-  removeCategoriesFromSegment(
+  async removeCategoriesFromSegment(
     @Args('segmentId', { type: () => Int }) segmentId: number,
     @Args('categoryIds', { type: () => [Int] }) categoryIds: number[],
     @CurrentUser() currentUser: User,
   ) {
-    return this.segmentsService.removeCategoriesFromSegment(segmentId, categoryIds, currentUser);
+    this.logger.debug('=== RESOLVER: REMOVE CATEGORIES FROM SEGMENT ===');
+
+    try {
+      const result = await this.segmentsService.removeCategoriesFromSegment(
+        segmentId,
+        categoryIds,
+        currentUser,
+      );
+      this.logger.debug('Categories removed from segment successfully');
+      return result;
+    } catch (error) {
+      this.logger.error('Error in removeCategoriesFromSegment resolver:', error);
+      throw error;
+    }
   }
 }
