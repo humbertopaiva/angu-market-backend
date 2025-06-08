@@ -29,7 +29,6 @@ export class SubcategoriesResolver {
     return this.subcategoriesService.create(createSubcategoryInput, currentUser);
   }
 
-  // CORREÇÃO: Query pública para listar subcategorias
   @Query(() => [Subcategory], { name: 'subcategories' })
   findAllSubcategories() {
     this.logger.debug('Finding all subcategories');
@@ -57,6 +56,7 @@ export class SubcategoriesResolver {
     return this.subcategoriesService.findBySlug(slug, placeId);
   }
 
+  // CORREÇÃO: Adicionar query para buscar subcategorias por categoria
   @Query(() => [Subcategory], { name: 'subcategoriesByCategory' })
   findSubcategoriesByCategory(@Args('categoryId', { type: () => Int }) categoryId: number) {
     this.logger.debug('Finding subcategories by category:', categoryId);
@@ -84,5 +84,14 @@ export class SubcategoriesResolver {
   removeSubcategory(@Args('id', { type: () => Int }) id: number, @CurrentUser() currentUser: User) {
     this.logger.debug('Removing subcategory:', id);
     return this.subcategoriesService.remove(id, currentUser);
+  }
+
+  // ADICIONAR: Query para estatísticas de subcategorias com contagem de empresas
+  @Query(() => [Subcategory], { name: 'subcategoriesWithCompanyCount' })
+  getSubcategoriesWithCompanyCount(
+    @Args('placeId', { type: () => Int, nullable: true }) placeId?: number,
+  ) {
+    this.logger.debug('Getting subcategories with company count');
+    return this.subcategoriesService.getSubcategoriesWithCompanyCount(placeId);
   }
 }

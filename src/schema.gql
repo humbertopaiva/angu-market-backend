@@ -846,6 +846,7 @@ type Query {
   subcategories: [Subcategory!]!
   subcategoriesByCategory(categoryId: Int!): [Subcategory!]!
   subcategoriesByPlace(placeId: Int!): [Subcategory!]!
+  subcategoriesWithCompanyCount(placeId: Int): [Subcategory!]!
   subcategory(id: Int!): Subcategory!
   subcategoryBySlug(placeId: Int!, slug: String!): Subcategory!
   user(
