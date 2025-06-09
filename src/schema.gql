@@ -41,8 +41,8 @@ type Category {
 type Company {
   address: String
   banner: String
-  category: Category
-  categoryId: Float
+  category: Category!
+  categoryId: Float!
   cnpj: String
   createdAt: DateTime!
   deletedAt: DateTime
@@ -58,9 +58,11 @@ type Company {
   phone: String
   place: Place!
   placeId: Float!
+  segment: Segment!
+  segmentId: Float!
   slug: String!
-  subcategory: Subcategory
-  subcategoryId: Float
+  subcategory: Subcategory!
+  subcategoryId: Float!
   tags: String
   updatedAt: DateTime!
   users: [User!]
@@ -99,7 +101,7 @@ input CreateCategoryInput {
 input CreateCompanyInput {
   address: String
   banner: String
-  categoryId: Int
+  categoryId: Int!
   cnpj: String
   description: String!
   email: String
@@ -111,8 +113,9 @@ input CreateCompanyInput {
   openingHours: String
   phone: String
   placeId: Int!
+  segmentId: Int!
   slug: String!
-  subcategoryId: Int
+  subcategoryId: Int!
   users: [CreateCompanyUserInput!]
   website: String
 }
@@ -283,9 +286,6 @@ type Mutation {
   addCategoriesToSegment(categoryIds: [Int!]!, segmentId: Int!): Segment!
   addSegmentsToCategory(categoryId: Int!, segmentIds: [Int!]!): Category!
   assignCompanyAdmin(companyId: Int!, userId: Int!): Company!
-  assignCompanyToCategory(categoryId: Int!, companyId: Int!): Company!
-  assignCompanyToSegment(companyId: Int!, segmentId: Int!): Company!
-  assignCompanyToSubcategory(companyId: Int!, subcategoryId: Int!): Company!
   assignRole(assignRoleInput: AssignRoleInput!): UserRole!
   companyLogin(companyLoginInput: CompanyLoginInput!): CompanyAuthResponse!
   createCategory(createCategoryInput: CreateCategoryInput!): Category!
@@ -305,7 +305,6 @@ type Mutation {
   removeCategory(id: Int!): Category!
   removeCompany(id: Int!): Boolean!
   removeCompanyAdmin(companyId: Int!, userId: Int!): Company!
-  removeCompanyFromSegmentation(companyId: Int!): Company!
   removePlace(id: Int!): Place!
   removeRole(roleId: Float!, userId: Float!): Boolean!
   removeSegment(id: Int!): Segment!
@@ -796,13 +795,18 @@ type Query {
   category(id: Int!): Category!
   categoryBySlug(placeId: Int!, slug: String!): Category!
   companies: [Company!]!
+  companiesByCategory(categoryId: Int!): [Company!]!
   companiesByPlace(placeId: Int!): [Company!]!
+  companiesBySegment(segmentId: Int!): [Company!]!
+  companiesBySegmentationCriteria(categoryId: Int, placeId: Int, segmentId: Int, subcategoryId: Int): [Company!]!
+  companiesBySubcategory(subcategoryId: Int!): [Company!]!
+  companiesWithIncompleteSegmentation: [Company!]!
   companiesWithUserCount(placeId: Int): [Company!]!
   companiesWithoutAdmin(placeId: Int): [Company!]!
-  companiesWithoutSegmentation(placeId: Int): [Company!]!
   company(id: Int!): Company!
   companyBySlug(slug: String!): Company!
   companyDetails(id: Int!): Company!
+  companySegmentationHierarchy(id: Int!): String!
   hello: String!
   mainOrganization: Organization!
   me: User!
@@ -848,6 +852,7 @@ type Query {
   placesByOrganization: [Place!]!
   segment(id: Int!): Segment!
   segmentBySlug(placeId: Int!, slug: String!): Segment!
+  segmentationStats(placeId: Int): String!
   segments: [Segment!]!
   segmentsByPlace(placeId: Int!): [Segment!]!
   subcategories: [Subcategory!]!
@@ -877,6 +882,7 @@ type Query {
   ): UserConnection!
   usersByCompany(companyId: Int!): [User!]!
   usersByPlace(placeId: Int!): [User!]!
+  validateCompanySegmentation(id: Int!): Boolean!
 }
 
 input RequestPasswordResetInput {
@@ -927,6 +933,7 @@ enum RoleType {
 type Segment {
   categories: [Category!]
   color: String
+  companies: [Company!]
   createdAt: DateTime!
   deletedAt: DateTime
   description: String!
@@ -1035,6 +1042,7 @@ input UpdateCompanyInput {
   openingHours: String
   phone: String
   placeId: Int
+  segmentId: Int
   slug: String
   subcategoryId: Int
   users: [CreateCompanyUserInput!]
