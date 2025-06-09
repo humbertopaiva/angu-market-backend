@@ -1,3 +1,4 @@
+// src/modules/companies/dto/company.input.ts - CORRIGIDO COM SEGMENTAÇÃO
 import { InputType, Field, ID } from '@nestjs/graphql';
 import { IsOptional, IsString, IsBoolean, IsNumber, IsEmail } from 'class-validator';
 
@@ -86,4 +87,15 @@ export class CompanyInput {
   @IsOptional()
   @IsNumber()
   placeId?: number;
+
+  // ADIÇÃO: Campos de Segmentação
+  @Field(() => ID, { nullable: true })
+  @IsOptional()
+  @IsNumber()
+  categoryId?: number;
+
+  @Field(() => ID, { nullable: true })
+  @IsOptional()
+  @IsNumber()
+  subcategoryId?: number;
 }

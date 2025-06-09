@@ -1,4 +1,4 @@
-// src/modules/companies/companies.resolver.ts - COMPLETE VERSION
+// src/modules/companies/companies.resolver.ts - COMPLETO COM HIERARQUIA DE SEGMENTAÇÃO
 
 import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
 import { UseGuards, Logger, ForbiddenException } from '@nestjs/common';
@@ -23,7 +23,7 @@ export class CompaniesResolver {
   // ===== BASIC COMPANY OPERATIONS =====
 
   /**
-   * Criar nova empresa
+   * Criar nova empresa com hierarquia obrigatória
    * Permitido: SUPER_ADMIN, PLACE_ADMIN
    */
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -47,10 +47,47 @@ export class CompaniesResolver {
         name: result.name,
         placeId: result.placeId,
         placeName: result.place?.name,
+        segmentId: result.segmentId,
+        segmentName: result.segment?.name,
+        categoryId: result.categoryId,
+        categoryName: result.category?.name,
+        subcategoryId: result.subcategoryId,
+        subcategoryName: result.subcategory?.name,
       });
       return result;
     } catch (error) {
       this.logger.error('Error creating company:', error.message);
+      throw error;
+    }
+  }
+
+  /**
+   * Criar empresa com usuários
+   * Permitido: SUPER_ADMIN, PLACE_ADMIN
+   */
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RoleType.SUPER_ADMIN, RoleType.PLACE_ADMIN)
+  @Mutation(() => Company)
+  async createCompanyWithUsers(
+    @Args('createCompanyInput') createCompanyInput: CreateCompanyInput,
+    @CurrentUser() currentUser: User,
+  ) {
+    this.logger.debug('=== CREATE COMPANY WITH USERS RESOLVER DEBUG START ===');
+    this.logger.debug('CreateCompanyInput:', createCompanyInput);
+
+    try {
+      const result = await this.companiesService.createWithUsers(createCompanyInput, currentUser);
+      this.logger.debug('Company with users created successfully:', {
+        id: result.id,
+        name: result.name,
+        usersCount: result.users?.length || 0,
+        segmentName: result.segment?.name,
+        categoryName: result.category?.name,
+        subcategoryName: result.subcategory?.name,
+      });
+      return result;
+    } catch (error) {
+      this.logger.error('Error creating company with users:', error.message);
       throw error;
     }
   }
@@ -74,6 +111,9 @@ export class CompaniesResolver {
           name: company.name,
           placeId: company.placeId,
           placeName: company.place?.name || 'No place data',
+          segmentName: company.segment?.name || 'No segment',
+          categoryName: company.category?.name || 'No category',
+          subcategoryName: company.subcategory?.name || 'No subcategory',
         });
       });
 
@@ -128,6 +168,38 @@ export class CompaniesResolver {
   findByPlace(@Args('placeId', { type: () => Int }) placeId: number) {
     this.logger.debug('Finding companies by place:', placeId);
     return this.companiesService.findByPlace(placeId);
+  }
+
+  // ===== QUERIES POR SEGMENTAÇÃO =====
+
+  /**
+   * Buscar empresas por segmento
+   * Público (sem autenticação)
+   */
+  @Query(() => [Company], { name: 'companiesBySegment' })
+  findBySegment(@Args('segmentId', { type: () => Int }) segmentId: number) {
+    this.logger.debug('Finding companies by segment:', segmentId);
+    return this.companiesService.findBySegment(segmentId);
+  }
+
+  /**
+   * Buscar empresas por categoria
+   * Público (sem autenticação)
+   */
+  @Query(() => [Company], { name: 'companiesByCategory' })
+  findByCategory(@Args('categoryId', { type: () => Int }) categoryId: number) {
+    this.logger.debug('Finding companies by category:', categoryId);
+    return this.companiesService.findByCategory(categoryId);
+  }
+
+  /**
+   * Buscar empresas por subcategoria
+   * Público (sem autenticação)
+   */
+  @Query(() => [Company], { name: 'companiesBySubcategory' })
+  findBySubcategory(@Args('subcategoryId', { type: () => Int }) subcategoryId: number) {
+    this.logger.debug('Finding companies by subcategory:', subcategoryId);
+    return this.companiesService.findBySubcategory(subcategoryId);
   }
 
   /**
@@ -256,36 +328,6 @@ export class CompaniesResolver {
     return this.companiesService.getAvailableCompanyAdmins(placeId);
   }
 
-  // ===== COMPANY WITH USERS OPERATIONS =====
-
-  /**
-   * Criar empresa com usuários associados
-   * Permitido: SUPER_ADMIN, PLACE_ADMIN
-   */
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(RoleType.SUPER_ADMIN, RoleType.PLACE_ADMIN)
-  @Mutation(() => Company)
-  async createCompanyWithUsers(
-    @Args('createCompanyInput') createCompanyInput: CreateCompanyInput,
-    @CurrentUser() currentUser: User,
-  ) {
-    this.logger.debug('=== CREATE COMPANY WITH USERS RESOLVER DEBUG START ===');
-    this.logger.debug('CreateCompanyInput:', createCompanyInput);
-
-    try {
-      const result = await this.companiesService.createWithUsers(createCompanyInput, currentUser);
-      this.logger.debug('Company with users created successfully:', {
-        id: result.id,
-        name: result.name,
-        usersCount: result.users?.length || 0,
-      });
-      return result;
-    } catch (error) {
-      this.logger.error('Error creating company with users:', error.message);
-      throw error;
-    }
-  }
-
   /**
    * Buscar usuários disponíveis para uma empresa (sem empresa ou sem conflito)
    * Permitido: SUPER_ADMIN, PLACE_ADMIN
@@ -338,9 +380,43 @@ export class CompaniesResolver {
     return this.companiesService.getCompaniesWithoutAdmin(placeId);
   }
 
-  // ===== COMPANY AUTHENTICATION =====
-  // Nota: A mutation companyLogin está no AuthResolver, não aqui
-  // mas poderia ser movida para cá se preferir organização por entidade
+  /**
+   * Buscar empresas com segmentação incompleta
+   * Permitido: SUPER_ADMIN, PLACE_ADMIN
+   */
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RoleType.SUPER_ADMIN, RoleType.PLACE_ADMIN)
+  @Query(() => [Company], { name: 'companiesWithIncompleteSegmentation' })
+  async getCompaniesWithIncompleteSegmentation() {
+    this.logger.debug('Getting companies with incomplete segmentation');
+    return this.companiesService.findCompaniesWithIncompleteSegmentation();
+  }
+
+  /**
+   * Obter estatísticas de segmentação
+   * Permitido: SUPER_ADMIN, PLACE_ADMIN
+   */
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RoleType.SUPER_ADMIN, RoleType.PLACE_ADMIN)
+  @Query(() => String, { name: 'segmentationStats' }) // Retornar como string JSON
+  async getSegmentationStats(
+    @Args('placeId', { type: () => Int, nullable: true }) placeId?: number,
+    @CurrentUser() currentUser?: User,
+  ): Promise<string> {
+    this.logger.debug('Getting segmentation stats');
+
+    // Se for place admin, só pode ver stats do seu place
+    if (currentUser) {
+      const userRoles = currentUser.userRoles?.map(ur => ur.role.name) || [];
+
+      if (userRoles.includes(RoleType.PLACE_ADMIN)) {
+        placeId = currentUser.placeId || placeId;
+      }
+    }
+
+    const stats = await this.companiesService.getSegmentationStats(placeId);
+    return JSON.stringify(stats);
+  }
 
   // ===== UTILITY QUERIES =====
 
@@ -403,7 +479,147 @@ export class CompaniesResolver {
       }
     }
 
-    // Use o método específico que carrega todos os detalhes dos usuários
+    // Use o método específico que carrega todos os detalhes dos usuários e segmentação
     return this.companiesService.findOneWithUsersDetails(id);
+  }
+
+  // ===== VALIDATION QUERIES =====
+
+  /**
+   * Validar se empresa tem hierarquia completa
+   * Permitido: SUPER_ADMIN, PLACE_ADMIN
+   */
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RoleType.SUPER_ADMIN, RoleType.PLACE_ADMIN)
+  @Query(() => Boolean, { name: 'validateCompanySegmentation' })
+  async validateCompanySegmentation(@Args('id', { type: () => Int }) id: number): Promise<boolean> {
+    this.logger.debug('Validating company segmentation for ID:', id);
+
+    try {
+      const company = await this.companiesService.findOne(id);
+
+      // Verificar se tem hierarquia completa
+      const hasCompleteHierarchy = !!(
+        company.segmentId &&
+        company.categoryId &&
+        company.subcategoryId &&
+        company.segment &&
+        company.category &&
+        company.subcategory
+      );
+
+      this.logger.debug('Company segmentation validation result:', {
+        companyId: id,
+        hasCompleteHierarchy,
+        segmentId: company.segmentId,
+        categoryId: company.categoryId,
+        subcategoryId: company.subcategoryId,
+      });
+
+      return hasCompleteHierarchy;
+    } catch (error) {
+      this.logger.error('Error validating company segmentation:', error.message);
+      return false;
+    }
+  }
+
+  /**
+   * Buscar empresas por critérios de segmentação
+   * Público (sem autenticação)
+   */
+  @Query(() => [Company], { name: 'companiesBySegmentationCriteria' })
+  async findBySegmentationCriteria(
+    @Args('segmentId', { type: () => Int, nullable: true }) segmentId?: number,
+    @Args('categoryId', { type: () => Int, nullable: true }) categoryId?: number,
+    @Args('subcategoryId', { type: () => Int, nullable: true }) subcategoryId?: number,
+    @Args('placeId', { type: () => Int, nullable: true }) placeId?: number,
+  ) {
+    this.logger.debug('Finding companies by segmentation criteria:', {
+      segmentId,
+      categoryId,
+      subcategoryId,
+      placeId,
+    });
+
+    // Priorizar pela hierarquia mais específica
+    if (subcategoryId) {
+      return this.companiesService.findBySubcategory(subcategoryId);
+    }
+
+    if (categoryId) {
+      return this.companiesService.findByCategory(categoryId);
+    }
+
+    if (segmentId) {
+      return this.companiesService.findBySegment(segmentId);
+    }
+
+    if (placeId) {
+      return this.companiesService.findByPlace(placeId);
+    }
+
+    // Se nenhum critério específico, retornar todas
+    return this.companiesService.findAll();
+  }
+
+  // ===== COMPANY HIERARCHY DISPLAY =====
+
+  /**
+   * Buscar hierarquia de segmentação de uma empresa
+   * Público (sem autenticação)
+   */
+  @Query(() => String, { name: 'companySegmentationHierarchy' })
+  async getCompanySegmentationHierarchy(
+    @Args('id', { type: () => Int }) id: number,
+  ): Promise<string> {
+    this.logger.debug('Getting company segmentation hierarchy for ID:', id);
+
+    try {
+      const company = await this.companiesService.findOne(id);
+
+      const hierarchy = {
+        companyId: company.id,
+        companyName: company.name,
+        place: {
+          id: company.place.id,
+          name: company.place.name,
+          city: company.place.city,
+          state: company.place.state,
+        },
+        segment: company.segment
+          ? {
+              id: company.segment.id,
+              name: company.segment.name,
+              slug: company.segment.slug,
+              color: company.segment.color,
+            }
+          : null,
+        category: company.category
+          ? {
+              id: company.category.id,
+              name: company.category.name,
+              slug: company.category.slug,
+              color: company.category.color,
+            }
+          : null,
+        subcategory: company.subcategory
+          ? {
+              id: company.subcategory.id,
+              name: company.subcategory.name,
+              slug: company.subcategory.slug,
+            }
+          : null,
+        hierarchyString:
+          company.segment && company.category && company.subcategory
+            ? `${company.segment.name} → ${company.category.name} → ${company.subcategory.name}`
+            : 'Hierarquia incompleta',
+        isComplete: !!(company.segmentId && company.categoryId && company.subcategoryId),
+      };
+
+      return JSON.stringify(hierarchy);
+    } catch (error) {
+      this.logger.error('Error getting company hierarchy:', error.message);
+      throw error;
+    }
   }
 }

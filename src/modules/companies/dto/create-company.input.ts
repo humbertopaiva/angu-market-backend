@@ -1,3 +1,4 @@
+// src/modules/companies/dto/create-company.input.ts - HIERARQUIA OBRIGATÓRIA
 import { InputType, Field, Int } from '@nestjs/graphql';
 import {
   IsNotEmpty,
@@ -19,24 +20,24 @@ export class CreateCompanyUserInput {
   @Field({ nullable: true })
   @IsOptional()
   @IsNumber()
-  existingUserId?: number; // Para atribuir usuário existente
+  existingUserId?: number;
 
   @Field({ nullable: true })
   @IsOptional()
   @IsString()
   @IsNotEmpty()
-  name?: string; // Para criar novo usuário
+  name?: string;
 
   @Field({ nullable: true })
   @IsOptional()
   @IsEmail()
-  email?: string; // Para criar novo usuário
+  email?: string;
 
   @Field({ nullable: true })
   @IsOptional()
   @IsString()
   @MinLength(6)
-  password?: string; // Para criar novo usuário
+  password?: string;
 
   @Field({ nullable: true })
   @IsOptional()
@@ -46,7 +47,7 @@ export class CreateCompanyUserInput {
   @Field({ nullable: true })
   @IsOptional()
   @IsString()
-  role?: 'COMPANY_ADMIN' | 'COMPANY_STAFF'; // Tipo de role para o usuário
+  role?: 'COMPANY_ADMIN' | 'COMPANY_STAFF';
 
   @Field({ nullable: true })
   @IsOptional()
@@ -76,6 +77,23 @@ export class CreateCompanyInput {
   @IsNumber()
   placeId: number;
 
+  // CAMPOS DE SEGMENTAÇÃO - TODOS OBRIGATÓRIOS
+  @Field(() => Int)
+  @IsNotEmpty()
+  @IsNumber()
+  segmentId: number;
+
+  @Field(() => Int)
+  @IsNotEmpty()
+  @IsNumber()
+  categoryId: number;
+
+  @Field(() => Int)
+  @IsNotEmpty()
+  @IsNumber()
+  subcategoryId: number;
+
+  // Campos opcionais da empresa
   @Field({ nullable: true })
   @IsOptional()
   @IsString()
@@ -131,7 +149,6 @@ export class CreateCompanyInput {
   @IsBoolean()
   isActive?: boolean;
 
-  // Novo campo para usuários
   @Field(() => [CreateCompanyUserInput], { nullable: true })
   @IsOptional()
   @IsArray()

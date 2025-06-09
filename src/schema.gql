@@ -99,6 +99,7 @@ input CreateCategoryInput {
 input CreateCompanyInput {
   address: String
   banner: String
+  categoryId: Int
   cnpj: String
   description: String!
   email: String
@@ -111,6 +112,7 @@ input CreateCompanyInput {
   phone: String
   placeId: Int!
   slug: String!
+  subcategoryId: Int
   users: [CreateCompanyUserInput!]
   website: String
 }
@@ -281,6 +283,9 @@ type Mutation {
   addCategoriesToSegment(categoryIds: [Int!]!, segmentId: Int!): Segment!
   addSegmentsToCategory(categoryId: Int!, segmentIds: [Int!]!): Category!
   assignCompanyAdmin(companyId: Int!, userId: Int!): Company!
+  assignCompanyToCategory(categoryId: Int!, companyId: Int!): Company!
+  assignCompanyToSegment(companyId: Int!, segmentId: Int!): Company!
+  assignCompanyToSubcategory(companyId: Int!, subcategoryId: Int!): Company!
   assignRole(assignRoleInput: AssignRoleInput!): UserRole!
   companyLogin(companyLoginInput: CompanyLoginInput!): CompanyAuthResponse!
   createCategory(createCategoryInput: CreateCategoryInput!): Category!
@@ -300,6 +305,7 @@ type Mutation {
   removeCategory(id: Int!): Category!
   removeCompany(id: Int!): Boolean!
   removeCompanyAdmin(companyId: Int!, userId: Int!): Company!
+  removeCompanyFromSegmentation(companyId: Int!): Company!
   removePlace(id: Int!): Place!
   removeRole(roleId: Float!, userId: Float!): Boolean!
   removeSegment(id: Int!): Segment!
@@ -793,6 +799,7 @@ type Query {
   companiesByPlace(placeId: Int!): [Company!]!
   companiesWithUserCount(placeId: Int): [Company!]!
   companiesWithoutAdmin(placeId: Int): [Company!]!
+  companiesWithoutSegmentation(placeId: Int): [Company!]!
   company(id: Int!): Company!
   companyBySlug(slug: String!): Company!
   companyDetails(id: Int!): Company!
@@ -1015,6 +1022,7 @@ input UpdateCategoryInput {
 input UpdateCompanyInput {
   address: String
   banner: String
+  categoryId: Int
   cnpj: String
   description: String
   email: String
@@ -1028,6 +1036,7 @@ input UpdateCompanyInput {
   phone: String
   placeId: Int
   slug: String
+  subcategoryId: Int
   users: [CreateCompanyUserInput!]
   website: String
 }

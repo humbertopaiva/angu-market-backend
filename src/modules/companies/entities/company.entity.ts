@@ -1,4 +1,4 @@
-// src/modules/companies/entities/company.entity.ts - CORRIGIDO
+// src/modules/companies/entities/company.entity.ts - HIERARQUIA CORRETA
 import { Entity, Column, ManyToOne, OneToMany, JoinColumn } from 'typeorm';
 import { ObjectType, Field } from '@nestjs/graphql';
 import { FilterableField } from '@nestjs-query/query-graphql';
@@ -6,6 +6,7 @@ import { Place } from '../../places/entities/place.entity';
 import { User } from '../../users/entities/user.entity';
 
 import { BaseEntity } from '@/modules/common/entities/base.entity';
+import { Segment } from '@/modules/segments/entities/segment.entity';
 import { Category } from '@/modules/segments/entities/company-category.entity';
 import { Subcategory } from '@/modules/segments/entities/company-subcategory.entity';
 
@@ -64,7 +65,7 @@ export class Company extends BaseEntity {
   @FilterableField({ nullable: true })
   cnpj?: string; // Brazilian company identification
 
-  // Relacionamentos
+  // Relacionamentos básicos
   @ManyToOne(() => Place, place => place.companies)
   @JoinColumn({ name: 'placeId' })
   @Field(() => Place)
@@ -78,24 +79,47 @@ export class Company extends BaseEntity {
   @Field(() => [User], { nullable: true })
   users?: User[];
 
-  // Relacionamentos para categorização (devem ser do mesmo place)
-  @ManyToOne(() => Category, category => category.companies, { nullable: true })
+  // HIERARQUIA DE SEGMENTAÇÃO CORRETA
+  // Cada empresa DEVE ter: Segmento → Categoria → Subcategoria
+
+  // 1. SEGMENTO (obrigatório)
+  @ManyToOne(() => Segment, segment => segment.companies, {
+    nullable: false, // OBRIGATÓRIO
+    eager: false,
+  })
+  @JoinColumn({ name: 'segmentId' })
+  @Field(() => Segment)
+  segment: Segment;
+
+  @Column()
+  @FilterableField()
+  segmentId: number;
+
+  // 2. CATEGORIA (obrigatório, deve pertencer ao segmento)
+  @ManyToOne(() => Category, category => category.companies, {
+    nullable: false, // OBRIGATÓRIO
+    eager: false,
+  })
   @JoinColumn({ name: 'categoryId' })
-  @Field(() => Category, { nullable: true })
-  category?: Category;
+  @Field(() => Category)
+  category: Category;
 
-  @Column({ nullable: true })
-  @FilterableField({ nullable: true })
-  categoryId?: number;
+  @Column()
+  @FilterableField()
+  categoryId: number;
 
-  @ManyToOne(() => Subcategory, subcategory => subcategory.companies, { nullable: true })
+  // 3. SUBCATEGORIA (obrigatório, deve pertencer à categoria)
+  @ManyToOne(() => Subcategory, subcategory => subcategory.companies, {
+    nullable: false, // OBRIGATÓRIO
+    eager: false,
+  })
   @JoinColumn({ name: 'subcategoryId' })
-  @Field(() => Subcategory, { nullable: true })
-  subcategory?: Subcategory;
+  @Field(() => Subcategory)
+  subcategory: Subcategory;
 
-  @Column({ nullable: true })
-  @FilterableField({ nullable: true })
-  subcategoryId?: number;
+  @Column()
+  @FilterableField()
+  subcategoryId: number;
 
   // Tags para busca adicional (opcional)
   @Column({ nullable: true, type: 'text' })

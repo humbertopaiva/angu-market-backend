@@ -1,4 +1,4 @@
-// src/modules/companies/companies.service.ts
+// src/modules/companies/companies.service.ts - COMPLETO COM HIERARQUIA DE SEGMENTAÇÃO
 import {
   Injectable,
   NotFoundException,
@@ -11,12 +11,15 @@ import { IsNull, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 
 import { Company } from './entities/company.entity';
-
 import { UpdateCompanyInput } from './dto/update-company.input';
 import { User } from '../users/entities/user.entity';
 import { Role, RoleType } from '../auth/entities/role.entity';
 import { UserRole } from '../auth/entities/user-role.entity';
 import { CreateCompanyInput } from './dto/create-company.input';
+// Importações de segmentação
+import { Segment } from '../segments/entities/segment.entity';
+import { Category } from '../segments/entities/company-category.entity';
+import { Subcategory } from '../segments/entities/company-subcategory.entity';
 
 @Injectable()
 export class CompaniesService {
@@ -31,6 +34,13 @@ export class CompaniesService {
     private roleRepository: Repository<Role>,
     @InjectRepository(UserRole)
     private userRoleRepository: Repository<UserRole>,
+    // Repositórios de segmentação
+    @InjectRepository(Segment)
+    private segmentRepository: Repository<Segment>,
+    @InjectRepository(Category)
+    private categoryRepository: Repository<Category>,
+    @InjectRepository(Subcategory)
+    private subcategoryRepository: Repository<Subcategory>,
   ) {}
 
   private validatePlaceAccess(placeId: number, user: User): void {
@@ -75,6 +85,74 @@ export class CompaniesService {
     throw new ForbiddenException('Você não tem permissão para gerenciar empresas');
   }
 
+  /**
+   * Validar hierarquia completa de segmentação
+   * Cada empresa DEVE ter: Segmento → Categoria → Subcategoria
+   */
+  private async validateCompleteSegmentationHierarchy(
+    segmentId: number,
+    categoryId: number,
+    subcategoryId: number,
+    placeId: number,
+  ): Promise<void> {
+    this.logger.debug('=== VALIDATE COMPLETE SEGMENTATION HIERARCHY ===');
+    this.logger.debug('SegmentId:', segmentId);
+    this.logger.debug('CategoryId:', categoryId);
+    this.logger.debug('SubcategoryId:', subcategoryId);
+    this.logger.debug('PlaceId:', placeId);
+
+    // 1. Validar que o segmento existe e pertence ao place
+    const segment = await this.segmentRepository.findOne({
+      where: { id: segmentId, placeId },
+      relations: ['place'],
+    });
+
+    if (!segment) {
+      throw new BadRequestException(`Segmento com ID ${segmentId} não encontrado neste place`);
+    }
+
+    // 2. Validar que a categoria existe, pertence ao place E ao segmento
+    const category = await this.categoryRepository.findOne({
+      where: { id: categoryId, placeId },
+      relations: ['place', 'segments'],
+    });
+
+    if (!category) {
+      throw new BadRequestException(`Categoria com ID ${categoryId} não encontrada neste place`);
+    }
+
+    // Verificar se a categoria pertence ao segmento selecionado
+    const categoryBelongsToSegment = category.segments?.some(seg => seg.id === segmentId);
+
+    if (!categoryBelongsToSegment) {
+      throw new BadRequestException(
+        `A categoria "${category.name}" não pertence ao segmento "${segment.name}"`,
+      );
+    }
+
+    // 3. Validar que a subcategoria existe, pertence ao place E à categoria
+    const subcategory = await this.subcategoryRepository.findOne({
+      where: { id: subcategoryId, placeId, categoryId },
+      relations: ['place', 'category'],
+    });
+
+    if (!subcategory) {
+      throw new BadRequestException(
+        `Subcategoria com ID ${subcategoryId} não encontrada nesta categoria e place`,
+      );
+    }
+
+    // Verificar consistência da hierarquia
+    if (subcategory.categoryId !== categoryId) {
+      throw new BadRequestException(
+        `A subcategoria "${subcategory.name}" não pertence à categoria "${category.name}"`,
+      );
+    }
+
+    this.logger.debug('Complete segmentation hierarchy validation passed');
+    this.logger.debug(`Hierarchy: ${segment.name} → ${category.name} → ${subcategory.name}`);
+  }
+
   async create(createCompanyInput: CreateCompanyInput, currentUser: User): Promise<Company> {
     this.logger.debug('=== CREATE COMPANY DEBUG START ===');
     this.logger.debug('CreateCompanyInput:', createCompanyInput);
@@ -84,13 +162,24 @@ export class CompaniesService {
       placeId: currentUser?.placeId,
     });
 
-    const { slug, placeId, ...companyData } = createCompanyInput;
+    const { slug, placeId, segmentId, categoryId, subcategoryId, ...companyData } =
+      createCompanyInput;
 
     try {
       // Validar acesso ao place
       this.logger.debug('Validating place access...');
       this.validatePlaceAccess(placeId, currentUser);
       this.logger.debug('Place access validated successfully');
+
+      // VALIDAÇÃO OBRIGATÓRIA: Hierarquia completa de segmentação
+      this.logger.debug('Validating complete segmentation hierarchy...');
+      await this.validateCompleteSegmentationHierarchy(
+        segmentId,
+        categoryId,
+        subcategoryId,
+        placeId,
+      );
+      this.logger.debug('Complete segmentation hierarchy validated successfully');
 
       // Verificar se já existe uma empresa com o mesmo slug
       this.logger.debug('Checking for existing company with slug:', slug);
@@ -117,26 +206,41 @@ export class CompaniesService {
 
       this.logger.debug('Cleaned company data:', cleanedData);
 
+      // Criar empresa com hierarquia completa OBRIGATÓRIA
       const company = this.companyRepository.create({
         ...cleanedData,
         slug,
         placeId,
+        segmentId, // OBRIGATÓRIO
+        categoryId, // OBRIGATÓRIO
+        subcategoryId, // OBRIGATÓRIO
       });
 
       this.logger.debug('Company entity created, saving...');
       const savedCompany = await this.companyRepository.save(company);
 
-      this.logger.debug('Company saved successfully:', {
+      this.logger.debug('Company saved successfully with complete segmentation:', {
         id: savedCompany.id,
         name: savedCompany.name,
         slug: savedCompany.slug,
         placeId: savedCompany.placeId,
+        segmentId: savedCompany.segmentId,
+        categoryId: savedCompany.categoryId,
+        subcategoryId: savedCompany.subcategoryId,
       });
 
-      // Buscar empresa completa com relacionamentos
+      // Buscar empresa completa com todos os relacionamentos de segmentação
       const completeCompany = await this.companyRepository.findOne({
         where: { id: savedCompany.id },
-        relations: ['place', 'category', 'subcategory'],
+        relations: [
+          'place',
+          'segment',
+          'category',
+          'category.segments',
+          'subcategory',
+          'subcategory.category',
+          'subcategory.category.segments',
+        ],
       });
 
       this.logger.debug('=== CREATE COMPANY DEBUG END ===');
@@ -161,8 +265,8 @@ export class CompaniesService {
     const { users, ...companyData } = createCompanyInput;
 
     try {
-      // Criar a empresa primeiro (usar método existente)
-      const company = await this.create(companyData as any, currentUser);
+      // Criar a empresa primeiro (usar método existente que já valida hierarquia)
+      const company = await this.create(companyData as CreateCompanyInput, currentUser);
       this.logger.debug('Company created:', { id: company.id, name: company.name });
 
       // Processar usuários se fornecidos
@@ -175,13 +279,20 @@ export class CompaniesService {
         where: { id: company.id },
         relations: {
           place: true,
+          segment: true,
+          category: {
+            segments: true,
+          },
+          subcategory: {
+            category: {
+              segments: true,
+            },
+          },
           users: {
             userRoles: {
               role: true,
             },
           },
-          category: true,
-          subcategory: true,
         },
       });
 
@@ -236,7 +347,7 @@ export class CompaniesService {
       throw new BadRequestException(`Empresa com ID ${companyId} não encontrada`);
     }
 
-    // Validar permissões (usuário deve ser do mesmo place)
+    // Validar que o usuário é do mesmo place
     if (user.placeId !== company.placeId) {
       throw new BadRequestException('Usuário deve ser do mesmo place da empresa');
     }
@@ -347,13 +458,21 @@ export class CompaniesService {
       const companies = await this.companyRepository.find({
         relations: {
           place: true,
+          // Incluir toda a hierarquia de segmentação
+          segment: true,
+          category: {
+            segments: true,
+          },
+          subcategory: {
+            category: {
+              segments: true,
+            },
+          },
           users: {
             userRoles: {
               role: true,
             },
           },
-          category: true,
-          subcategory: true,
         },
         order: {
           createdAt: 'DESC',
@@ -370,6 +489,12 @@ export class CompaniesService {
           slug: company.slug,
           placeId: company.placeId,
           placeName: company.place?.name || 'No place loaded',
+          segmentId: company.segmentId,
+          segmentName: company.segment?.name || 'No segment',
+          categoryId: company.categoryId,
+          categoryName: company.category?.name || 'No category',
+          subcategoryId: company.subcategoryId,
+          subcategoryName: company.subcategory?.name || 'No subcategory',
           usersCount: company.users?.length || 0,
           adminsCount:
             company.users?.filter(user =>
@@ -398,13 +523,21 @@ export class CompaniesService {
       where: { id },
       relations: {
         place: true,
+        // Incluir toda a hierarquia de segmentação
+        segment: true,
+        category: {
+          segments: true,
+        },
+        subcategory: {
+          category: {
+            segments: true,
+          },
+        },
         users: {
           userRoles: {
             role: true,
           },
         },
-        category: true,
-        subcategory: true,
       },
     });
 
@@ -415,6 +548,9 @@ export class CompaniesService {
     this.logger.debug('Company found:', {
       id: company.id,
       name: company.name,
+      segmentName: company.segment?.name,
+      categoryName: company.category?.name,
+      subcategoryName: company.subcategory?.name,
       usersCount: company.users?.length || 0,
       adminsCount:
         company.users?.filter(user =>
@@ -431,13 +567,20 @@ export class CompaniesService {
       where: { slug },
       relations: {
         place: true,
+        segment: true,
+        category: {
+          segments: true,
+        },
+        subcategory: {
+          category: {
+            segments: true,
+          },
+        },
         users: {
           userRoles: {
             role: true,
           },
         },
-        category: true,
-        subcategory: true,
       },
     });
 
@@ -456,13 +599,20 @@ export class CompaniesService {
       where: { placeId },
       relations: {
         place: true,
+        segment: true,
+        category: {
+          segments: true,
+        },
+        subcategory: {
+          category: {
+            segments: true,
+          },
+        },
         users: {
           userRoles: {
             role: true,
           },
         },
-        category: true,
-        subcategory: true,
       },
       order: {
         createdAt: 'DESC',
@@ -476,6 +626,9 @@ export class CompaniesService {
       this.logger.debug(`Company ${index + 1} in place:`, {
         id: company.id,
         name: company.name,
+        segmentName: company.segment?.name,
+        categoryName: company.category?.name,
+        subcategoryName: company.subcategory?.name,
         usersCount: company.users?.length || 0,
         adminsCount:
           company.users?.filter(user =>
@@ -515,7 +668,7 @@ export class CompaniesService {
     updateCompanyInput: UpdateCompanyInput,
     currentUser: User,
   ): Promise<Company> {
-    const { slug, placeId } = updateCompanyInput;
+    const { slug, placeId, segmentId, categoryId, subcategoryId } = updateCompanyInput;
 
     // Verifica se a empresa existe
     const company = await this.findOne(id);
@@ -526,6 +679,21 @@ export class CompaniesService {
     // Se está atualizando o place, validar acesso ao novo place também
     if (placeId && placeId !== company.placeId) {
       this.validatePlaceAccess(placeId, currentUser);
+    }
+
+    // Se está atualizando qualquer campo de segmentação, validar hierarquia completa
+    if (segmentId !== undefined || categoryId !== undefined || subcategoryId !== undefined) {
+      const finalSegmentId = segmentId || company.segmentId;
+      const finalCategoryId = categoryId || company.categoryId;
+      const finalSubcategoryId = subcategoryId || company.subcategoryId;
+      const finalPlaceId = placeId || company.placeId;
+
+      await this.validateCompleteSegmentationHierarchy(
+        finalSegmentId,
+        finalCategoryId,
+        finalSubcategoryId,
+        finalPlaceId,
+      );
     }
 
     // Se está atualizando o slug, verifica se já existe outra empresa com o mesmo slug
@@ -797,12 +965,16 @@ export class CompaniesService {
     const company = await this.companyRepository
       .createQueryBuilder('company')
       .leftJoinAndSelect('company.place', 'place')
+      .leftJoinAndSelect('company.segment', 'segment')
+      .leftJoinAndSelect('company.category', 'category')
+      .leftJoinAndSelect('category.segments', 'categorySegments')
+      .leftJoinAndSelect('company.subcategory', 'subcategory')
+      .leftJoinAndSelect('subcategory.category', 'subcategoryCategory')
+      .leftJoinAndSelect('subcategoryCategory.segments', 'subcategoryCategorySegments')
       .leftJoinAndSelect('company.users', 'user')
       .leftJoinAndSelect('user.userRoles', 'userRole')
       .leftJoinAndSelect('userRole.role', 'role')
       .leftJoinAndSelect('user.company', 'userCompany')
-      .leftJoinAndSelect('company.category', 'category')
-      .leftJoinAndSelect('company.subcategory', 'subcategory')
       .where('company.id = :id', { id })
       .andWhere('user.isActive = :isActive OR user.id IS NULL', { isActive: true })
       .andWhere('userRole.isActive = :roleActive OR userRole.id IS NULL', { roleActive: true })
@@ -815,6 +987,9 @@ export class CompaniesService {
     this.logger.debug('Company found with users details:', {
       id: company.id,
       name: company.name,
+      segmentName: company.segment?.name,
+      categoryName: company.category?.name,
+      subcategoryName: company.subcategory?.name,
       usersCount: company.users?.length || 0,
     });
 
@@ -837,5 +1012,197 @@ export class CompaniesService {
 
     this.logger.debug('=== FIND ONE WITH USERS DETAILS DEBUG END ===');
     return company;
+  }
+
+  /**
+   * Buscar empresas por segmento
+   */
+  async findBySegment(segmentId: number): Promise<Company[]> {
+    this.logger.debug('=== FIND COMPANIES BY SEGMENT ===');
+    this.logger.debug('Segment ID:', segmentId);
+
+    const companies = await this.companyRepository.find({
+      where: { segmentId },
+      relations: {
+        place: true,
+        segment: true,
+        category: {
+          segments: true,
+        },
+        subcategory: {
+          category: {
+            segments: true,
+          },
+        },
+        users: {
+          userRoles: {
+            role: true,
+          },
+        },
+      },
+      order: {
+        name: 'ASC',
+      },
+    });
+
+    this.logger.debug(`Found ${companies.length} companies for segment ${segmentId}`);
+    return companies;
+  }
+
+  /**
+   * Buscar empresas por categoria
+   */
+  async findByCategory(categoryId: number): Promise<Company[]> {
+    this.logger.debug('=== FIND COMPANIES BY CATEGORY ===');
+    this.logger.debug('Category ID:', categoryId);
+
+    const companies = await this.companyRepository.find({
+      where: { categoryId },
+      relations: {
+        place: true,
+        segment: true,
+        category: {
+          segments: true,
+        },
+        subcategory: {
+          category: {
+            segments: true,
+          },
+        },
+        users: {
+          userRoles: {
+            role: true,
+          },
+        },
+      },
+      order: {
+        name: 'ASC',
+      },
+    });
+
+    this.logger.debug(`Found ${companies.length} companies for category ${categoryId}`);
+    return companies;
+  }
+
+  /**
+   * Buscar empresas por subcategoria
+   */
+  async findBySubcategory(subcategoryId: number): Promise<Company[]> {
+    this.logger.debug('=== FIND COMPANIES BY SUBCATEGORY ===');
+    this.logger.debug('Subcategory ID:', subcategoryId);
+
+    const companies = await this.companyRepository.find({
+      where: { subcategoryId },
+      relations: {
+        place: true,
+        segment: true,
+        category: {
+          segments: true,
+        },
+        subcategory: {
+          category: {
+            segments: true,
+          },
+        },
+        users: {
+          userRoles: {
+            role: true,
+          },
+        },
+      },
+      order: {
+        name: 'ASC',
+      },
+    });
+
+    this.logger.debug(`Found ${companies.length} companies for subcategory ${subcategoryId}`);
+    return companies;
+  }
+
+  /**
+   * Buscar empresas sem segmentação completa (para relatórios)
+   */
+  async findCompaniesWithIncompleteSegmentation(): Promise<Company[]> {
+    this.logger.debug('=== FIND COMPANIES WITH INCOMPLETE SEGMENTATION ===');
+
+    // Esta query não deveria retornar nenhuma empresa se a validação estiver funcionando corretamente
+    // mas é útil para relatórios e verificação de integridade
+    const companies = await this.companyRepository
+      .createQueryBuilder('company')
+      .leftJoinAndSelect('company.place', 'place')
+      .leftJoinAndSelect('company.segment', 'segment')
+      .leftJoinAndSelect('company.category', 'category')
+      .leftJoinAndSelect('company.subcategory', 'subcategory')
+      .where(
+        'company.segmentId IS NULL OR company.categoryId IS NULL OR company.subcategoryId IS NULL',
+      )
+      .getMany();
+
+    this.logger.debug(`Found ${companies.length} companies with incomplete segmentation`);
+
+    if (companies.length > 0) {
+      this.logger.warn('WARNING: Found companies with incomplete segmentation hierarchy!');
+      companies.forEach(company => {
+        this.logger.warn(`Company ${company.id} (${company.name}) missing:`, {
+          segmentId: company.segmentId || 'MISSING',
+          categoryId: company.categoryId || 'MISSING',
+          subcategoryId: company.subcategoryId || 'MISSING',
+        });
+      });
+    }
+
+    return companies;
+  }
+
+  /**
+   * Obter estatísticas de segmentação
+   */
+  async getSegmentationStats(placeId?: number): Promise<{
+    totalCompanies: number;
+    bySegment: Record<string, number>;
+    byCategory: Record<string, number>;
+    bySubcategory: Record<string, number>;
+    incompleteSegmentation: number;
+  }> {
+    this.logger.debug('=== GET SEGMENTATION STATS ===');
+
+    let companies: Company[];
+
+    if (placeId) {
+      companies = await this.findByPlace(placeId);
+    } else {
+      companies = await this.findAll();
+    }
+
+    const stats = {
+      totalCompanies: companies.length,
+      bySegment: {} as Record<string, number>,
+      byCategory: {} as Record<string, number>,
+      bySubcategory: {} as Record<string, number>,
+      incompleteSegmentation: 0,
+    };
+
+    companies.forEach(company => {
+      // Verificar se tem segmentação completa
+      if (!company.segmentId || !company.categoryId || !company.subcategoryId) {
+        stats.incompleteSegmentation++;
+        return;
+      }
+
+      // Estatísticas por segmento
+      const segmentName = company.segment?.name || 'Segment not loaded';
+      stats.bySegment[segmentName] = (stats.bySegment[segmentName] || 0) + 1;
+
+      // Estatísticas por categoria
+      const categoryName = company.category?.name || 'Category not loaded';
+      stats.byCategory[categoryName] = (stats.byCategory[categoryName] || 0) + 1;
+
+      // Estatísticas por subcategoria
+      const subcategoryName = company.subcategory?.name || 'Subcategory not loaded';
+      stats.bySubcategory[subcategoryName] = (stats.bySubcategory[subcategoryName] || 0) + 1;
+    });
+
+    this.logger.debug('Segmentation stats:', stats);
+    return stats;
   }
 }

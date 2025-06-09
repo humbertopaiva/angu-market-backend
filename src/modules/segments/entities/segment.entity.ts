@@ -1,17 +1,19 @@
-import { Entity, Column, ManyToMany, ManyToOne, JoinTable, JoinColumn } from 'typeorm';
+// src/modules/segments/entities/segment.entity.ts - COM RELACIONAMENTO PARA COMPANIES
+import { Entity, Column, ManyToMany, ManyToOne, OneToMany, JoinTable, JoinColumn } from 'typeorm';
 import { ObjectType, Field } from '@nestjs/graphql';
 import { FilterableField } from '@nestjs-query/query-graphql';
 import { BaseEntity } from '@/modules/common/entities/base.entity';
 
 import { Place } from '../../places/entities/place.entity';
 import { Category } from './company-category.entity';
+import { Company } from '../../companies/entities/company.entity';
 
-@Entity('segment') // IMPORTANTE: Nome explícito da tabela
-@ObjectType('Segment') // IMPORTANTE: Nome explícito do tipo GraphQL
+@Entity('segment')
+@ObjectType('Segment')
 export class Segment extends BaseEntity {
   @Column({ type: 'varchar', length: 255 })
   @FilterableField()
-  @Field() // DUPLA DECORAÇÃO PARA GARANTIR
+  @Field()
   name: string;
 
   @Column({ type: 'varchar', length: 255, unique: false })
@@ -41,7 +43,7 @@ export class Segment extends BaseEntity {
 
   // Relacionamentos
   @ManyToOne(() => Place, place => place.segments, {
-    eager: false, // NÃO carregar automaticamente
+    eager: false,
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'placeId' })
@@ -54,7 +56,7 @@ export class Segment extends BaseEntity {
   placeId: number;
 
   @ManyToMany(() => Category, category => category.segments, {
-    cascade: false, // Evitar problemas de cascata
+    cascade: false,
     eager: false,
   })
   @JoinTable({
@@ -64,4 +66,12 @@ export class Segment extends BaseEntity {
   })
   @Field(() => [Category], { nullable: true })
   categories?: Category[];
+
+  // ADIÇÃO: Relacionamento direto com empresas
+  @OneToMany(() => Company, company => company.segment, {
+    cascade: false,
+    eager: false,
+  })
+  @Field(() => [Company], { nullable: true })
+  companies?: Company[];
 }
