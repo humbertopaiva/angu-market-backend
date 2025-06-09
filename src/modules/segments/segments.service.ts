@@ -126,20 +126,6 @@ export class SegmentsService {
       });
 
       this.logger.debug(`Found ${segments.length} segments`);
-
-      // Log detalhado para debug
-      segments.forEach((segment, index) => {
-        this.logger.debug(`Segment ${index + 1}:`, {
-          id: segment.id,
-          name: segment.name,
-          slug: segment.slug,
-          placeId: segment.placeId,
-          placeName: segment.place?.name || 'No place loaded',
-          categoriesCount: segment.categories?.length || 0,
-          isActive: segment.isActive,
-        });
-      });
-
       return segments;
     } catch (error) {
       this.logger.error('Error in findAll:', error);

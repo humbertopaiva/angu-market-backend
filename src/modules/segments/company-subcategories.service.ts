@@ -127,22 +127,6 @@ export class SubcategoriesService {
       });
 
       this.logger.debug(`Found ${subcategories.length} subcategories`);
-
-      // Log detalhado para debug
-      subcategories.forEach((subcategory, index) => {
-        this.logger.debug(`Subcategory ${index + 1}:`, {
-          id: subcategory.id,
-          name: subcategory.name,
-          slug: subcategory.slug,
-          placeId: subcategory.placeId,
-          categoryId: subcategory.categoryId,
-          placeName: subcategory.place?.name || 'No place loaded',
-          categoryName: subcategory.category?.name || 'No category loaded',
-          companiesCount: subcategory.companies?.length || 0,
-          isActive: subcategory.isActive,
-        });
-      });
-
       return subcategories;
     } catch (error) {
       this.logger.error('Error in findAll:', error);

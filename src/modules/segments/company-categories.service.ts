@@ -129,22 +129,6 @@ export class CategoriesService {
       });
 
       this.logger.debug(`Found ${categories.length} categories`);
-
-      // Log detalhado para debug
-      categories.forEach((category, index) => {
-        this.logger.debug(`Category ${index + 1}:`, {
-          id: category.id,
-          name: category.name,
-          slug: category.slug,
-          placeId: category.placeId,
-          placeName: category.place?.name || 'No place loaded',
-          segmentsCount: category.segments?.length || 0,
-          subcategoriesCount: category.subcategories?.length || 0,
-          companiesCount: category.companies?.length || 0,
-          isActive: category.isActive,
-        });
-      });
-
       return categories;
     } catch (error) {
       this.logger.error('Error in findAll:', error);
