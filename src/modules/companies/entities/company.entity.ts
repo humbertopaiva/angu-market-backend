@@ -18,6 +18,8 @@ import { CompanyBasicInfo } from '@/modules/company-data/company-basic-info/enti
 import { CompanyPayments } from '@/modules/company-data/company-payments/entities/company-payments.entity';
 import { CompanySocials } from '@/modules/company-data/company-socials/entities/company-socials.entity';
 import { CompanySocial } from '@/modules/company-data/company-socials/entities/company-social.entity';
+import { CompanySchedule } from '@/modules/company-data/company-schedule/entities/company-schedule.entity';
+import { CompanyScheduleHour } from '@/modules/company-data/company-schedule/entities/company-schedule-hour.entity';
 
 @Entity()
 @ObjectType()
@@ -187,13 +189,19 @@ export class Company extends BaseEntity {
   // ===== FUTUROS SUBMÓDULOS =====
   // Quando implementados, adicionar aqui:
 
-  // 5. HORÁRIOS DE FUNCIONAMENTO
-  // @OneToOne(() => CompanySchedule, schedule => schedule.company, {
-  //   cascade: ['insert', 'update'],
-  //   eager: false,
-  // })
-  // @Field(() => CompanySchedule, { nullable: true })
-  // schedule?: CompanySchedule;
+  @OneToOne(() => CompanySchedule, schedule => schedule.company, {
+    cascade: ['insert', 'update'],
+    eager: false,
+  })
+  @Field(() => CompanySchedule, { nullable: true })
+  schedule?: CompanySchedule;
+
+  @OneToMany(() => CompanyScheduleHour, scheduleHour => scheduleHour.company, {
+    cascade: ['insert', 'update', 'remove'],
+    eager: false,
+  })
+  @Field(() => [CompanyScheduleHour], { nullable: true })
+  scheduleHours?: CompanyScheduleHour[];
 
   // 6. CONFIGURAÇÕES DE DELIVERY
   // @OneToOne(() => CompanyDelivery, delivery => delivery.company, {
