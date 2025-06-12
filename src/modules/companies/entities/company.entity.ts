@@ -20,6 +20,7 @@ import { CompanySocials } from '@/modules/company-data/company-socials/entities/
 import { CompanySocial } from '@/modules/company-data/company-socials/entities/company-social.entity';
 import { CompanySchedule } from '@/modules/company-data/company-schedule/entities/company-schedule.entity';
 import { CompanyScheduleHour } from '@/modules/company-data/company-schedule/entities/company-schedule-hour.entity';
+import { CompanyDelivery } from '@/modules/company-data/company-delivery/entities/company-delivery.entity';
 
 @Entity()
 @ObjectType()
@@ -204,12 +205,12 @@ export class Company extends BaseEntity {
   scheduleHours?: CompanyScheduleHour[];
 
   // 6. CONFIGURAÇÕES DE DELIVERY
-  // @OneToOne(() => CompanyDelivery, delivery => delivery.company, {
-  //   cascade: ['insert', 'update'],
-  //   eager: false,
-  // })
-  // @Field(() => CompanyDelivery, { nullable: true })
-  // delivery?: CompanyDelivery;
+  @OneToOne(() => CompanyDelivery, delivery => delivery.company, {
+    cascade: ['insert', 'update'],
+    eager: false,
+  })
+  @Field(() => CompanyDelivery, { nullable: true })
+  delivery?: CompanyDelivery;
 
   // 9. GALERIA DE FOTOS
   // @OneToMany(() => CompanyPhoto, photo => photo.company, {
