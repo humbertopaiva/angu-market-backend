@@ -21,6 +21,7 @@ import { CompanySocial } from '@/modules/company-data/company-socials/entities/c
 import { CompanySchedule } from '@/modules/company-data/company-schedule/entities/company-schedule.entity';
 import { CompanyScheduleHour } from '@/modules/company-data/company-schedule/entities/company-schedule-hour.entity';
 import { CompanyDelivery } from '@/modules/company-data/company-delivery/entities/company-delivery.entity';
+import { DeliveryZone } from '@/modules/company-data/company-delivery/entities/delivery-zone.entity';
 
 @Entity()
 @ObjectType()
@@ -187,9 +188,7 @@ export class Company extends BaseEntity {
   @Field(() => [CompanySocial], { nullable: true })
   socialNetworks?: CompanySocial[];
 
-  // ===== FUTUROS SUBMÓDULOS =====
-  // Quando implementados, adicionar aqui:
-
+  // 5. HORÁRIOS DE FUNCIONAMENTO (ONE-TO-ONE)
   @OneToOne(() => CompanySchedule, schedule => schedule.company, {
     cascade: ['insert', 'update'],
     eager: false,
@@ -197,6 +196,7 @@ export class Company extends BaseEntity {
   @Field(() => CompanySchedule, { nullable: true })
   schedule?: CompanySchedule;
 
+  // 6. HORÁRIOS INDIVIDUAIS (ONE-TO-MANY)
   @OneToMany(() => CompanyScheduleHour, scheduleHour => scheduleHour.company, {
     cascade: ['insert', 'update', 'remove'],
     eager: false,
@@ -204,13 +204,24 @@ export class Company extends BaseEntity {
   @Field(() => [CompanyScheduleHour], { nullable: true })
   scheduleHours?: CompanyScheduleHour[];
 
-  // 6. CONFIGURAÇÕES DE DELIVERY
+  // 7. CONFIGURAÇÕES DE DELIVERY (ONE-TO-ONE)
   @OneToOne(() => CompanyDelivery, delivery => delivery.company, {
     cascade: ['insert', 'update'],
     eager: false,
   })
   @Field(() => CompanyDelivery, { nullable: true })
   delivery?: CompanyDelivery;
+
+  // 8. ZONAS DE ENTREGA (ONE-TO-MANY)
+  @OneToMany(() => DeliveryZone, deliveryZone => deliveryZone.company, {
+    cascade: ['insert', 'update', 'remove'],
+    eager: false,
+  })
+  @Field(() => [DeliveryZone], { nullable: true })
+  deliveryZones?: DeliveryZone[];
+
+  // ===== FUTUROS SUBMÓDULOS =====
+  // Quando implementados, adicionar aqui:
 
   // 9. GALERIA DE FOTOS
   // @OneToMany(() => CompanyPhoto, photo => photo.company, {
@@ -219,4 +230,20 @@ export class Company extends BaseEntity {
   // })
   // @Field(() => [CompanyPhoto], { nullable: true })
   // photos?: CompanyPhoto[];
+
+  // 10. AVALIAÇÕES/REVIEWS
+  // @OneToMany(() => CompanyReview, review => review.company, {
+  //   cascade: ['insert', 'update', 'remove'],
+  //   eager: false,
+  // })
+  // @Field(() => [CompanyReview], { nullable: true })
+  // reviews?: CompanyReview[];
+
+  // 11. PRODUTOS/SERVIÇOS
+  // @OneToMany(() => CompanyProduct, product => product.company, {
+  //   cascade: ['insert', 'update', 'remove'],
+  //   eager: false,
+  // })
+  // @Field(() => [CompanyProduct], { nullable: true })
+  // products?: CompanyProduct[];
 }

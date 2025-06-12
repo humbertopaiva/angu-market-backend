@@ -1,3 +1,4 @@
+// src/modules/company-data/company-delivery/entities/company-delivery.entity.ts
 import { Entity, Column, OneToOne, OneToMany, JoinColumn } from 'typeorm';
 import { ObjectType, Field } from '@nestjs/graphql';
 import { FilterableField } from '@nestjs-query/query-graphql';
@@ -5,7 +6,6 @@ import { BaseEntity } from '@/modules/common/entities/base.entity';
 import { Company } from '@/modules/companies/entities/company.entity';
 import { DeliveryZone } from './delivery-zone.entity';
 import { DeliveryType } from '../enums/delivery-type.enum';
-import { FeeCalculationType } from '../enums/fee-calculation-type.enum';
 
 @Entity('company_delivery')
 @ObjectType('CompanyDelivery')
@@ -26,16 +26,7 @@ export class CompanyDelivery extends BaseEntity {
   @Field(() => [DeliveryType])
   availableTypes: DeliveryType[];
 
-  // Configurações de taxa
-  @Column({
-    type: 'enum',
-    enum: FeeCalculationType,
-    default: FeeCalculationType.FIXED,
-  })
-  @FilterableField(() => FeeCalculationType)
-  @Field(() => FeeCalculationType)
-  feeCalculationType: FeeCalculationType;
-
+  // Configurações de taxa - simplificado para taxa fixa ou gratuita
   @Column({ type: 'decimal', precision: 8, scale: 2, default: 0 })
   @FilterableField()
   @Field()
@@ -46,21 +37,11 @@ export class CompanyDelivery extends BaseEntity {
   @Field({ nullable: true })
   freeDeliveryMinValue?: number; // Valor mínimo para entrega grátis
 
-  @Column({ type: 'decimal', precision: 5, scale: 2, nullable: true })
-  @FilterableField({ nullable: true })
-  @Field({ nullable: true })
-  feePerKm?: number; // Taxa por quilômetro (se BY_DISTANCE)
-
   // Configurações de tempo
   @Column({ type: 'int', default: 30 })
   @FilterableField()
   @Field()
   estimatedTimeMinutes: number;
-
-  @Column({ type: 'int', nullable: true })
-  @FilterableField({ nullable: true })
-  @Field({ nullable: true })
-  maxDeliveryTimeMinutes?: number;
 
   @Column({ type: 'int', default: 15 })
   @FilterableField()
@@ -78,27 +59,6 @@ export class CompanyDelivery extends BaseEntity {
   @Field({ nullable: true })
   maximumOrderValue?: number;
 
-  // Configurações operacionais
-  @Column({ type: 'boolean', default: true })
-  @FilterableField()
-  @Field()
-  acceptPreOrders: boolean;
-
-  @Column({ type: 'int', nullable: true })
-  @FilterableField({ nullable: true })
-  @Field({ nullable: true })
-  maxPreOrderDays?: number; // Máximo de dias para agendamento
-
-  @Column({ type: 'boolean', default: false })
-  @FilterableField()
-  @Field()
-  requiresAge: boolean; // Se requer verificação de idade
-
-  @Column({ type: 'int', nullable: true })
-  @FilterableField({ nullable: true })
-  @Field({ nullable: true })
-  minimumAge?: number;
-
   // Configurações de pagamento
   @Column({ type: 'boolean', default: true })
   @FilterableField()
@@ -114,27 +74,6 @@ export class CompanyDelivery extends BaseEntity {
   @FilterableField()
   @Field()
   acceptsPix: boolean;
-
-  @Column({ type: 'boolean', default: false })
-  @FilterableField()
-  @Field()
-  requiresPrepayment: boolean;
-
-  // Configurações de tracking
-  @Column({ type: 'boolean', default: false })
-  @FilterableField()
-  @Field()
-  enableTracking: boolean;
-
-  @Column({ type: 'boolean', default: true })
-  @FilterableField()
-  @Field()
-  sendSMSUpdates: boolean;
-
-  @Column({ type: 'boolean', default: true })
-  @FilterableField()
-  @Field()
-  sendWhatsAppUpdates: boolean;
 
   // Informações adicionais
   @Column({ type: 'text', nullable: true })
@@ -156,33 +95,6 @@ export class CompanyDelivery extends BaseEntity {
   @FilterableField({ nullable: true })
   @Field({ nullable: true })
   deliveryWhatsApp?: string; // WhatsApp específico para delivery
-
-  // Configurações de capacidade
-  @Column({ type: 'int', nullable: true })
-  @FilterableField({ nullable: true })
-  @Field({ nullable: true })
-  maxConcurrentOrders?: number; // Máximo de pedidos simultâneos
-
-  @Column({ type: 'int', nullable: true })
-  @FilterableField({ nullable: true })
-  @Field({ nullable: true })
-  maxDailyOrders?: number; // Máximo de pedidos por dia
-
-  // Configurações de promoção
-  @Column({ type: 'boolean', default: false })
-  @FilterableField()
-  @Field()
-  hasLoyaltyProgram: boolean;
-
-  @Column({ type: 'decimal', precision: 5, scale: 2, nullable: true })
-  @FilterableField({ nullable: true })
-  @Field({ nullable: true })
-  loyaltyDiscountPercent?: number;
-
-  @Column({ type: 'int', nullable: true })
-  @FilterableField({ nullable: true })
-  @Field({ nullable: true })
-  loyaltyMinOrders?: number; // Mínimo de pedidos para desconto
 
   // Relacionamento ONE-TO-ONE com Company
   @OneToOne(() => Company, company => company.delivery, {

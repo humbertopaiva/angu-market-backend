@@ -16,49 +16,22 @@ import { DeliveryZoneType } from '../enums/delivery-zone-type.enum';
 @InputType()
 export class CreateDeliveryZoneInput {
   @Field()
-  @IsNotEmpty()
   @IsString()
   @MaxLength(255)
   name: string;
 
-  @Field(() => DeliveryZoneType)
-  @IsNotEmpty()
-  @IsEnum(DeliveryZoneType)
-  zoneType: DeliveryZoneType;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsNumber()
-  @Min(0.1)
-  @Max(100)
-  radiusKm?: number;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsObject()
-  coordinates?: object;
-
-  @Field({ nullable: true })
-  @IsOptional()
+  @Field()
   @IsString()
-  neighborhoods?: string;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsString()
-  postalCodes?: string;
+  neighborhoods: string; // Lista de bairros separados por vírgula
 
   @Field()
-  @IsNotEmpty()
   @IsNumber()
   @Min(0)
   deliveryFee: number;
 
   @Field(() => Int)
-  @IsNotEmpty()
   @IsNumber()
   @Min(5)
-  @Max(300)
   estimatedTimeMinutes: number;
 
   @Field({ nullable: true })
@@ -76,7 +49,6 @@ export class CreateDeliveryZoneInput {
   @IsOptional()
   @IsNumber()
   @Min(0)
-  @Max(100)
   priority?: number;
 
   @Field({ nullable: true })
@@ -84,9 +56,4 @@ export class CreateDeliveryZoneInput {
   @IsString()
   @MaxLength(1000)
   description?: string;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsObject()
-  customSchedule?: object;
 }

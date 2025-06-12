@@ -41,11 +41,14 @@ type Category {
 type Company {
   address: String
   banner: String
+  basicInfo: CompanyBasicInfo
   category: Category!
   categoryId: Float!
   cnpj: String
   createdAt: DateTime!
   deletedAt: DateTime
+  delivery: CompanyDelivery
+  deliveryZones: [DeliveryZone!]
   description: String!
   email: String
   id: ID!
@@ -55,12 +58,17 @@ type Company {
   longitude: Float
   name: String!
   openingHours: String
+  payments: CompanyPayments
   phone: String
   place: Place!
   placeId: Float!
+  schedule: CompanySchedule
+  scheduleHours: [CompanyScheduleHour!]
   segment: Segment!
   segmentId: Float!
   slug: String!
+  socialNetworks: [CompanySocial!]
+  socials: CompanySocials
   subcategory: Subcategory!
   subcategoryId: Float!
   tags: String
@@ -76,10 +84,163 @@ type CompanyAuthResponse {
   user: User!
 }
 
+type CompanyBasicInfo {
+  address: String
+  banner: String
+  company: Company!
+  companyId: Float!
+  createdAt: DateTime!
+  deletedAt: DateTime
+  description: String
+  email: String
+  id: ID!
+  isActive: Boolean!
+  logo: String
+  phone: String
+  updatedAt: DateTime!
+  uuid: String!
+  whatsapp: String
+}
+
+type CompanyDelivery {
+  acceptsCard: Boolean!
+  acceptsCash: Boolean!
+  acceptsPix: Boolean!
+  availableTypes: [DeliveryType!]!
+  baseFee: Float!
+  company: Company!
+  companyId: Float!
+  createdAt: DateTime!
+  deletedAt: DateTime
+  deliveryInstructions: String
+  deliveryPhone: String
+  deliveryWhatsApp: String
+  deliveryZones: [DeliveryZone!]
+  estimatedTimeMinutes: Float!
+  freeDeliveryMinValue: Float
+  id: ID!
+  isActive: Boolean!
+  isEnabled: Boolean!
+  maximumOrderValue: Float
+  minimumOrderValue: Float
+  pickupInstructions: String
+  pickupTimeMinutes: Float!
+  updatedAt: DateTime!
+  uuid: String!
+}
+
 input CompanyLoginInput {
   companySlug: String!
   email: String!
   password: String!
+}
+
+type CompanyPayments {
+  acceptsInstallments: Boolean!
+  cardInfo: String
+  company: Company!
+  companyId: Float!
+  createdAt: DateTime!
+  deletedAt: DateTime
+  id: ID!
+  isActive: Boolean!
+  maxInstallments: Float
+  minimumCardAmount: Float
+  notes: String
+  paymentMethods: [PaymentMethodType!]!
+  pixDescription: String
+  pixKey: String
+  pixKeyType: PixKeyType
+  updatedAt: DateTime!
+  uuid: String!
+  voucherInfo: String
+}
+
+type CompanySchedule {
+  advanceBookingDays: Float
+  allowOnlineScheduling: Boolean!
+  autoUpdateStatus: Boolean!
+  closedMessage: String
+  company: Company!
+  companyId: Float!
+  createdAt: DateTime!
+  deletedAt: DateTime
+  hasDeliverySchedule: Boolean!
+  hasTakeoutSchedule: Boolean!
+  holidayMessage: String
+  id: ID!
+  isActive: Boolean!
+  isEnabled: Boolean!
+  scheduleHours: [CompanyScheduleHour!]
+  scheduleNotes: String
+  showNextOpenTime: Boolean!
+  slotDurationMinutes: Float
+  timezone: String
+  updatedAt: DateTime!
+  uuid: String!
+}
+
+type CompanyScheduleHour {
+  breakEndTime: String
+  breakStartTime: String
+  closeTime: String
+  company: Company!
+  companyId: Float!
+  createdAt: DateTime!
+  dayOfWeek: DayOfWeek!
+  deletedAt: DateTime
+  id: ID!
+  is24Hours: Boolean!
+  isActive: Boolean!
+  isClosed: Boolean!
+  notes: String
+  openTime: String
+  priority: Float!
+  scheduleType: ScheduleType!
+  specificDate: DateTime
+  updatedAt: DateTime!
+  uuid: String!
+  validFrom: DateTime
+  validUntil: DateTime
+}
+
+type CompanySocial {
+  company: Company!
+  companyId: Float!
+  createdAt: DateTime!
+  deletedAt: DateTime
+  description: String
+  displayName: String
+  displayOrder: Float!
+  followersCount: Float
+  id: ID!
+  isActive: Boolean!
+  isPrimary: Boolean!
+  isVisible: Boolean!
+  lastUpdated: DateTime
+  networkType: SocialNetworkType!
+  updatedAt: DateTime!
+  url: String!
+  username: String
+  uuid: String!
+}
+
+type CompanySocials {
+  allowMessages: Boolean!
+  company: Company!
+  companyId: Float!
+  createdAt: DateTime!
+  deletedAt: DateTime
+  id: ID!
+  isActive: Boolean!
+  isEnabled: Boolean!
+  primaryContactSocial: String
+  showFollowersCount: Boolean!
+  socialMediaRules: String
+  socialMediaStrategy: String
+  socialNetworks: [CompanySocial!]
+  updatedAt: DateTime!
+  uuid: String!
 }
 
 """Cursor for paging through collections"""
@@ -240,6 +401,30 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
+"""Dias da semana"""
+enum DayOfWeek {
+  """Domingo"""
+  DOMINGO
+
+  """Quarta-feira"""
+  QUARTA
+
+  """Quinta-feira"""
+  QUINTA
+
+  """Sábado"""
+  SABADO
+
+  """Segunda-feira"""
+  SEGUNDA
+
+  """Sexta-feira"""
+  SEXTA
+
+  """Terça-feira"""
+  TERCA
+}
+
 input DeleteManyOrganizationsInput {
   """Filter to find records to delete"""
   filter: OrganizationDeleteFilter!
@@ -258,6 +443,37 @@ input DeleteOneOrganizationInput {
 input DeleteOneUserInput {
   """The id of the record to delete."""
   id: ID!
+}
+
+"""Tipos de serviço de entrega"""
+enum DeliveryType {
+  """Entrega a domicílio"""
+  DELIVERY
+
+  """Consumo no local"""
+  DINE_IN
+
+  """Retirada no local"""
+  PICKUP
+}
+
+type DeliveryZone {
+  company: Company!
+  companyId: Float!
+  createdAt: DateTime!
+  deletedAt: DateTime
+  deliveryFee: Float!
+  description: String
+  estimatedTimeMinutes: Float!
+  id: ID!
+  isActive: Boolean!
+  isEnabled: Boolean!
+  minimumOrderValue: Float
+  name: String!
+  neighborhoods: String!
+  priority: Float!
+  updatedAt: DateTime!
+  uuid: String!
 }
 
 input IDFilterComparison {
@@ -563,6 +779,48 @@ type PageInfo {
 
   """The cursor of the first returned record."""
   startCursor: ConnectionCursor
+}
+
+"""Tipos de métodos de pagamento aceitos pela empresa"""
+enum PaymentMethodType {
+  """Boleto Bancário"""
+  BOLETO
+
+  """Cartão de Crédito"""
+  CARTAO_CREDITO
+
+  """Cartão de Débito"""
+  CARTAO_DEBITO
+
+  """Dinheiro"""
+  DINHEIRO
+
+  """Pagamento via PIX"""
+  PIX
+
+  """Vale Alimentação"""
+  VALE_ALIMENTACAO
+
+  """Vale Refeição"""
+  VALE_REFEICAO
+}
+
+"""Tipos de chave PIX"""
+enum PixKeyType {
+  """Chave Aleatória"""
+  CHAVE_ALEATORIA
+
+  """CNPJ"""
+  CNPJ
+
+  """CPF"""
+  CPF
+
+  """E-mail"""
+  EMAIL
+
+  """Telefone"""
+  TELEFONE
 }
 
 type Place {
@@ -930,6 +1188,24 @@ enum RoleType {
   SUPER_ADMIN
 }
 
+"""Tipos de horário"""
+enum ScheduleType {
+  """Feriado"""
+  HOLIDAY
+
+  """Horário regular"""
+  REGULAR
+
+  """Horário especial"""
+  SPECIAL
+
+  """Fechamento temporário"""
+  TEMPORARY_CLOSURE
+
+  """Férias"""
+  VACATION
+}
+
 type Segment {
   categories: [Category!]
   color: String
@@ -961,6 +1237,48 @@ type SignUpResponse {
   message: String!
   success: Boolean!
   userId: Float
+}
+
+"""Tipos de redes sociais e canais de comunicação"""
+enum SocialNetworkType {
+  """Blog"""
+  BLOG
+
+  """Facebook"""
+  FACEBOOK
+
+  """Instagram"""
+  INSTAGRAM
+
+  """LinkedIn"""
+  LINKEDIN
+
+  """Outras redes sociais"""
+  OUTRAS
+
+  """Pinterest"""
+  PINTEREST
+
+  """Snapchat"""
+  SNAPCHAT
+
+  """Telegram"""
+  TELEGRAM
+
+  """TikTok"""
+  TIKTOK
+
+  """Twitter (X)"""
+  TWITTER
+
+  """Website"""
+  WEBSITE
+
+  """WhatsApp"""
+  WHATSAPP
+
+  """YouTube"""
+  YOUTUBE
 }
 
 """Sort Directions"""
