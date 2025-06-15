@@ -93,38 +93,57 @@ export class CompaniesResolver {
   }
 
   /**
-   * Listar todas as empresas
-   * Público (sem autenticação)
-   */
-  @Query(() => [Company], { name: 'companies' })
-  async findAll() {
-    this.logger.debug('=== COMPANIES RESOLVER FIND ALL DEBUG START ===');
+ * Listar todas as empresas
+ * CORRIGIR: Adicionar autenticação e controle de acesso
+ */
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(RoleType.SUPER_ADMIN, RoleType.PLACE_ADMIN)
+@Query(() => [Company], { name: 'companies' })
+async findAll(@CurrentUser() currentUser: User) {
+  this.logger.debug('=== COMPANIES RESOLVER FIND ALL DEBUG START ===');
+  this.logger.debug('Current User:', {
+    id: currentUser?.id,
+    email: currentUser?.email,
+    roles: currentUser?.userRoles?.map(ur => ur.role.name) || []
+  });
 
-    try {
-      const companies = await this.companiesService.findAll();
-      this.logger.debug(`Resolver returning ${companies.length} companies`);
-
-      // Log das empresas encontradas para debug
-      companies.forEach((company, index) => {
-        this.logger.debug(`Company ${index + 1} in resolver:`, {
-          id: company.id,
-          name: company.name,
-          placeId: company.placeId,
-          placeName: company.place?.name || 'No place data',
-          segmentName: company.segment?.name || 'No segment',
-          categoryName: company.category?.name || 'No category',
-          subcategoryName: company.subcategory?.name || 'No subcategory',
-        });
-      });
-
-      this.logger.debug('=== COMPANIES RESOLVER FIND ALL DEBUG END ===');
-      return companies;
-    } catch (error) {
-      this.logger.error('=== COMPANIES RESOLVER FIND ALL ERROR ===');
-      this.logger.error('Error:', error.message);
-      throw error;
+  try {
+    const userRoles = currentUser.userRoles?.map(ur => ur.role.name) || [];
+    
+    // Se for PLACE_ADMIN, filtrar apenas empresas do seu place
+    if (userRoles.includes(RoleType.PLACE_ADMIN) && !userRoles.includes(RoleType.SUPER_ADMIN)) {
+      if (!currentUser.placeId) {
+        throw new ForbiddenException('Place Admin deve estar associado a um place');
+      }
+      this.logger.debug('Place Admin - filtering by place:', currentUser.placeId);
+      return this.companiesService.findByPlace(currentUser.placeId);
     }
+    
+    // Super Admin pode ver todas
+    const companies = await this.companiesService.findAll();
+    this.logger.debug(`Resolver returning ${companies.length} companies`);
+
+    // Log das empresas encontradas para debug
+    companies.forEach((company, index) => {
+      this.logger.debug(`Company ${index + 1} in resolver:`, {
+        id: company.id,
+        name: company.name,
+        placeId: company.placeId,
+        placeName: company.place?.name || 'No place data',
+        segmentName: company.segment?.name || 'No segment',
+        categoryName: company.category?.name || 'No category',
+        subcategoryName: company.subcategory?.name || 'No subcategory',
+      });
+    });
+
+    this.logger.debug('=== COMPANIES RESOLVER FIND ALL DEBUG END ===');
+    return companies;
+  } catch (error) {
+    this.logger.error('=== COMPANIES RESOLVER FIND ALL ERROR ===');
+    this.logger.error('Error:', error.message);
+    throw error;
   }
+}
 
   /**
    * Buscar empresas do usuário logado
