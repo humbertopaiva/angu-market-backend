@@ -259,6 +259,35 @@ input CreateCategoryInput {
   slug: String!
 }
 
+input CreateCompanyBasicInfoInput {
+  address: String
+  banner: String
+  description: String
+  email: String
+  logo: String
+  phone: String
+  whatsapp: String
+}
+
+input CreateCompanyDeliveryInput {
+  acceptsCard: Boolean
+  acceptsCash: Boolean
+  acceptsPix: Boolean
+  availableTypes: [DeliveryType!]
+  baseFee: Float
+  deliveryInstructions: String
+  deliveryPhone: String
+  deliveryWhatsApp: String
+  deliveryZones: [CreateDeliveryZoneInput!]
+  estimatedTimeMinutes: Int
+  freeDeliveryMinValue: Float
+  isEnabled: Boolean
+  maximumOrderValue: Float
+  minimumOrderValue: Float
+  pickupInstructions: String
+  pickupTimeMinutes: Int
+}
+
 input CreateCompanyInput {
   address: String
   banner: String
@@ -281,6 +310,57 @@ input CreateCompanyInput {
   website: String
 }
 
+input CreateCompanyPaymentsInput {
+  acceptsInstallments: Boolean
+  cardInfo: String
+  maxInstallments: Int
+  minimumCardAmount: Float
+  notes: String
+  paymentMethods: [PaymentMethodType!]!
+  pixDescription: String
+  pixKey: String
+  pixKeyType: PixKeyType
+  voucherInfo: String
+}
+
+input CreateCompanyScheduleInput {
+  advanceBookingDays: Int
+  allowOnlineScheduling: Boolean
+  autoUpdateStatus: Boolean
+  closedMessage: String
+  hasDeliverySchedule: Boolean
+  hasTakeoutSchedule: Boolean
+  holidayMessage: String
+  isEnabled: Boolean
+  scheduleHours: [CreateScheduleHourInput!]
+  scheduleNotes: String
+  showNextOpenTime: Boolean
+  slotDurationMinutes: Int
+  timezone: String
+}
+
+input CreateCompanySocialInput {
+  description: String
+  displayName: String
+  displayOrder: Int
+  followersCount: Int
+  isPrimary: Boolean
+  isVisible: Boolean
+  networkType: SocialNetworkType!
+  url: String!
+  username: String
+}
+
+input CreateCompanySocialsInput {
+  allowMessages: Boolean
+  isEnabled: Boolean
+  primaryContactSocial: String
+  showFollowersCount: Boolean
+  socialMediaRules: String
+  socialMediaStrategy: String
+  socialNetworks: [CreateCompanySocialInput!]
+}
+
 input CreateCompanyUserInput {
   email: String
   existingUserId: Float
@@ -289,6 +369,17 @@ input CreateCompanyUserInput {
   password: String
   phone: String
   role: String
+}
+
+input CreateDeliveryZoneInput {
+  deliveryFee: Float!
+  description: String
+  estimatedTimeMinutes: Int!
+  isEnabled: Boolean
+  minimumOrderValue: Float
+  name: String!
+  neighborhoods: String!
+  priority: Int
 }
 
 input CreateManyOrganizationsInput {
@@ -323,6 +414,22 @@ input CreatePlaceInput {
   postalCode: String
   slug: String!
   state: String!
+}
+
+input CreateScheduleHourInput {
+  breakEndTime: String
+  breakStartTime: String
+  closeTime: String
+  dayOfWeek: DayOfWeek!
+  is24Hours: Boolean
+  isClosed: Boolean
+  notes: String
+  openTime: String
+  priority: Int
+  scheduleType: ScheduleType
+  specificDate: String
+  validFrom: String
+  validUntil: String
 }
 
 input CreateSegmentInput {
@@ -500,12 +607,20 @@ input LoginInput {
 
 type Mutation {
   addCategoriesToSegment(categoryIds: [Int!]!, segmentId: Int!): Segment!
+  addDeliveryZone(companyId: Int!, zoneData: CreateDeliveryZoneInput!): DeliveryZone!
+  addScheduleHour(companyId: Int!, hourData: CreateScheduleHourInput!): CompanyScheduleHour!
   addSegmentsToCategory(categoryId: Int!, segmentIds: [Int!]!): Category!
+  addSocialNetwork(companyId: Int!, socialData: CreateCompanySocialInput!): CompanySocial!
   assignCompanyAdmin(companyId: Int!, userId: Int!): Company!
   assignRole(assignRoleInput: AssignRoleInput!): UserRole!
   companyLogin(companyLoginInput: CompanyLoginInput!): CompanyAuthResponse!
   createCategory(createCategoryInput: CreateCategoryInput!): Category!
   createCompany(createCompanyInput: CreateCompanyInput!): Company!
+  createCompanyBasicInfo(companyId: Int!, createBasicInfoInput: CreateCompanyBasicInfoInput!): CompanyBasicInfo!
+  createCompanyDelivery(companyId: Int!, createDeliveryInput: CreateCompanyDeliveryInput!): CompanyDelivery!
+  createCompanyPayments(companyId: Int!, createPaymentsInput: CreateCompanyPaymentsInput!): CompanyPayments!
+  createCompanySchedule(companyId: Int!, createScheduleInput: CreateCompanyScheduleInput!): CompanySchedule!
+  createCompanySocials(companyId: Int!, createSocialsInput: CreateCompanySocialsInput!): CompanySocials!
   createCompanyWithUsers(createCompanyInput: CreateCompanyInput!): Company!
   createManyOrganizations(input: CreateManyOrganizationsInput!): [Organization!]!
   createOneOrganization(input: CreateOneOrganizationInput!): Organization!
@@ -521,10 +636,18 @@ type Mutation {
   removeCategory(id: Int!): Category!
   removeCompany(id: Int!): Boolean!
   removeCompanyAdmin(companyId: Int!, userId: Int!): Company!
+  removeCompanyBasicInfo(id: Int!): Boolean!
+  removeCompanyDelivery(id: Int!): Boolean!
+  removeCompanyPayments(id: Int!): Boolean!
+  removeCompanySchedule(id: Int!): Boolean!
+  removeCompanySocials(id: Int!): Boolean!
+  removeDeliveryZone(id: Int!): Boolean!
   removePlace(id: Int!): Place!
   removeRole(roleId: Float!, userId: Float!): Boolean!
+  removeScheduleHour(id: Int!): Boolean!
   removeSegment(id: Int!): Segment!
   removeSegmentsFromCategory(categoryId: Int!, segmentIds: [Int!]!): Category!
+  removeSocialNetwork(id: Int!): Boolean!
   removeSubcategory(id: Int!): Subcategory!
   removeUser(id: Int!): User!
   requestPasswordReset(requestPasswordResetInput: RequestPasswordResetInput!): RequestPasswordResetResponse!
@@ -534,13 +657,27 @@ type Mutation {
   testAuth: String!
   updateCategory(updateCategoryInput: UpdateCategoryInput!): Category!
   updateCompany(updateCompanyInput: UpdateCompanyInput!): Company!
+  updateCompanyBasicInfo(updateBasicInfoInput: UpdateCompanyBasicInfoInput!): CompanyBasicInfo!
+  updateCompanyDelivery(updateDeliveryInput: UpdateCompanyDeliveryInput!): CompanyDelivery!
+  updateCompanyPayments(updatePaymentsInput: UpdateCompanyPaymentsInput!): CompanyPayments!
+  updateCompanySchedule(updateScheduleInput: UpdateCompanyScheduleInput!): CompanySchedule!
+  updateCompanySocials(updateSocialsInput: UpdateCompanySocialsInput!): CompanySocials!
+  updateDeliveryZone(updateZoneInput: UpdateDeliveryZoneInput!): DeliveryZone!
   updateMainOrganization(updateMainOrganizationInput: UpdateMainOrganizationInput!): Organization!
   updateManyOrganizations(input: UpdateManyOrganizationsInput!): UpdateManyResponse!
   updateOneOrganization(input: UpdateOneOrganizationInput!): Organization!
   updatePlace(updatePlaceInput: UpdatePlaceInput!): Place!
+  updateScheduleHour(updateHourInput: UpdateScheduleHourInput!): CompanyScheduleHour!
   updateSegment(updateSegmentInput: UpdateSegmentInput!): Segment!
+  updateSocialMetrics(followersCount: Int!, id: Int!): CompanySocial!
+  updateSocialNetwork(updateSocialInput: UpdateCompanySocialInput!): CompanySocial!
   updateSubcategory(updateSubcategoryInput: UpdateSubcategoryInput!): Subcategory!
   updateUser(updateUserInput: UpdateUserInput!): User!
+  upsertCompanyBasicInfo(basicInfoData: CreateCompanyBasicInfoInput!, companyId: Int!): CompanyBasicInfo!
+  upsertCompanyDelivery(companyId: Int!, deliveryData: CreateCompanyDeliveryInput!): CompanyDelivery!
+  upsertCompanyPayments(companyId: Int!, paymentsData: CreateCompanyPaymentsInput!): CompanyPayments!
+  upsertCompanySchedule(companyId: Int!, scheduleData: CreateCompanyScheduleInput!): CompanySchedule!
+  upsertCompanySocials(companyId: Int!, socialsData: CreateCompanySocialsInput!): CompanySocials!
   verifyEmail(verifyEmailInput: VerifyEmailInput!): VerifyEmailResponse!
 }
 
@@ -1045,8 +1182,14 @@ type PlaceSumAggregate {
 }
 
 type Query {
+  allCompanyBasicInfos: [CompanyBasicInfo!]!
+  allCompanyDeliveries: [CompanyDelivery!]!
+  allCompanyPayments: [CompanyPayments!]!
+  allCompanySchedules: [CompanySchedule!]!
+  allCompanySocials: [CompanySocials!]!
   availableCompanyAdmins(placeId: Int!): [User!]!
   availableUsersForCompany(placeId: Int!): [User!]!
+  calculateDeliveryFeeByNeighborhood(companyId: Int!, neighborhood: String!, orderValue: Float): String!
   categories: [Category!]!
   categoriesByPlace(placeId: Int!): [Category!]!
   categoriesBySegment(segmentId: Int!): [Category!]!
@@ -1054,21 +1197,48 @@ type Query {
   categoryBySlug(placeId: Int!, slug: String!): Category!
   companies: [Company!]!
   companiesByCategory(categoryId: Int!): [Company!]!
+  companiesByPaymentMethod(paymentMethod: PaymentMethodType!): [CompanyPayments!]!
   companiesByPlace(placeId: Int!): [Company!]!
   companiesBySegment(segmentId: Int!): [Company!]!
   companiesBySegmentationCriteria(categoryId: Int, placeId: Int, segmentId: Int, subcategoryId: Int): [Company!]!
+  companiesBySocialNetwork(networkType: SocialNetworkType!): [CompanySocial!]!
   companiesBySubcategory(subcategoryId: Int!): [Company!]!
+  companiesOpenNow(placeId: Int): String!
+  companiesThatAcceptPix(placeId: Int): [CompanyPayments!]!
+  companiesWithDelivery(placeId: Int): [CompanyDelivery!]!
   companiesWithIncompleteSegmentation: [Company!]!
   companiesWithUserCount(placeId: Int): [Company!]!
   companiesWithoutAdmin(placeId: Int): [Company!]!
   company(id: Int!): Company!
+  companyBasicInfo(id: Int!): CompanyBasicInfo!
+  companyBasicInfoByCompany(companyId: Int!): CompanyBasicInfo
+  companyBasicInfosByPlace(placeId: Int!): [CompanyBasicInfo!]!
   companyBySlug(slug: String!): Company!
+  companyDeliveriesByPlace(placeId: Int!): [CompanyDelivery!]!
+  companyDelivery(id: Int!): CompanyDelivery!
+  companyDeliveryByCompany(companyId: Int!): CompanyDelivery
   companyDetails(id: Int!): Company!
+  companyPayments(id: Int!): CompanyPayments!
+  companyPaymentsByCompany(companyId: Int!): CompanyPayments
+  companyPaymentsByPlace(placeId: Int!): [CompanyPayments!]!
+  companySchedule(id: Int!): CompanySchedule!
+  companyScheduleByCompany(companyId: Int!): CompanySchedule
+  companySchedulesByPlace(placeId: Int!): [CompanySchedule!]!
   companySegmentationHierarchy(id: Int!): String!
+  companySocials(id: Int!): CompanySocials!
+  companySocialsByCompany(companyId: Int!): CompanySocials
+  companySocialsByPlace(placeId: Int!): [CompanySocials!]!
+  deliveryStatistics(placeId: Int): String!
   hello: String!
+  isCompanyOpenNow(companyId: Int!): String!
   mainOrganization: Organization!
   me: User!
   myCompanies: [Company!]!
+  myCompanyBasicInfos: [CompanyBasicInfo!]!
+  myCompanyDeliveries: [CompanyDelivery!]!
+  myCompanyPayments: [CompanyPayments!]!
+  myCompanySchedules: [CompanySchedule!]!
+  myCompanySocials: [CompanySocials!]!
   organization(
     """The id of the record to find."""
     id: ID!
@@ -1108,6 +1278,8 @@ type Query {
     sorting: [PlaceSort!]! = []
   ): PlaceConnection!
   placesByOrganization: [Place!]!
+  popularSocials(limit: Int, placeId: Int): [CompanySocial!]!
+  scheduleStatistics(placeId: Int): String!
   segment(id: Int!): Segment!
   segmentBySlug(placeId: Int!, slug: String!): Segment!
   segmentationStats(placeId: Int): String!
@@ -1141,6 +1313,7 @@ type Query {
   usersByCompany(companyId: Int!): [User!]!
   usersByPlace(placeId: Int!): [User!]!
   validateCompanySegmentation(id: Int!): Boolean!
+  verifiedSocials(placeId: Int): [CompanySocial!]!
 }
 
 input RequestPasswordResetInput {
@@ -1343,6 +1516,37 @@ input UpdateCategoryInput {
   slug: String
 }
 
+input UpdateCompanyBasicInfoInput {
+  address: String
+  banner: String
+  description: String
+  email: String
+  id: Int!
+  logo: String
+  phone: String
+  whatsapp: String
+}
+
+input UpdateCompanyDeliveryInput {
+  acceptsCard: Boolean
+  acceptsCash: Boolean
+  acceptsPix: Boolean
+  availableTypes: [DeliveryType!]
+  baseFee: Float
+  deliveryInstructions: String
+  deliveryPhone: String
+  deliveryWhatsApp: String
+  deliveryZones: [CreateDeliveryZoneInput!]
+  estimatedTimeMinutes: Int
+  freeDeliveryMinValue: Float
+  id: Int!
+  isEnabled: Boolean
+  maximumOrderValue: Float
+  minimumOrderValue: Float
+  pickupInstructions: String
+  pickupTimeMinutes: Int
+}
+
 input UpdateCompanyInput {
   address: String
   banner: String
@@ -1364,6 +1568,73 @@ input UpdateCompanyInput {
   subcategoryId: Int
   users: [CreateCompanyUserInput!]
   website: String
+}
+
+input UpdateCompanyPaymentsInput {
+  acceptsInstallments: Boolean
+  cardInfo: String
+  id: Int!
+  maxInstallments: Int
+  minimumCardAmount: Float
+  notes: String
+  paymentMethods: [PaymentMethodType!]
+  pixDescription: String
+  pixKey: String
+  pixKeyType: PixKeyType
+  voucherInfo: String
+}
+
+input UpdateCompanyScheduleInput {
+  advanceBookingDays: Int
+  allowOnlineScheduling: Boolean
+  autoUpdateStatus: Boolean
+  closedMessage: String
+  hasDeliverySchedule: Boolean
+  hasTakeoutSchedule: Boolean
+  holidayMessage: String
+  id: Int!
+  isEnabled: Boolean
+  scheduleHours: [CreateScheduleHourInput!]
+  scheduleNotes: String
+  showNextOpenTime: Boolean
+  slotDurationMinutes: Int
+  timezone: String
+}
+
+input UpdateCompanySocialInput {
+  description: String
+  displayName: String
+  displayOrder: Int
+  followersCount: Int
+  id: Int!
+  isPrimary: Boolean
+  isVisible: Boolean
+  networkType: SocialNetworkType
+  url: String
+  username: String
+}
+
+input UpdateCompanySocialsInput {
+  allowMessages: Boolean
+  id: Int!
+  isEnabled: Boolean
+  primaryContactSocial: String
+  showFollowersCount: Boolean
+  socialMediaRules: String
+  socialMediaStrategy: String
+  socialNetworks: [CreateCompanySocialInput!]
+}
+
+input UpdateDeliveryZoneInput {
+  deliveryFee: Float
+  description: String
+  estimatedTimeMinutes: Int
+  id: Int!
+  isEnabled: Boolean
+  minimumOrderValue: Float
+  name: String
+  neighborhoods: String
+  priority: Int
 }
 
 input UpdateMainOrganizationInput {
@@ -1420,6 +1691,23 @@ input UpdatePlaceInput {
   postalCode: String
   slug: String
   state: String
+}
+
+input UpdateScheduleHourInput {
+  breakEndTime: String
+  breakStartTime: String
+  closeTime: String
+  dayOfWeek: DayOfWeek
+  id: Int!
+  is24Hours: Boolean
+  isClosed: Boolean
+  notes: String
+  openTime: String
+  priority: Int
+  scheduleType: ScheduleType
+  specificDate: String
+  validFrom: String
+  validUntil: String
 }
 
 input UpdateSegmentInput {

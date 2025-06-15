@@ -12,6 +12,8 @@ import { OrganizationsModule } from './modules/organizations/organizations.modul
 import { PlacesModule } from './modules/places/places.module';
 import { CompaniesModule } from './modules/companies/companies.module';
 import { SegmentationModule } from './modules/segments/segmentation.module';
+// ADIÇÃO: Importar o CompanyDataModule
+import { CompanyDataModule } from './modules/company-data/company-data.module';
 
 @Module({
   imports: [
@@ -41,6 +43,7 @@ import { SegmentationModule } from './modules/segments/segmentation.module';
     PlacesModule,
     CompaniesModule,
     SegmentationModule,
+    CompanyDataModule, // CORREÇÃO: Adicionar CompanyDataModule
   ],
   providers: [AppResolver],
 })
