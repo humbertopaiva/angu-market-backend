@@ -1181,7 +1181,6 @@ type Role {
 """Os tipos de papéis disponíveis no sistema"""
 enum RoleType {
   COMPANY_ADMIN
-  COMPANY_STAFF
   ORGANIZATION_ADMIN
   PLACE_ADMIN
   PUBLIC_USER
