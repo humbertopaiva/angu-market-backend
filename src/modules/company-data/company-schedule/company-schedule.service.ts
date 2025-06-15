@@ -65,7 +65,7 @@ export class CompanyScheduleService {
       return company;
     }
 
-    if (userRoles.includes(RoleType.COMPANY_ADMIN) || userRoles.includes(RoleType.COMPANY_STAFF)) {
+    if (userRoles.includes(RoleType.COMPANY_ADMIN)) {
       if (user.companyId !== companyId) {
         throw new ForbiddenException('Você só pode gerenciar horários da sua própria empresa');
       }

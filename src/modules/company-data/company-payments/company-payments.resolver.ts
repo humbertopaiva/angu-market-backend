@@ -24,7 +24,7 @@ export class CompanyPaymentsResolver {
    * Permitido: SUPER_ADMIN, PLACE_ADMIN, COMPANY_ADMIN, COMPANY_STAFF
    */
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(RoleType.SUPER_ADMIN, RoleType.PLACE_ADMIN, RoleType.COMPANY_ADMIN, RoleType.COMPANY_STAFF)
+  @Roles(RoleType.SUPER_ADMIN, RoleType.PLACE_ADMIN, RoleType.COMPANY_ADMIN)
   @Mutation(() => CompanyPayments)
   async createCompanyPayments(
     @Args('companyId', { type: () => Int }) companyId: number,
@@ -130,7 +130,7 @@ export class CompanyPaymentsResolver {
    * Permitido: SUPER_ADMIN, PLACE_ADMIN, COMPANY_ADMIN, COMPANY_STAFF
    */
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(RoleType.SUPER_ADMIN, RoleType.PLACE_ADMIN, RoleType.COMPANY_ADMIN, RoleType.COMPANY_STAFF)
+  @Roles(RoleType.SUPER_ADMIN, RoleType.PLACE_ADMIN, RoleType.COMPANY_ADMIN)
   @Mutation(() => CompanyPayments)
   updateCompanyPayments(
     @Args('updatePaymentsInput') updatePaymentsInput: UpdateCompanyPaymentsInput,
@@ -171,7 +171,7 @@ export class CompanyPaymentsResolver {
    * Permitido: SUPER_ADMIN, PLACE_ADMIN, COMPANY_ADMIN, COMPANY_STAFF
    */
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(RoleType.SUPER_ADMIN, RoleType.PLACE_ADMIN, RoleType.COMPANY_ADMIN, RoleType.COMPANY_STAFF)
+  @Roles(RoleType.SUPER_ADMIN, RoleType.PLACE_ADMIN, RoleType.COMPANY_ADMIN)
   @Mutation(() => CompanyPayments)
   async upsertCompanyPayments(
     @Args('companyId', { type: () => Int }) companyId: number,

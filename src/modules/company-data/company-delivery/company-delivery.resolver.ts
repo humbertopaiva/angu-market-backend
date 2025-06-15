@@ -25,7 +25,7 @@ export class CompanyDeliveryResolver {
   // ===== COMPANY DELIVERY =====
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(RoleType.SUPER_ADMIN, RoleType.PLACE_ADMIN, RoleType.COMPANY_ADMIN, RoleType.COMPANY_STAFF)
+  @Roles(RoleType.SUPER_ADMIN, RoleType.PLACE_ADMIN, RoleType.COMPANY_ADMIN)
   @Mutation(() => CompanyDelivery)
   async createCompanyDelivery(
     @Args('companyId', { type: () => Int }) companyId: number,
@@ -106,7 +106,7 @@ export class CompanyDeliveryResolver {
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(RoleType.SUPER_ADMIN, RoleType.PLACE_ADMIN, RoleType.COMPANY_ADMIN, RoleType.COMPANY_STAFF)
+  @Roles(RoleType.SUPER_ADMIN, RoleType.PLACE_ADMIN, RoleType.COMPANY_ADMIN)
   @Mutation(() => CompanyDelivery)
   updateCompanyDelivery(
     @Args('updateDeliveryInput') updateDeliveryInput: UpdateCompanyDeliveryInput,
@@ -127,7 +127,7 @@ export class CompanyDeliveryResolver {
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(RoleType.SUPER_ADMIN, RoleType.PLACE_ADMIN, RoleType.COMPANY_ADMIN, RoleType.COMPANY_STAFF)
+  @Roles(RoleType.SUPER_ADMIN, RoleType.PLACE_ADMIN, RoleType.COMPANY_ADMIN)
   @Mutation(() => CompanyDelivery)
   async upsertCompanyDelivery(
     @Args('companyId', { type: () => Int }) companyId: number,
@@ -140,7 +140,7 @@ export class CompanyDeliveryResolver {
   // ===== ZONAS DE ENTREGA =====
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(RoleType.SUPER_ADMIN, RoleType.PLACE_ADMIN, RoleType.COMPANY_ADMIN, RoleType.COMPANY_STAFF)
+  @Roles(RoleType.SUPER_ADMIN, RoleType.PLACE_ADMIN, RoleType.COMPANY_ADMIN)
   @Mutation(() => DeliveryZone)
   async addDeliveryZone(
     @Args('companyId', { type: () => Int }) companyId: number,
@@ -151,7 +151,7 @@ export class CompanyDeliveryResolver {
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(RoleType.SUPER_ADMIN, RoleType.PLACE_ADMIN, RoleType.COMPANY_ADMIN, RoleType.COMPANY_STAFF)
+  @Roles(RoleType.SUPER_ADMIN, RoleType.PLACE_ADMIN, RoleType.COMPANY_ADMIN)
   @Mutation(() => DeliveryZone)
   updateDeliveryZone(
     @Args('updateZoneInput') updateZoneInput: UpdateDeliveryZoneInput,
@@ -161,7 +161,7 @@ export class CompanyDeliveryResolver {
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(RoleType.SUPER_ADMIN, RoleType.PLACE_ADMIN, RoleType.COMPANY_ADMIN, RoleType.COMPANY_STAFF)
+  @Roles(RoleType.SUPER_ADMIN, RoleType.PLACE_ADMIN, RoleType.COMPANY_ADMIN)
   @Mutation(() => Boolean)
   async removeDeliveryZone(
     @Args('id', { type: () => Int }) id: number,

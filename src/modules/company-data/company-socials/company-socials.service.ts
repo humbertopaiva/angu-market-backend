@@ -32,7 +32,7 @@ export class CompanySocialsService {
     private companyRepository: Repository<Company>,
   ) {}
 
-  private async validateCompanyAccess(companyId: number, user: User): Promise<Company> {
+   private async validateCompanyAccess(companyId: number, user: User): Promise<Company> {
     this.logger.debug('=== VALIDATE COMPANY ACCESS ===');
     this.logger.debug('CompanyId:', companyId);
     this.logger.debug('User:', {
@@ -69,10 +69,10 @@ export class CompanySocialsService {
       return company;
     }
 
-    // Company admin/staff pode acessar apenas sua própria empresa
-    if (userRoles.includes(RoleType.COMPANY_ADMIN) || userRoles.includes(RoleType.COMPANY_STAFF)) {
+    // Company admin pode acessar apenas sua própria empresa
+    if (userRoles.includes(RoleType.COMPANY_ADMIN)) {
       if (user.companyId !== companyId) {
-        throw new ForbiddenException('Você só pode gerenciar redes sociais da sua própria empresa');
+        throw new ForbiddenException('Você só pode gerenciar sua própria empresa');
       }
       return company;
     }

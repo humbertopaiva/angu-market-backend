@@ -113,7 +113,7 @@ export class UsersService {
             if (currentUserRoles.includes(RoleType.PLACE_ADMIN)) {
               const allowedRoles = [
                 RoleType.COMPANY_ADMIN,
-                RoleType.COMPANY_STAFF,
+            
                 RoleType.PUBLIC_USER,
               ];
               if (!allowedRoles.includes(role.name)) {

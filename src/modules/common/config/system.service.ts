@@ -52,10 +52,7 @@ export class SystemService implements OnModuleInit {
         name: RoleType.COMPANY_ADMIN,
         description: 'Administrador da empresa',
       },
-      {
-        name: RoleType.COMPANY_STAFF,
-        description: 'Funcionário da empresa',
-      },
+    
       {
         name: RoleType.PUBLIC_USER,
         description: 'Usuário público',

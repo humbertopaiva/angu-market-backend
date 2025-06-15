@@ -170,7 +170,7 @@ export class AuthService {
 
     // Verificar se o usuário tem role adequada para empresa
     const userRoles = user.userRoles?.map(ur => ur.role.name) || [];
-    const companyRoles = [RoleType.COMPANY_ADMIN, RoleType.COMPANY_STAFF];
+    const companyRoles = [RoleType.COMPANY_ADMIN];
 
     if (!userRoles.some(role => companyRoles.includes(role))) {
       throw new UnauthorizedException('Usuário não tem permissão para acessar empresas');

@@ -64,7 +64,7 @@ export class CompanyBasicInfoService {
     }
 
     // Company admin/staff pode acessar apenas sua própria empresa
-    if (userRoles.includes(RoleType.COMPANY_ADMIN) || userRoles.includes(RoleType.COMPANY_STAFF)) {
+    if (userRoles.includes(RoleType.COMPANY_ADMIN)) {
       if (user.companyId !== companyId) {
         throw new ForbiddenException('Você só pode gerenciar informações da sua própria empresa');
       }

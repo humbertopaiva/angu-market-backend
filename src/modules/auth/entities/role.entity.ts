@@ -1,3 +1,4 @@
+// src/modules/auth/entities/role.entity.ts
 import { Entity, Column, OneToMany } from 'typeorm';
 import { ObjectType, Field, registerEnumType } from '@nestjs/graphql';
 import { FilterableField } from '@nestjs-query/query-graphql';
@@ -9,7 +10,7 @@ export enum RoleType {
   ORGANIZATION_ADMIN = 'ORGANIZATION_ADMIN', // Admin de uma organização
   PLACE_ADMIN = 'PLACE_ADMIN', // Admin de um place
   COMPANY_ADMIN = 'COMPANY_ADMIN', // Admin de uma empresa
-  COMPANY_STAFF = 'COMPANY_STAFF', // Funcionário de empresa
+  // REMOVIDO: COMPANY_STAFF - Funcionário de empresa (não existe mais)
   PUBLIC_USER = 'PUBLIC_USER', // Usuário público
 }
 

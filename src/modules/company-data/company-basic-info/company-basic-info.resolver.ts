@@ -23,7 +23,7 @@ export class CompanyBasicInfoResolver {
    * Permitido: SUPER_ADMIN, PLACE_ADMIN, COMPANY_ADMIN, COMPANY_STAFF
    */
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(RoleType.SUPER_ADMIN, RoleType.PLACE_ADMIN, RoleType.COMPANY_ADMIN, RoleType.COMPANY_STAFF)
+  @Roles(RoleType.SUPER_ADMIN, RoleType.PLACE_ADMIN, RoleType.COMPANY_ADMIN)
   @Mutation(() => CompanyBasicInfo)
   async createCompanyBasicInfo(
     @Args('companyId', { type: () => Int }) companyId: number,
@@ -109,7 +109,7 @@ export class CompanyBasicInfoResolver {
    * Permitido: SUPER_ADMIN, PLACE_ADMIN, COMPANY_ADMIN, COMPANY_STAFF
    */
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(RoleType.SUPER_ADMIN, RoleType.PLACE_ADMIN, RoleType.COMPANY_ADMIN, RoleType.COMPANY_STAFF)
+  @Roles(RoleType.SUPER_ADMIN, RoleType.PLACE_ADMIN, RoleType.COMPANY_ADMIN)
   @Mutation(() => CompanyBasicInfo)
   updateCompanyBasicInfo(
     @Args('updateBasicInfoInput') updateBasicInfoInput: UpdateCompanyBasicInfoInput,
@@ -150,7 +150,7 @@ export class CompanyBasicInfoResolver {
    * Permitido: SUPER_ADMIN, PLACE_ADMIN, COMPANY_ADMIN, COMPANY_STAFF
    */
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(RoleType.SUPER_ADMIN, RoleType.PLACE_ADMIN, RoleType.COMPANY_ADMIN, RoleType.COMPANY_STAFF)
+  @Roles(RoleType.SUPER_ADMIN, RoleType.PLACE_ADMIN, RoleType.COMPANY_ADMIN)
   @Mutation(() => CompanyBasicInfo)
   async upsertCompanyBasicInfo(
     @Args('companyId', { type: () => Int }) companyId: number,

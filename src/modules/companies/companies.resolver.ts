@@ -247,8 +247,8 @@ export class CompaniesResolver {
 
   // ===== COMPANY ADMIN MANAGEMENT =====
 
-  /**
-   * Atribuir usuário como admin de uma empresa
+ /**
+   * Atribuir admin a uma empresa
    * Permitido: SUPER_ADMIN, PLACE_ADMIN
    */
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -259,26 +259,12 @@ export class CompaniesResolver {
     @Args('userId', { type: () => Int }) userId: number,
     @CurrentUser() currentUser: User,
   ) {
-    this.logger.debug('=== ASSIGN COMPANY ADMIN RESOLVER DEBUG START ===');
-    this.logger.debug('Company ID:', companyId);
-    this.logger.debug('User ID:', userId);
-    this.logger.debug('Current user:', {
-      id: currentUser?.id,
-      email: currentUser?.email,
-    });
-
-    try {
-      const result = await this.companiesService.assignCompanyAdmin(companyId, userId, currentUser);
-      this.logger.debug('Company admin assigned successfully');
-      return result;
-    } catch (error) {
-      this.logger.error('Error assigning company admin:', error.message);
-      throw error;
-    }
+    this.logger.debug('Assigning company admin:', { companyId, userId });
+    return this.companiesService.assignCompanyAdmin(companyId, userId, currentUser);
   }
 
   /**
-   * Remover usuário como admin de uma empresa
+   * Remover admin de uma empresa
    * Permitido: SUPER_ADMIN, PLACE_ADMIN
    */
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -289,22 +275,12 @@ export class CompaniesResolver {
     @Args('userId', { type: () => Int }) userId: number,
     @CurrentUser() currentUser: User,
   ) {
-    this.logger.debug('=== REMOVE COMPANY ADMIN RESOLVER DEBUG START ===');
-    this.logger.debug('Company ID:', companyId);
-    this.logger.debug('User ID:', userId);
-
-    try {
-      const result = await this.companiesService.removeCompanyAdmin(companyId, userId, currentUser);
-      this.logger.debug('Company admin removed successfully');
-      return result;
-    } catch (error) {
-      this.logger.error('Error removing company admin:', error.message);
-      throw error;
-    }
+    this.logger.debug('Removing company admin:', { companyId, userId });
+    return this.companiesService.removeCompanyAdmin(companyId, userId, currentUser);
   }
 
-  /**
-   * Buscar usuários disponíveis para serem admin de empresa
+ /**
+   * Buscar admins disponíveis para uma empresa
    * Permitido: SUPER_ADMIN, PLACE_ADMIN
    */
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -366,17 +342,23 @@ export class CompaniesResolver {
     @Args('placeId', { type: () => Int, nullable: true }) placeId?: number,
     @CurrentUser() currentUser?: User,
   ) {
-    this.logger.debug('Getting companies without admin');
+    this.logger.debug('Getting companies without admin', { placeId });
 
-    // Se for place admin, só pode ver empresas do seu place
-    if (currentUser) {
-      const userRoles = currentUser.userRoles?.map(ur => ur.role.name) || [];
+    const userRoles = currentUser?.userRoles?.map(ur => ur.role.name) || [];
 
+    // Validar acesso
+    if (!userRoles.includes(RoleType.SUPER_ADMIN)) {
       if (userRoles.includes(RoleType.PLACE_ADMIN)) {
-        placeId = currentUser.placeId || placeId;
+        if (!currentUser?.placeId) {
+          throw new ForbiddenException('Usuário PLACE_ADMIN deve estar associado a um place');
+        }
+        placeId = currentUser.placeId;
+      } else {
+        throw new ForbiddenException('Usuário não tem permissão para esta operação');
       }
     }
 
+    // Usar o service para buscar empresas sem admin
     return this.companiesService.getCompaniesWithoutAdmin(placeId);
   }
 

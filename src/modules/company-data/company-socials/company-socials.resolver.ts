@@ -29,7 +29,7 @@ export class CompanySocialsResolver {
    * Permitido: SUPER_ADMIN, PLACE_ADMIN, COMPANY_ADMIN, COMPANY_STAFF
    */
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(RoleType.SUPER_ADMIN, RoleType.PLACE_ADMIN, RoleType.COMPANY_ADMIN, RoleType.COMPANY_STAFF)
+  @Roles(RoleType.SUPER_ADMIN, RoleType.PLACE_ADMIN, RoleType.COMPANY_ADMIN)
   @Mutation(() => CompanySocials)
   async createCompanySocials(
     @Args('companyId', { type: () => Int }) companyId: number,
@@ -111,7 +111,7 @@ export class CompanySocialsResolver {
    * Permitido: SUPER_ADMIN, PLACE_ADMIN, COMPANY_ADMIN, COMPANY_STAFF
    */
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(RoleType.SUPER_ADMIN, RoleType.PLACE_ADMIN, RoleType.COMPANY_ADMIN, RoleType.COMPANY_STAFF)
+  @Roles(RoleType.SUPER_ADMIN, RoleType.PLACE_ADMIN, RoleType.COMPANY_ADMIN)
   @Mutation(() => CompanySocials)
   updateCompanySocials(
     @Args('updateSocialsInput') updateSocialsInput: UpdateCompanySocialsInput,
@@ -152,7 +152,7 @@ export class CompanySocialsResolver {
    * Permitido: SUPER_ADMIN, PLACE_ADMIN, COMPANY_ADMIN, COMPANY_STAFF
    */
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(RoleType.SUPER_ADMIN, RoleType.PLACE_ADMIN, RoleType.COMPANY_ADMIN, RoleType.COMPANY_STAFF)
+  @Roles(RoleType.SUPER_ADMIN, RoleType.PLACE_ADMIN, RoleType.COMPANY_ADMIN)
   @Mutation(() => CompanySocials)
   async upsertCompanySocials(
     @Args('companyId', { type: () => Int }) companyId: number,
@@ -178,7 +178,7 @@ export class CompanySocialsResolver {
    * Permitido: SUPER_ADMIN, PLACE_ADMIN, COMPANY_ADMIN, COMPANY_STAFF
    */
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(RoleType.SUPER_ADMIN, RoleType.PLACE_ADMIN, RoleType.COMPANY_ADMIN, RoleType.COMPANY_STAFF)
+  @Roles(RoleType.SUPER_ADMIN, RoleType.PLACE_ADMIN, RoleType.COMPANY_ADMIN)
   @Mutation(() => CompanySocial)
   async addSocialNetwork(
     @Args('companyId', { type: () => Int }) companyId: number,
@@ -202,7 +202,7 @@ export class CompanySocialsResolver {
    * Permitido: SUPER_ADMIN, PLACE_ADMIN, COMPANY_ADMIN, COMPANY_STAFF
    */
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(RoleType.SUPER_ADMIN, RoleType.PLACE_ADMIN, RoleType.COMPANY_ADMIN, RoleType.COMPANY_STAFF)
+  @Roles(RoleType.SUPER_ADMIN, RoleType.PLACE_ADMIN, RoleType.COMPANY_ADMIN)
   @Mutation(() => CompanySocial)
   updateSocialNetwork(
     @Args('updateSocialInput') updateSocialInput: UpdateCompanySocialInput,
@@ -224,7 +224,7 @@ export class CompanySocialsResolver {
    * Permitido: SUPER_ADMIN, PLACE_ADMIN, COMPANY_ADMIN, COMPANY_STAFF
    */
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(RoleType.SUPER_ADMIN, RoleType.PLACE_ADMIN, RoleType.COMPANY_ADMIN, RoleType.COMPANY_STAFF)
+  @Roles(RoleType.SUPER_ADMIN, RoleType.PLACE_ADMIN, RoleType.COMPANY_ADMIN)
   @Mutation(() => Boolean)
   async removeSocialNetwork(
     @Args('id', { type: () => Int }) id: number,
@@ -286,7 +286,7 @@ export class CompanySocialsResolver {
    * Permitido: SUPER_ADMIN, PLACE_ADMIN, COMPANY_ADMIN, COMPANY_STAFF
    */
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(RoleType.SUPER_ADMIN, RoleType.PLACE_ADMIN, RoleType.COMPANY_ADMIN, RoleType.COMPANY_STAFF)
+  @Roles(RoleType.SUPER_ADMIN, RoleType.PLACE_ADMIN, RoleType.COMPANY_ADMIN)
   @Mutation(() => CompanySocial)
   async updateSocialMetrics(
     @Args('id', { type: () => Int }) id: number,

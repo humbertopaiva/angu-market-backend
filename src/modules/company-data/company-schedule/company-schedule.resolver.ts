@@ -28,7 +28,7 @@ export class CompanyScheduleResolver {
    * Permitido: SUPER_ADMIN, PLACE_ADMIN, COMPANY_ADMIN, COMPANY_STAFF
    */
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(RoleType.SUPER_ADMIN, RoleType.PLACE_ADMIN, RoleType.COMPANY_ADMIN, RoleType.COMPANY_STAFF)
+  @Roles(RoleType.SUPER_ADMIN, RoleType.PLACE_ADMIN, RoleType.COMPANY_ADMIN)
   @Mutation(() => CompanySchedule)
   async createCompanySchedule(
     @Args('companyId', { type: () => Int }) companyId: number,
@@ -169,7 +169,7 @@ export class CompanyScheduleResolver {
    * Permitido: SUPER_ADMIN, PLACE_ADMIN, COMPANY_ADMIN, COMPANY_STAFF
    */
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(RoleType.SUPER_ADMIN, RoleType.PLACE_ADMIN, RoleType.COMPANY_ADMIN, RoleType.COMPANY_STAFF)
+  @Roles(RoleType.SUPER_ADMIN, RoleType.PLACE_ADMIN, RoleType.COMPANY_ADMIN)
   @Mutation(() => CompanySchedule)
   updateCompanySchedule(
     @Args('updateScheduleInput') updateScheduleInput: UpdateCompanyScheduleInput,
@@ -210,7 +210,7 @@ export class CompanyScheduleResolver {
    * Permitido: SUPER_ADMIN, PLACE_ADMIN, COMPANY_ADMIN, COMPANY_STAFF
    */
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(RoleType.SUPER_ADMIN, RoleType.PLACE_ADMIN, RoleType.COMPANY_ADMIN, RoleType.COMPANY_STAFF)
+  @Roles(RoleType.SUPER_ADMIN, RoleType.PLACE_ADMIN, RoleType.COMPANY_ADMIN)
   @Mutation(() => CompanySchedule)
   async upsertCompanySchedule(
     @Args('companyId', { type: () => Int }) companyId: number,
@@ -236,7 +236,7 @@ export class CompanyScheduleResolver {
    * Permitido: SUPER_ADMIN, PLACE_ADMIN, COMPANY_ADMIN, COMPANY_STAFF
    */
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(RoleType.SUPER_ADMIN, RoleType.PLACE_ADMIN, RoleType.COMPANY_ADMIN, RoleType.COMPANY_STAFF)
+  @Roles(RoleType.SUPER_ADMIN, RoleType.PLACE_ADMIN, RoleType.COMPANY_ADMIN)
   @Mutation(() => CompanyScheduleHour)
   async addScheduleHour(
     @Args('companyId', { type: () => Int }) companyId: number,
@@ -260,7 +260,7 @@ export class CompanyScheduleResolver {
    * Permitido: SUPER_ADMIN, PLACE_ADMIN, COMPANY_ADMIN, COMPANY_STAFF
    */
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(RoleType.SUPER_ADMIN, RoleType.PLACE_ADMIN, RoleType.COMPANY_ADMIN, RoleType.COMPANY_STAFF)
+  @Roles(RoleType.SUPER_ADMIN, RoleType.PLACE_ADMIN, RoleType.COMPANY_ADMIN)
   @Mutation(() => CompanyScheduleHour)
   updateScheduleHour(
     @Args('updateHourInput') updateHourInput: UpdateScheduleHourInput,
@@ -282,7 +282,7 @@ export class CompanyScheduleResolver {
    * Permitido: SUPER_ADMIN, PLACE_ADMIN, COMPANY_ADMIN, COMPANY_STAFF
    */
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(RoleType.SUPER_ADMIN, RoleType.PLACE_ADMIN, RoleType.COMPANY_ADMIN, RoleType.COMPANY_STAFF)
+  @Roles(RoleType.SUPER_ADMIN, RoleType.PLACE_ADMIN, RoleType.COMPANY_ADMIN)
   @Mutation(() => Boolean)
   async removeScheduleHour(
     @Args('id', { type: () => Int }) id: number,
